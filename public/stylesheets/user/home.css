@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Piedra&display=swap');
+
+.navbar-brand {
+  font-family: 'Piedra', cursive; 
+  color: #854C4C !important;  
+  font-size: 2rem !important;   
+  margin-right: 3rem !important;
+}
+form {
+  margin-top: 0.5rem; 
+}
+.login-register {
+  font-size: 1.12rem !important;
+  text-decoration: underline !important; 
+}
+.search-bar{
+  width:300px !important;
+}
+.text-image{
+  background-color: #fff; 
+  padding: 50px; 
+  border: 2px solid #efecec;
+  width: 700px !important;
+  height: 401px !important;
+  margin-left: 35px;
+  margin-bottom: 230px;
+  align-items: center;
+  padding-top: 120px;
+}
+.image-box{
+  background-color: #ffe4e1; 
+  border: 2px solid #efecec;
+  width: 720px !important;
+  overflow: hidden;
+  height: 401px !important;
+  margin-bottom: 230px;
+}
+.subscribe-section {
+  text-align: center;
+  padding: 30px 0;
+}
+.subscribe-section input {
+  max-width: 400px;
+  display: inline-block;
+}
+footer {
+  background-color: #f8f9fa; 
+  padding: 40px 0; 
+  text-align: center;
+}
+.footer-section {
+  background-color: #f8f9fa;
+  padding: 40px 0;
+}

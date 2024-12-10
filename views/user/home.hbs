@@ -1,0 +1,119 @@
+  <section class="container-fluid d-flex align-items-center" style="height: 50vh; margin-top:200px">
+    <div class="col-md-6 text-center text-image">
+      <p style="font-size: 14px; font-weight: bold; color: #888;">---OUR BESTSELLERS---</p>
+      <h1 style="font-size: 36px; font-weight: bold; margin: 20px 0;">Latest Arrivals</h1>
+      <a href="#" style="text-decoration: none; font-size: 16px; font-weight: bold; color: black;">Shop now---</a>
+    </div>
+    <div class="col-md-6 d-flex image-box">
+      <img src="images/hero_img.png" alt="Fashion Model" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+  </section>
+  <section class="second-section">
+    <figure class="text-center">
+      <blockquote class="blockquote" style="font-size:30px;">
+        <p>For the Bold, Stylish & Confident you</p>
+      </blockquote>
+      <figcaption class="blockquote-footer" style="font-size:20px">
+        Our collection features a range of stylish and versatile outfits perfect for any casual occasion. <cite
+          title="Source Title">From breezy <br>Jackets to comfy pants, each piece is crafted with care and attention to
+          detail.We use high-quality fabrics <br>that are breathable and easy to care for, ensuring that you look and
+          feel your best all day long. </cite>
+      </figcaption>
+    </figure>
+  </section>
+  <section>
+    <figure class="text-center">
+      </blockquote>
+    </figure>
+  </section>
+  <section>
+    <figure class="text-center pt-4">
+  <blockquote class="blockquote">
+    <h1>LATEST COLLECTION</h1>
+  </blockquote>
+</figure>
+  </section>
+  <section>
+    <div class="container pt-4">
+      <div class="row">
+        {{#each products}}
+        <div class="col-md-3 mb-4">
+          <div class="card" style="width: 18rem;">
+            <img src="{{this.image}}" class="card-img-top" alt="...">
+            <div class="card-body">
+              <p class="card-title" style="font-size: 14px;">{{this.name}}</p>
+              <p class="card-text" style="font-size: 14px;">{{this.price}}</p>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+    <section>
+    <figure class="text-center pt-4">
+  <blockquote class="blockquote">
+    <h1>BESTSELLER</h1>
+  </blockquote>
+</figure>
+  </section> 
+    <section>
+    <div class="container pt-4">
+      <div class="row">
+        {{#each bestseller}}
+        <div class="col-md-3 mb-4">
+          <div class="card" style="width: 18rem;">
+            <img src="{{this.image}}" class="card-img-top" alt="...">
+            <div class="card-body">
+              <p class="card-title" style="font-size: 14px;">{{this.name}}</p>
+              <p class="card-text" style="font-size: 14px;">{{this.price}}</p>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+<section>
+      <div class="container text-center py-5">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <img src="images/exchange_icon.png" alt="Easy Exchange" class="mb-2">
+        <h5>Easy Exchange Policy</h5>
+        <p class="text-muted">We offer hassle-free exchange policy</p>
+      </div>
+      <div class="col-md-4">
+        <img src="images/quality_icon.png" alt="Return Policy" class="mb-2">
+        <h5>7 Days Return Policy</h5>
+        <p class="text-muted">We provide 7 days return policy</p>
+      </div>
+      <div class="col-md-4">
+        <img src="images/support_img.png" alt="Customer Support" class="mb-2">
+        <h5>Best Customer Support</h5>
+        <p class="text-muted">We provide 24/7 customer service</p>
+      </div>
+    </div>
+  </div>
+  </section>
+  <section>
+     <div class="subscribe-section">
+    <h2>Subscribe now & get 20% off</h2>
+    <p>Apply for our free membership to receive exclusive deals, news, and events.</p>
+    <div class="input-group justify-content-center">
+      <input
+        type="email"
+        class="form-control"
+        placeholder="Enter your email"
+        aria-label="Email"
+        aria-describedby="subscribe-button"
+      >
+      <button
+        class="btn btn-dark"
+        type="button"
+        id="subscribe-button"
+      >
+        SUBSCRIBE
+      </button>
+    </div>
+  </div>
+  </section>

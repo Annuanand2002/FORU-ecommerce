@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Piedra&display=swap');
+.navbar-brand {
+  font-family: 'Piedra', cursive; 
+  color: #854C4C !important;  
+  font-size: 30px;
+}
+.navbar-color{
+  background-color: #f3f3f4;
+}
+.custom-link {
+  color: rgb(113, 111, 111); 
+  text-decoration: none; 
+  font-weight: 700;
+}
+
+
