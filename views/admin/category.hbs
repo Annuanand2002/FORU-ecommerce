@@ -1,0 +1,51 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-6">
+      <h4 class="my-3 pt-5" style="color: rgb(228, 178, 117);">Category</h4>
+      <h6 class="my-3 pt-5" style="color: rgb(39, 38, 38); font-weight: 600;">Category Details</h6>
+
+      <!-- Add Button -->
+      <button type="button" class="btn mt-4" style="background-color: rgb(228, 178, 117); color: white;" 
+              data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add</button>
+
+      <!-- Display Categories -->
+      <ul class="list-group mt-4" id="categoryList">
+        {{#each categories}}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{this.name}}
+          <button type="button" class="btn btn-sm delete-category" data-id="{{this._id}}" style="border-radius: 50%;">
+            &times;
+          </button>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="categoryName" class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="categoryName" placeholder="Enter category name">
+            <div id="categoryError" class="text-danger mt-2"></div>
+          </div>
+          <button type="button" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+

@@ -6,23 +6,11 @@ const addProduct = async (productData,files)=>{
   try{
     const {name,price,piece,category,gender,size,description} = productData;
     const sizes = productData['size[]'] || [];
-    let image = '';
+    let imagePath = [];
 
-    if (files && files['image']) {
-      const uploadDir = path.join(__dirname, '../uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      const file = files['image']; 
-      const uploadPath = path.join(uploadDir, file.name);
-      await file.mv(uploadPath); 
-      image = file.name; 
-    } else {
-      console.log('No image file provided');
+    if(files && files.length > 0){
+      imagePath = files.map(file=>'/uploads/' + file.filename)
     }
-    
-
     const newProduct = new Product({
       name,
       category,
@@ -31,10 +19,10 @@ const addProduct = async (productData,files)=>{
       gender,
       size: sizes,
       description,
-      images:image,
+      images:imagePath
     })
     await newProduct.save();
-    return { success: true };
+    return { success: true};
   }
   catch(err){
     console.error('Error adding product:', err);

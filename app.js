@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const fileUpload = require('express-fileupload');
 
 var hbs = require('express-handlebars')
 var db = require('./config/connection')
@@ -24,8 +23,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.engine('hbs',hbs.engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))
-app.use(fileUpload())
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 db.connect((err)=>{
   if(err){
     console.log('database connection failed',err)

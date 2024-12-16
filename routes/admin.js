@@ -2,9 +2,11 @@ var express = require('express');
 var router = express.Router();
 const userHelper = require('../controllers/user-helper');
 const productHelper = require('../controllers/product-helper');
+const {upload} = require('../controllers/multer-middleware');
 const adminHelper = require('../controllers/admin-helper');
 const Product = require('../models/product-schema');
-
+const Category = require('../models/cateogory-schema');
+const categoryHelper = require('../controllers/cateogory-helper');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -37,9 +39,13 @@ router.get('/products', async (req, res, next)=>{
 router.get('/add-product', function(req, res, next) {
   res.render('admin/add-product',{admin:true,isAdminLogin:false})
 });
-router.post('/add-product', async (req, res) => {
+router.post('/add-product', upload, async (req, res) => {
   try {
-    const result = await productHelper.addProduct(req.body, req.files);
+    const productData = req.body;
+    const files = req.files
+    const result = await productHelper.addProduct(productData,files);
+    console.log(productData)
+    console.log(files)
 
     if (result.success) {
       res.redirect('/admin/products'); 
@@ -56,6 +62,17 @@ router.get('/admin/edit-product/:id', async (req, res)=>{
     res.render('admin/edit-product', {admin:true,isAdminLogin:false});
 })
 
+router.get('/category', async (req, res) => {
+  try {
+    const categories = await Category.find({}).lean();
+    res.render('admin/category', { categories,admin:true,isAdminLogin:false});
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 router.get('/user', async (req, res) => {
   try{
     const users = await userHelper.getUsers();
@@ -65,6 +82,8 @@ router.get('/user', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
 
 
 

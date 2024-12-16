@@ -23,7 +23,17 @@
           <tbody>
             {{#each products}}
             <tr>
-              <td class="text-center"> <img src="/uploads/{{this.image}}" class="card-img-top" alt="..." style="width: 100px; height:auto"></td>
+               <td class="text-center">
+  {{#if this.images}}
+    {{#each this.images}}
+      {{#if @first}}
+        <img src="{{this}}" class="card-img-top" alt="..." style="width: 100px; height:auto">
+      {{/if}}
+    {{/each}}
+  {{else}}
+    <img src="/images/upload_area.png" class="card-img-top" alt="..." style="width: 100px; height:auto">
+  {{/if}}
+</td>
               <td class="text-center">{{this.name}}</td>
               <td class="text-center">{{this.category}}</td>
               <td class="text-center">{{this.price}}</td>
