@@ -1,0 +1,54 @@
+/* Sidebar Layout */
+.sidebar {
+  background-color: #e8e8e4;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Styling */
+h4 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #151010;
+}
+
+/* Filter Section Styling */
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.form-check {
+  margin-bottom: 10px;
+}
+
+/* Price Range Styling */
+.form-range {
+  width: 100%;
+}
+
+.price-range-output {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Checkbox & Label Styling */
+.form-check-label {
+  font-size: 14px;
+  color: #555;
+}
+
+.form-check-input {
+  margin-right: 10px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}

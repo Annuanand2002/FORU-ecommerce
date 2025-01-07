@@ -1,0 +1,32 @@
+<div class="container-fluid p-4 position-relative">
+    <button type="button" class="btn mt-4" style="background-color: rgb(228, 178, 117); color: white;" 
+            data-bs-toggle="modal" data-bs-target="#addAdminModal">Add Admin</button>
+</div>
+
+<!-- Modal -->
+<!-- Modal -->
+<div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAdminModalLabel">Add Admin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addAdminForm">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Enter username">
+            <div id="usernameError" class="text-danger mt-2"></div>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Enter password">
+            <div id="passwordError" class="text-danger mt-2"></div>
+          </div>
+          <button type="submit" class="btn" id="saveAdminBtn" style="background-color: rgb(228, 178, 117); color: white;">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

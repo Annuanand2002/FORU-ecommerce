@@ -1,54 +1,110 @@
-    <div class="col-md-10 p-4">
-      <h4 class="my-3" style="color: rgb(228, 178, 117);">Products</h4>
-      <div class="d-flex justify-content-between align-items-center mb-4 pt-5">
-        <div>
-          <input type="text" class="form-control me-3" style="width: 300px; display: inline-block;" placeholder="Search Products" />
-        </div>
-        <div>
-          <button class="btn" style="background-color: rgb(228, 178, 117); color:white" onclick="window.location.href='/admin/add-product';">Add Product</button>
-        </div>
-      </div>
-      <div class="table-responsive pt-3">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th class="text-center">Product</th>
-              <th class="text-center">Product Name</th>
-              <th class="text-center">Category</th>
-              <th class="text-center">Price</th>
-              <th class="text-center">Piece</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each products}}
-            <tr>
-               <td class="text-center">
-  {{#if this.images}}
-    {{#each this.images}}
-      {{#if @first}}
-        <img src="{{this}}" class="card-img-top" alt="..." style="width: 100px; height:auto">
-      {{/if}}
-    {{/each}}
-  {{else}}
-    <img src="/images/upload_area.png" class="card-img-top" alt="..." style="width: 100px; height:auto">
-  {{/if}}
-</td>
-              <td class="text-center">{{this.name}}</td>
-              <td class="text-center">{{this.category}}</td>
-              <td class="text-center">{{this.price}}</td>
-              <td class="text-center">{{this.piece}}</td>
-              <td class="text-center">
-            <a href="/admin/edit-product/{{_id}}" class="btn btn-sm" style="background-color:rgb(192, 108, 108);color:white">Edit</a>
-            <form action="/admin/delete/{{_id}}" method="POST" style="display:inline;">
-            <button class="btn btn-sm" style="background-color: rgb(161, 221, 161); color:white">Delete</button>
-          </form>
-          </td>
-            </tr>
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
+<div class="col-md-10 p-4">
+  <h4 class="my-3" style="color: rgb(228, 178, 117);">Products</h4>
+  <div class="d-flex justify-content-between align-items-center mb-4 pt-5">
+
+    <!-- Pagination Buttons -->
+<div class="pagination-container">
+  <nav aria-label="Page navigation" class="d-flex justify-content-center">
+    <ul class="pagination">
+      <!-- Previous Page Link -->
+      
+{{#if prevPage}}
+  <li class="page-item">
+    <a class="page-link" href="/admin/products?page={{prevPage}}&searchQuery={{searchQuery}}" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">&laquo; Previous</a>
+  </li>
+{{else}}
+  <li class="page-item disabled">
+    <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">&laquo; Previous</span>
+  </li>
+{{/if}}
+
+      <!-- Page Numbers -->
+      {{#each pages}}
+        <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+          <a class="page-link" href="/admin/products?page={{this}}" 
+            style="background-color: {{#ifEquals this ../currentPage}}rgb(228, 178, 117){{else}}transparent{{/ifEquals}}; 
+                   color: {{#ifEquals this ../currentPage}}white{{else}}black{{/ifEquals}}; 
+                   border: 2px solid {{#ifEquals this ../currentPage}}rgb(255, 224, 178){{else}}transparent{{/ifEquals}};">
+            {{this}}
+          </a>
+        </li>
+      {{/each}}
+
+      <!-- Next Page Link -->
+{{#if nextPage}}
+  <li class="page-item">
+    <a class="page-link" href="/admin/products?page={{nextPage}}&searchQuery={{searchQuery}}" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">Next &raquo;</a>
+  </li>
+{{else}}
+  <li class="page-item disabled">
+    <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">Next &raquo;</span>
+  </li>
+{{/if}}
+
+    </ul>
+  </nav>
+</div>
+
+
+    <!-- Add Product Button -->
+    <div>
+      <button class="btn" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white" onclick="window.location.href='/admin/add-product';">Add Product</button>
     </div>
   </div>
+  
+  <!-- Table -->
+  <div class="table-responsive pt-3">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Product</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Product Name</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Category</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Price</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Piece</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#if products.length}}
+          {{#each products}}
+            <tr>
+              <td class="text-center">
+                {{#if this.images}}
+                  {{#each this.images}}
+                    {{#if @first}}
+                      <img src="{{this}}" class="card-img-top" alt="..." style="width: 100px; height:auto">
+                    {{/if}}
+                  {{/each}}
+                {{else}}
+                  <img src="/images/upload_area.png" class="card-img-top" alt="..." style="width: 100px; height:auto">
+                {{/if}}
+              </td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.name}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.category}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">₹{{this.price}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.piece}}</td>
+              <td style="text-align: center; vertical-align: middle;">
+                <a href="/admin/edit-product/{{this._id}}" class="btn" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;" aria-label="Edit product">
+                  Edit
+                </a>
+              </td>
+              <td style="text-align: center; vertical-align: middle;">
+                <form action="/admin/delete-product/{{this._id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                  <button type="submit" class="btn" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">Delete</button>
+                </form>
+              </td>
+            </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td colspan="7" class="text-center">No products found for "{{searchQuery}}"</td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+

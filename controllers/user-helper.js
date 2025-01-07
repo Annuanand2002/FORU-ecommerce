@@ -1,93 +1,164 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user-schema');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
-const registerUser = async (userData) => {
+async function registerUser({ name, email, password, phone }) {
   try {
+    const existingUser = await User.findOne({ email });
+if (existingUser) {
+    throw new Error('Email already in use. Please use a different email address.');
+}
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationTokenExpires = Date.now() + 10 * 60 * 1000; 
 
-    const existingUser = await User.findOne({ email: userData.email });
-    if (existingUser) {
-      return { success: false, exists: true, message: 'Email ID already exists' };
-    }
-
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
-      name: userData.name,
-      email: userData.email,
+      name,
+      email,
       password: hashedPassword,
+      phone,
+      verificationToken,
+      verificationTokenExpires,
     });
 
     await user.save();
-    return { success: true, message: 'User registered successfully' };
-  } catch (err) {
-    return { success: false, message: err.message };
-  }
-};
-const loginUser = async (email,password)=>{
-  try{
-    const user = await User.findOne({email})
-    if(!user){
-      return { success: false, message: 'Invalid email or password' };
-    }
 
-    const isPasswordMatch = await bcrypt.compare(password,user.password)
-    if(!isPasswordMatch){
-      return { success: false, message: 'Invalid email or password' };
-    }
-    return {
-      success: true,
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', 
+      auth: {
+        user: 'annuanand219@gmail.com', 
+        pass: 'lvav wfrh kuwx mabz', 
       },
-    };
-  }
-  catch(err){
-    console.error('Error in loginUser helper:', err);
-      return { success: false, message: 'Internal server error' };
+    });
+
+    const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
+
+    await transporter.sendMail({
+      to: email,
+      subject: 'Email Verification',
+      text: `Click on the link to verify your email: ${verificationLink}`,
+    });
+
+    return { success: true, message: 'Registration successful. Please check your email to verify your account.' };
+  } catch (error) {
+    console.error(error);
+    throw new Error('Server error. Please try again later.');
   }
 }
+
+async function verifyEmail(token) {
+  try {
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      throw new Error('Invalid verification token.');
+    }
+
+    if (user.verificationTokenExpires < Date.now()) {
+      throw new Error('Verification link has expired.');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    
+    await user.save();
+    return { success: true, message: 'Your email has been verified. You can now log in.' };
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.message || 'An error occurred during email verification.');
+  }
+}
+
+
+const loginUser = async (email, password) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return { success: false, error: "Invalid username or password." };
+    }
+    if (user.blocked) {
+      return { success: false,blocked:true};
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, error: "Invalid username or password." };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    console.error("Error in loginUser helper:", error);
+    return { success: false, error: "Internal server error." };
+  }
+};
+
+
+const generateResetToken = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new Error('Invalid email address');
+  }
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetTokenExpires = Date.now() + 5 * 60 * 1000; 
+
+ 
+  user.resetToken = resetToken;
+  user.resetTokenExpires = resetTokenExpires;
+  await user.save();
+
+  
+  return resetToken;
+};
+
+
+const resetPassword = async (password, token) => {
+  const user = await User.findOne({ resetToken: token });
+
+  
+  if (!user || user.resetTokenExpires < Date.now()) {
+    throw new Error('Reset link expired or invalid');
+  }
+
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+  user.password = hashedPassword;
+  user.resetToken = undefined; 
+  user.resetTokenExpires = undefined; 
+  await user.save();
+};
 const getUsers = async ()=>{
   try{
-    const users = await User.find({}, { name: 1, email: 1 ,blocked:1}).lean();
+    const users = await User.find({}, { name: 1, email: 1 ,blocked:1,phone:1,isVerified:1}).lean();
     return users
   }
   catch (err) {
     console.error('Error fetching users:', err);
   }
 }
-
-const blockUser = async (userId)=>{
+const blockUser = async(userId)=>{
   try{
-    const user = await User.findById(userId); 
-    if (user) {
-      user.blocked = true; 
-      await user.save(); 
-      return true; 
-    }
-    return false;
+    return await User.findByIdAndUpdate(userId,{blocked:true})
   }
-  catch(err){
-    console.error('Error blocking user:', err);
+  catch(error){
+    throw new Error("Error blocking user",error)
   }
 }
 
-const unblockUser = async (userId)=>{
+const unblockUser = async(userId)=>{
   try{
-    const user = await User.findById(userId);
-    if(user){
-      user.blocked = false;
-      await user.save(); 
-      return true;
-    }
-    return false;
+    return await User.findByIdAndUpdate(userId,{blocked:false})
   }
-  catch(err){
-    console.error('Error unblocking user:', err);
+  catch(error){
+    throw new Error("Error unblocking the user",error)
   }
 }
+
 module.exports = { registerUser,loginUser,getUsers,blockUser,
-  unblockUser};
+  unblockUser,verifyEmail,generateResetToken,
+  resetPassword};
 

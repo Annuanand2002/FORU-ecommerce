@@ -1,0 +1,11 @@
+<div class="container-verify">
+  <div class="verification-box">
+    <h1>Verification Link</h1>
+    {{#if message}}
+      <p class="error-message">{{message}}</p>
+    {{else}}
+      <p>Please check your email for the verification link.</p>
+      <button id="resendButton" class="btn btn-primary">Resend Verification Link</button>
+    {{/if}}
+  </div>
+</div>

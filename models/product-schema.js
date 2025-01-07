@@ -9,7 +9,10 @@ const productSchema =new mongoose.Schema({
   size: [String], 
   description: { type: String },
   images: [String],
+  latestCollection: { type: Boolean, default: false },
+  bestSeller: { type: Boolean, default: false },
 })
+productSchema.index({ name: 'text', description: 'text' });
 
 
 

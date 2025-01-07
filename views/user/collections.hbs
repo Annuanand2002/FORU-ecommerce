@@ -1,0 +1,121 @@
+<section class="main-content d-flex">
+  <aside class="sidebar col-md-3">
+    <div class="sidebar-content">
+      <!-- Categories Filter -->
+      <div class="filter-section">
+        <h4>Categories</h4>
+        <form id="category-form" method="get" action="/collections">
+          <input type="hidden" name="page" value="{{currentPage}}">
+          <input type="hidden" name="searchQuery" value="{{searchQuery}}">
+          {{#each categories}}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" 
+                     name="categories" value="{{this.name}}" 
+                     id="{{this.name}}"
+                     {{#if (arrayContains ../selectedCategories this.name)}}checked{{/if}}>
+              <label class="form-check-label" for="{{this.name}}">
+                {{this.name}}
+              </label>
+            </div>
+          {{/each}}
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+      </div>
+
+      <!-- Gender Filter -->
+      <div class="filter-section">
+        <h4>Gender</h4>
+        <form id="gender-form" method="get" action="/collections">
+          <input type="hidden" name="page" value="{{currentPage}}">
+          <input type="hidden" name="searchQuery" value="{{searchQuery}}">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="gender" value="Men" id="men" {{#ifEquals selectedGender "Men"}}checked{{/ifEquals}}>
+            <label class="form-check-label" for="men">Men</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="gender" value="Women" id="women" {{#ifEquals selectedGender "Women"}}checked{{/ifEquals}}>
+            <label class="form-check-label" for="women">Women</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="gender" value="Girl" id="girl" {{#ifEquals selectedGender "Girl"}}checked{{/ifEquals}}>
+            <label class="form-check-label" for="women">Girl</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="gender" value="Boy" id="boy" {{#ifEquals selectedGender "Boy"}}checked{{/ifEquals}}>
+            <label class="form-check-label" for="women">Boy</label>
+          </div>
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Product Cards Section -->
+  <section class="product-section col-md-9" style="margin-top: 30px;">
+    <div class="container">
+      <div class="row">
+        {{#each products}}
+          <div class="col-md-4 mb-4 product-card" style="display: block;" data-categories='{{json this.categories}}'>
+            <div class="card" style="width: 18rem;">
+              <!-- Display the first image -->
+              {{#if this.images}}
+                {{#each this.images}}
+                  {{#if @first}}
+                    <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto;">
+                  {{/if}}
+                {{/each}}
+              {{/if}}
+
+              <div class="card-body">
+                <p class="card-title" style="font-size: 16px; font-weight: bold;">{{this.name}}</p>
+                <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </section>
+
+</section>
+
+<!-- Pagination Section -->
+<div class="pagination-container">
+  <nav aria-label="Page navigation" class="d-flex justify-content-center">
+    <ul class="pagination">
+      <!-- Previous Page Link -->
+      {{#if prevPage}}
+        <li class="page-item">
+          <a class="page-link" href="/collections?page={{prevPage}}&searchQuery={{searchQuery}}" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">&laquo; Previous</a>
+        </li>
+      {{else}}
+        <li class="page-item disabled">
+          <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">&laquo; Previous</span>
+        </li>
+      {{/if}}
+
+      <!-- Page Numbers -->
+      {{#each pages}}
+        <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+          <a class="page-link" href="/collections?page={{this}}&searchQuery={{searchQuery}}" 
+            style="background-color: {{#ifEquals this ../currentPage}}rgb(228, 178, 117){{else}}transparent{{/ifEquals}}; 
+                   color: {{#ifEquals this ../currentPage}}white{{else}}black{{/ifEquals}}; 
+                   border: 2px solid {{#ifEquals this ../currentPage}}rgb(255, 224, 178){{else}}transparent{{/ifEquals}};">
+            {{this}}
+          </a>
+        </li>
+      {{/each}}
+
+      <!-- Next Page Link -->
+      {{#if nextPage}}
+        <li class="page-item">
+          <a class="page-link" href="/collections?page={{nextPage}}&searchQuery={{searchQuery}}" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">Next &raquo;</a>
+        </li>
+      {{else}}
+        <li class="page-item disabled">
+          <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">Next &raquo;</span>
+        </li>
+      {{/if}}
+    </ul>
+  </nav>
+</div>

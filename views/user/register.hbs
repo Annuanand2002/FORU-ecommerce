@@ -10,41 +10,54 @@
             </div>
             <div class="col-md-6 col-lg-7 d-flex align-items-center">
               <div class="card-body p-4 p-lg-5 text-black">
-
-                <form id="registerForm">
-
+                <form id="registerForm" action="/register" method="POST">
                   <div class="d-flex align-items-center mb-3 pb-1">
-                    <span class="h1 fw-bold mb-0" style="font-family: 'Piedra', cursive; 
-  color: #854C4C !important; ">FORU</span>
+                    <span class="h1 fw-bold mb-0" style="font-family: 'Piedra', cursive; color: #854C4C !important;">FORU</span>
                   </div>
 
-                  <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Hello! Register here and experienece the feel of shopping</h5>
-
+                  <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Hello! Register here and experience the feel of shopping</h5>
                   <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="name" id="name" class="form-control form-control-lg" name="name" required/>
+                    <input type="text" id="name" class="form-control form-control-lg" name="name" placeholder="First and last name"/>
                     <label class="form-label" for="name">Name*</label>
                     <span class="error-message" id="nameError" style="color: red;"></span>
                   </div>
 
+                  
+                <div data-mdb-input-init class="form-outline mb-4">
+                 <input 
+                  type="text" 
+                  id="phone" 
+                  class="form-control form-control-lg" 
+                  name="phone" 
+                  placeholder="Phone number" />
+                <label class="form-label" for="phone">Phone number*</label>
+                <span class="error-message" id="phoneError" style="color: red;"></span>
+                </div>
+
                   <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="email" id="email" class="form-control form-control-lg" name="email" required/>
-                    <label class="form-label" for="email">Email address*</label>
+                    <input  id="email" class="form-control form-control-lg" name="email" placeholder="Email address"/>
+                    <label class="form-label" for="email">Email address</label>
                     <span class="error-message" id="emailError" style="color: red;"></span>
                   </div>
 
-                  <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="password" id="password" class="form-control form-control-lg" name="password" required/>
-                    <i class="fa-solid fa-eye" id="togglePassword"></i>
-                    <label class="form-label" for="password">Password*</label>
+
+                  
+                   <div data-mdb-input-init class="form-outline mb-4">
+                     <input type="password" id="password" class="form-control form-control-lg" name="password" placeholder="At least 6 characters" />
+                     <i class="fa-solid fa-eye" id="togglePassword" style="cursor: pointer;"></i>
+                     <label class="form-label" for="password">Password*</label>
                     <span class="error-message" id="passwordError" style="color: red;"></span>
-                  </div>
+                    </div>
 
                   <div class="pt-1 mb-4">
-                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="submit" id="registerButton">Sign in</button>
+                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="submit" id="registerButton">Sign Up</button>
+                    <a class="small text-muted" href="/login" style="margin-left: 150px; ">Already have an account?</a>
+                    <a href="/auth/google" class="btn" style="border: 1px solid rgb(8, 8, 13); margin-left:250px">
+                    <i class="fa-brands fa-google"></i> 
+                    Signin with Google
+                    </a>
                   </div>
 
-                  <a class="small text-muted" href="/login" style="margin-right: 150px;">Already have an account?</a>
-                  <a class="small text-muted " href="#!">Register with google</a>
                 </form>
               </div>
             </div>
@@ -54,3 +67,4 @@
     </div>
   </div>
 </section>
+

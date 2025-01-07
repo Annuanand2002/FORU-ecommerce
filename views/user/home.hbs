@@ -36,13 +36,19 @@
   <section>
     <div class="container pt-4">
       <div class="row">
-        {{#each products}}
+        {{#each latestCollection}}
         <div class="col-md-3 mb-4">
           <div class="card" style="width: 18rem;">
-            <img src="{{this.image}}" class="card-img-top" alt="...">
+            {{#if this.images}}
+                  {{#each this.images}}
+                    {{#if @first}}
+                      <img src="{{this}}" class="card-img-top" alt="..." style="width: 100%; height: auto;">
+                    {{/if}}
+                  {{/each}}
+                {{/if}}
             <div class="card-body">
-              <p class="card-title" style="font-size: 14px;">{{this.name}}</p>
-              <p class="card-text" style="font-size: 14px;">{{this.price}}</p>
+              <p class="card-title" style="font-size: 16px; font-weight: 50; color: #4c4b4a; margin: 0; font-family: 'Arial', sans-serif;">{{this.name}}</p>
+              <p class="card-text" style="font-size: 16px; font-weight: 50; color: #3a3938; margin: 0; font-family: 'Arial', sans-serif;">{{this.price}}</p>
             </div>
           </div>
         </div>
@@ -53,7 +59,7 @@
     <section>
     <figure class="text-center pt-4">
   <blockquote class="blockquote">
-    <h1>BESTSELLER</h1>
+    <h1>BEST-SELLER</h1>
   </blockquote>
 </figure>
   </section> 
@@ -63,10 +69,16 @@
         {{#each bestseller}}
         <div class="col-md-3 mb-4">
           <div class="card" style="width: 18rem;">
-            <img src="{{this.image}}" class="card-img-top" alt="...">
+            {{#if this.images}}
+                  {{#each this.images}}
+                    {{#if @first}}
+                      <img src="{{this}}" class="card-img-top" alt="..." style="width: 100%; height:auto">
+                    {{/if}}
+                  {{/each}}
+                {{/if}}
             <div class="card-body">
-              <p class="card-title" style="font-size: 14px;">{{this.name}}</p>
-              <p class="card-text" style="font-size: 14px;">{{this.price}}</p>
+              <p class="card-title" style="font-size: 16px; font-weight: 50; color: #4c4b4a; margin: 0; font-family: 'Arial', sans-serif;">{{this.name}}</p>
+              <p class="card-text" style="font-size: 16px; font-weight: 50; color: #3a3938; margin: 0; font-family: 'Arial', sans-serif;">{{this.price}}</p>
             </div>
           </div>
         </div>

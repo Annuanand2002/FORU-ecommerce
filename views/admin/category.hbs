@@ -22,7 +22,8 @@
     </div>
   </div>
 
-  <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+<form id="addCategoryForm">
+   <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -36,10 +37,12 @@
             <input type="text" class="form-control" id="categoryName" placeholder="Enter category name">
             <div id="categoryError" class="text-danger mt-2"></div>
           </div>
-          <button type="button" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+          <button type="submit" class="btn btn-primary" id="saveCategoryBtn">Save</button>
         </form>
       </div>
     </div>
+</form>
+ 
   </div>
 </div>
 

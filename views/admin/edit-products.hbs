@@ -1,0 +1,62 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="text-center mb-4" style="color: rgb(228, 178, 117);">Edit Product</h2>
+      <form action="/admin/edit-product/{{product._id}}" method="post" enctype="multipart/form-data" class="shadow p-4 rounded" style="background-color: #f8f9fa;">
+
+        <div class="mb-3">
+          <label for="name" class="form-label" style="color: #333;">Product Name:</label>
+          <input type="text" name="name" id="name" class="form-control" value="{{product.name}}" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="price" class="form-label" style="color: #333;">Price:</label>
+          <input type="number" name="price" id="price" class="form-control" value="{{product.price}}" required>
+        </div>
+        <div class="mb-3">
+          <label for="piece" class="form-label" style="color: #333;">Piece:</label>
+          <input type="number" name="piece" id="piece" class="form-control" value="{{product.piece}}" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="category" class="form-label" style="color: #333;">Category:</label>
+          <select name="category" id="category" class="form-select">
+            {{#each categories}}
+              <option value="{{this._id}}" {{#ifEquals this._id ../product.category}}selected{{/ifEquals}}>{{this.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+
+<div class="mb-3">
+  <label for="images" class="form-label" style="color: #333;">Current Images:</label>
+  <div id="images-container">
+    {{#each product.images}}
+      <div class="image-thumbnail" style="display: inline-block; margin-right: 10px;">
+        <img src="{{this}}" alt="Product Image" class="img-thumbnail" style="width: 100px; height: auto;">
+      </div>
+    {{/each}}
+  </div>
+  <label for="images" class="form-label" style="color: #333;">New Images (optional):</label>
+  <input type="file" name="images" id="images" class="form-control" multiple>
+</div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" name="bestSeller" id="bestSeller" class="form-check-input" 
+            {{#if product.bestSeller}}checked{{/if}} />
+          <label for="bestSeller" class="form-check-label" style="color: #333;">Bestseller</label>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" name="latestCollection" id="latestCollection" class="form-check-input" 
+            {{#if product.latestCollection}}checked{{/if}} />
+          <label for="latestCollection" class="form-check-label" style="color: #333;">Latest Collection</label>
+        </div>
+
+        <button type="submit" class="btn mt-4" style="background-color:rgb(228, 178, 117);color:white">Submit</button>
+        <a href="/admin/products" class="btn mt-4" style="background-color:rgb(228, 178, 117);color:white">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+
