@@ -1,0 +1,48 @@
+
+.admin-layout .custom-sidebar {
+    background-color: rgb(228, 178, 117);
+    height: auto;
+  overflow-y: auto;
+  }
+
+  .admin-layout .custom-sidebar a.custom-link {
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .admin-layout .custom-sidebar a.custom-link.active {
+    background-color: white;
+    color: rgb(228, 178, 117);
+    border-radius: 5px;
+  }
+
+  .admin-layout .custom-sidebar a.custom-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .admin-layout .custom-sidebar .nav-item {
+    margin-bottom: 10px;
+  }
+
+  .admin-layout .navbar-brand {
+    color: white !important;
+  }
+
+.admin-layout .custom-link {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px;
+  }
+
+ .admin-layout .p-3 {
+    padding: 16px !important;
+  }
+
+  /* Active Link Styling */
+  .admin-layout .nav-item a.active {
+    background-color: white;
+    color: rgb(228, 178, 117);
+    border-radius: 5px;
+  }
+

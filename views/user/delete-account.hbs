@@ -1,0 +1,176 @@
+    <style>
+        body {
+            background: linear-gradient(to right, #f5f5f5, #d6a57a);
+            color: #4e4e4e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .account-menu {
+            width: 250px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+
+        .account-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-menu li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .account-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .account-menu li.active {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .main-content {
+    flex: 1;
+    padding: 20px;
+}
+        .delete-content{
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .delete-content img{
+            display: block;
+            margin: 0 auto;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .delete-content ul{
+            list-style-type: disc;
+            padding-left: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .delete-content li{
+            margin-bottom: 10px;
+        }
+        .delete-actions{
+            display: flex;
+            justify-content: space-between;
+        }
+        .delete-actions button{
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+        .delete-actions .delete-anyway{
+            background-color: #ff4081; /* Pink */
+            color: white;
+        }
+        .delete-actions .keep-account{
+            background-color: transparent;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        .delete-anyway:hover{
+            background-color: #f02061;
+        }
+        .keep-account:hover{
+            background-color: #ff4081;
+            color:white;
+            border: 1px solid #ddd;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .account-menu a{
+  text-decoration: none;
+  color:black
+}
+    </style>
+<body>
+  <div class="container">
+    <div class="account-menu">
+      <ul>
+        <li><a href="/account">Profile</a></li>
+        <li><a href="/addresses">Addresses</a></li>
+        <li class="active"><a href="/delete-account">Delete Account</a></li>
+      </ul>
+    </div>
+    <div class="main-content">
+      <h2>Delete Account</h2>
+      <div class="delete-content">
+        <img src="https://i.postimg.cc/VLjVMWkV/image.png" alt="Delete Account Illustration">
+        <p>Is this goodbye? Are you sure you don't want to reconsider?</p>
+        <ul>
+          <li>You'll lose your order history, saved details, ForU Credit, and all other coupons and benefits.</li>
+          <li>Any account-related benefits will be forfeited once the account is deleted and will no longer be available to you. You cannot recover the same. However, you can always create a new account. By deleting your account, you acknowledge you have read our <a href="#">Privacy Policy</a>.</li>
+          <li>Any pending orders, exchanges, returns, or refunds will no longer be accessible via your account.</li>
+          <li>ForU will try to complete the open transactions in the next 30 days on a best effort basis. However, we cannot ensure tracking & traceability of transactions once the account is deleted.</li>
+          <li>ForU may not extend the New User coupon if an account is created with the same mobile number or email id.</li>
+          <li>ForU may refuse or delay deletion in case there are any pending grievances related to orders, shipments, cancellations, or any other services offered by ForU.</li>
+          <li>ForU may retain certain data for legitimate reasons such as security, fraud prevention, future abuse, regulatory compliance, including the exercise of legal rights or compliance with legal orders under applicable laws.</li>
+        </ul>
+        <div class="checkbox-container">
+          <input type="checkbox" id="agreeTerms">
+          <label for="agreeTerms">I agree to all the terms and conditions</label>
+        </div>
+        <div class="error-message" style="color: red; display: none;">You must agree to the terms and conditions to delete your account.</div>
+        <div class="delete-actions">
+          <button class="delete-anyway">DELETE ANYWAY</button>
+          <button class="keep-account">KEEP ACCOUNT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.delete-anyway').addEventListener('click', function () {
+      const checkbox = document.getElementById('agreeTerms');
+      const errorMessage = document.querySelector('.error-message');
+      
+      if (!checkbox.checked) {
+        errorMessage.style.display = 'block';
+      } else {
+        errorMessage.style.display = 'none';
+        fetch('/delete-account', { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              window.location.href = '/';  
+            } else {
+              alert('Error deleting account');
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+    });
+
+    document.querySelector('.keep-account').addEventListener('click', function () {
+      window.location.href = '/';  
+    });
+  </script>
+</body>
+

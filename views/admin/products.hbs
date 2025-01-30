@@ -17,7 +17,6 @@
     <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">&laquo; Previous</span>
   </li>
 {{/if}}
-
       <!-- Page Numbers -->
       {{#each pages}}
         <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
@@ -61,7 +60,7 @@
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Product Name</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Category</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Price</th>
-          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Piece</th>
+          
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
         </tr>
@@ -84,7 +83,7 @@
               <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.name}}</td>
               <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.category}}</td>
               <td class="text-center" style="text-align: center; vertical-align: middle;">₹{{this.price}}</td>
-              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.piece}}</td>
+              
               <td style="text-align: center; vertical-align: middle;">
                 <a href="/admin/edit-product/{{this._id}}" class="btn" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;" aria-label="Edit product">
                   Edit

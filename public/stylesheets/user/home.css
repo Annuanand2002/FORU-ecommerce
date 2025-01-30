@@ -1,21 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Piedra&display=swap');
+/* Soft background gradient for the navbar */
+.user-layout .navbar {
+  background: linear-gradient(to right, #f5f5f5, #d6a57a); /* Light brown gradient */
+  border-bottom: 1px solid #ccc; /* Subtle border */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light drop shadow for depth */
+  padding: 0.8rem 2rem; /* Ample padding for a balanced, spacious look */
+}
 
-.navbar-brand {
-  font-family: 'Piedra', cursive; 
-  color: #854C4C !important;  
-  font-size: 2rem !important;   
-  margin-right: 3rem !important;
+/* Refined Navbar link styling */
+.user-layout .navbar-nav .nav-link {
+  color: #4e4e4e !important; /* Soft dark gray */
+  font-size: 1.1rem; /* Slightly larger text for better readability */
+  font-weight: 500; /* Medium weight */
+  padding: 10px 15px; /* Proper padding for a more clickable feel */
+  text-transform: uppercase; /* Uppercase text */
+  transition: color 0.3s ease; /* Smooth hover transition */
 }
-form {
-  margin-top: 0.5rem; 
+
+/* Subtle hover effect for navbar links */
+.user-layout .navbar-nav .nav-link:hover {
+  color: #d6a57a !important; /* Light brown color on hover */
+  text-decoration: none; /* Remove underline */
+  background-color: rgba(255, 255, 255, 0.1); /* Light background on hover */
+  border-radius: 5px; /* Rounded corners */
 }
-.login-register {
-  font-size: 1.12rem !important;
-  text-decoration: underline !important; 
+
+/* Styling for the search bar */
+.user-layout .search-bar {
+  width: 280px; /* Slightly wider for a more spacious look */
+  padding: 10px 15px; /* Reduced padding for a cleaner, compact look */
+  border-radius: 25px; /* Rounded corners for a smooth feel */
+  border: none; /* No border for a cleaner, modern look */
+  background-color: rgba(255, 255, 255, 0.8); /* Light background */
+  color: #4e4e4e; /* Dark gray text for readability */
+  font-size: 1rem; /* Slightly larger text */
 }
-.search-bar{
-  width:300px !important;
+
+/* Button Styling (for wishlist, shopping cart, and login/register) */
+.user-layout .btn {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  background-color: transparent; /* Clean, transparent background */
+  border: 1px solid #d6a57a; /* Light brown border */
+  color: #4e4e4e; /* Dark gray text */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+
+/* Hover effect for buttons */
+.user-layout .btn:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Light hover background */
+  border-color: #d6a57a; /* Brown border on hover */
+  color: #d6a57a; /* Brown text color on hover */
+}
+
+/* Styling for the Login/Register button */
+.user-layout .login-register {
+  background-color: #d6a57a; /* Light brown background */
+  color: #f5f5f5; /* Soft white text */
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
+}
+
+.user-layout .login-register:hover {
+  background-color: #b77d4a; /* Slightly darker brown on hover */
+  text-decoration: none;
+}
+
+
 .text-image{
   background-color: #fff; 
   padding: 50px; 
@@ -43,12 +98,53 @@ form {
   max-width: 400px;
   display: inline-block;
 }
-footer {
-  background-color: #f8f9fa; 
-  padding: 40px 0; 
-  text-align: center;
-}
+/* Footer Section */
 .footer-section {
-  background-color: #f8f9fa;
-  padding: 40px 0;
+  background: linear-gradient(to right, #f5f5f5, #d6a57a); /* Light brown gradient like the navbar */
+  color: #4e4e4e; /* Soft dark gray text for consistency */
+  padding: 40px 0; /* Same padding as before */
+  text-align: center; /* Center-align content */
+  border-top: 1px solid #ccc; /* Subtle border at the top */
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+/* Footer Links */
+.footer-section a {
+  color: #4e4e4e; /* Dark gray link color */
+  text-decoration: none; /* Remove underline */
+  font-size: 1rem; /* Consistent font size */
+  transition: color 0.3s ease; /* Smooth hover effect */
+}
+
+.footer-section a:hover {
+  color: #d6a57a; /* Light brown on hover */
+}
+
+/* Footer Icons (if any) */
+.footer-section .social-icons a {
+  margin: 0 10px;
+  color: #4e4e4e;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.footer-section .social-icons a:hover {
+  color: #d6a57a; /* Light brown color on hover */
+}
+
+/* Footer Buttons (if needed) */
+.footer-section .btn {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: transparent; /* Clean, transparent background */
+  border: 1px solid #d6a57a; /* Light brown border */
+  color: #4e4e4e; /* Dark gray text */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.footer-section .btn:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Light hover background */
+  border-color: #d6a57a; /* Brown border on hover */
+  color: #d6a57a; /* Brown text color on hover */
 }

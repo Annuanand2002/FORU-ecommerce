@@ -1,0 +1,368 @@
+
+    <style>
+        body {
+            background: linear-gradient(to right, #f5f5f5, #d6a57a);
+            color: #4e4e4e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .account-menu {
+    width: 250px;
+    padding: 20px;
+    border-right: 1px solid #eee;
+}
+
+        .account-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-menu li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .account-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .account-menu li.active {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+        .edit-details {
+            border: 1px solid #ddd;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .edit-details h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .input-container { /* Container for input and change button */
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px;
+        }
+
+        .input-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .input-container button {
+            white-space: nowrap;
+            margin-left: 10px;
+            background-color: transparent;
+            border: 1px solid #d6a57a;
+            color: #4e4e4e;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .input-container button:hover {
+            background-color: rgba(214, 165, 122, 0.1);
+            border-color: #d6a57a;
+            color: #d6a57a;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: 1px solid #ff4081;
+        }
+
+        .gender-options {
+            display: flex;
+            align-items: center;
+        }
+
+        .gender-options label {
+            margin-bottom: 0;
+            margin-right: 15px;
+            white-space: nowrap;
+        }
+
+        .gender-options input[type="radio"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+            margin-right: 5px;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        .gender-options input[type="radio"]:checked::before {
+            position: absolute;
+            content: '';
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background-color: #ff4081;
+            border-radius: 50%;
+        }
+
+        .save-details {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .save-details button {
+            background-color: #ff4081;
+            color: white;
+            padding: 14px 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+            width: 100%;
+            max-width: 250px;
+            font-size: 1.1rem;
+            margin-right: 30px;
+        }
+
+        .save-details button:hover {
+            background-color: #f02061;
+        }
+        .form-group input[type="date"]{
+            padding: 10px;
+        }
+        h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    margin-left:10px;
+}
+.account-menu a{
+  text-decoration: none;
+  color:black
+}
+    </style>
+<body>
+    <div class="container">
+        <div class="account-menu">
+           <ul>
+            <li  ><a href="/account">Profile</a></li>
+            <li  class="active"><a href="/addresses">Addresses</a></li>
+            <li a href="/delete-account">Delete Account</a></li>
+        </ul>
+        </div>
+    
+        <div class="main-content">
+            <div><h2>Edit Details</h2></div>
+            <div class="edit-details">
+    
+                <form id="edit-details-form" method="post" action="edit-profile">
+                    <div class="form-group">
+                        <label for="mobile-number">Mobile Number</label>
+                        <div class="change-mobile">
+                            <input type="tel" id="mobile-number" name="phone" value="{{user.phone}}"/>
+                            <span id="mobile-number-error" style="color: red; display: none;"></span>
+                        </div>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" name="name" value="{{user.name}}"/>
+                        <span id="full-name-error" style="color: red; display: none;"></span>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{user.email}}"/>
+                        <span id="email-error" style="color: red; display: none;"></span>
+                    </div>
+   <div>
+    <input type="radio" name="gender" value="Male" id="male" /> Male
+    <input type="radio" name="gender" value="Female" id="female" /> Female
+    <span id="gender-error" style="color: red; display: none;"></span> <!-- Error message for gender -->
+</div>
+
+
+
+    
+                    <div class="form-group">
+                        <label for="dob">Birthday (dd/mm/yyyy)</label>
+                        <input type="date" id="dob" name="dateOfBirth" value="user.dateOfBirth"/>
+                        <span id="dob-error" style="color: red; display: none;"></span>
+                    </div>
+    
+                    <div class="save-details">
+                        <button type="submit">SAVE DETAILS</button>
+                    </div>
+                     </form>
+                        <div class="save-details">
+                          <a href="/account" style="margin-left: 10px;"><button>Cancel</button></a>
+                        </div>
+                        
+                    
+               
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+        const form = document.getElementById('edit-details-form');
+    
+        // Utility function to display error messages
+        const errorMessage = (id, message) => {
+            const element = document.getElementById(`${id}-error`);
+            if (message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+        };
+    
+        // Validation functions
+        const validateMobile = (mobile, id) => {
+            const mobileRegex = /^[6-9]\d{9}$/; // Starts with 6-9 and has 10 digits
+            if (!mobileRegex.test(mobile)) {
+                errorMessage(id, 'Enter a valid 10-digit mobile number starting with 6-9.');
+                return false;
+            }
+            errorMessage(id, '');
+            return true;
+        };
+    
+        const validateFullName = (name, id) => {
+            if (name.length < 3 || !/^[a-zA-Z\s]+$/.test(name)) {
+                errorMessage(id, 'Full name must be at least 3 characters and contain only letters and spaces.');
+                return false;
+            }
+            errorMessage(id, '');
+            return true;
+        };
+    
+        const validateEmail = (email, id) => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorMessage(id, 'Enter a valid email address.');
+                return false;
+            }
+            errorMessage(id, '');
+            return true;
+        };
+    
+        const validateGender = () => {
+            const gender = document.querySelector('input[name="gender"]:checked');
+            if (!gender) {
+                errorMessage('gender', 'Please select your gender.');
+                return false;
+            }
+            errorMessage('gender', '');
+            return true;
+        };
+    
+        const validateDOB = (dob, id) => {
+            const today = new Date().toISOString().split('T')[0];
+            const ageLimit = new Date().getFullYear() - 18; // Minimum age of 18
+            const dobYear = new Date(dob).getFullYear();
+            if (dob === '' || dob > today || dobYear > ageLimit) {
+                errorMessage(id, 'Enter a valid date of birth. You must be at least 18 years old.');
+                return false;
+            }
+            errorMessage(id, '');
+            return true;
+        };
+    
+ 
+    
+        // Event listeners for real-time validation
+        document.getElementById('mobile-number').addEventListener('input', (e) => {
+            validateMobile(e.target.value.trim(), 'mobile-number');
+        });
+    
+        document.getElementById('full-name').addEventListener('input', (e) => {
+            validateFullName(e.target.value.trim(), 'full-name');
+        });
+    
+        document.getElementById('email').addEventListener('input', (e) => {
+            validateEmail(e.target.value.trim(), 'email');
+        });
+    
+        document.getElementById('dob').addEventListener('change', (e) => {
+            validateDOB(e.target.value.trim(), 'dob');
+        });
+        document.querySelectorAll('input[name="gender"]').forEach((radio) => {
+            radio.addEventListener('change', validateGender);
+        });
+    
+       form.addEventListener('submit', function (e) {
+    e.preventDefault(); // Prevent form submission
+
+    const isMobileValid = validateMobile(document.getElementById('mobile-number').value.trim(), 'mobile-number');
+    const isFullNameValid = validateFullName(document.getElementById('full-name').value.trim(), 'full-name');
+    const isEmailValid = validateEmail(document.getElementById('email').value.trim(), 'email');
+    const isGenderValid = validateGender();
+    const isDOBValid = validateDOB(document.getElementById('dob').value.trim(), 'dob');
+
+    if (isMobileValid && isFullNameValid && isEmailValid && isGenderValid && isDOBValid) {
+        // If validation passes, submit the form data to the server
+        form.submit(); // This submits the form
+    }
+});
+
+    </script>
+</body>

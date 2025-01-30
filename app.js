@@ -16,7 +16,7 @@ var adminRouter = require('./routes/admin');
 var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+app.set('view engine', 'hbs');                                
 
 hbs.create({}).handlebars.registerHelper('ifEquals', function(value1, value2, options) {
   if (value1 === value2) {
@@ -25,6 +25,7 @@ hbs.create({}).handlebars.registerHelper('ifEquals', function(value1, value2, op
     return options.inverse(this); 
   }
 });
+
 handlebars.registerHelper('json', function(context) {
   return JSON.stringify(context);
 });
@@ -46,6 +47,10 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session())
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null; 
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.engine('hbs',hbs.engine({extname:'hbs',defaultLayout:'layout',layoutsDir:__dirname+'/views/layout/',partialsDir:__dirname+'/views/partials/'}))
@@ -54,7 +59,7 @@ db.connect((err)=>{
     console.log('database connection failed',err)
     process.exit(1)
   }
-  console.log('server is running')
+  console.log('server is running') 
 })
 
 app.use('/', userRouter);

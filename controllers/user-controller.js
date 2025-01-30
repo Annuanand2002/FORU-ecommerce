@@ -2,12 +2,18 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user-schema');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-
+const { log } = require('console');
+const passport = require('passport')
 async function registerUser({ name, email, password, phone }) {
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or:[{email},{phone}]});
 if (existingUser) {
-    throw new Error('Email already in use. Please use a different email address.');
+  if (existingUser.email === email) {
+    return { success: false, message: "Email already in use. Please use a different email address." };
+  }
+  if (existingUser.phone === phone) {
+    return { success: false, message: "Phone number already in use. Please use a different phone number." };
+  }
 }
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpires = Date.now() + 10 * 60 * 1000; 
@@ -73,27 +79,32 @@ async function verifyEmail(token) {
 }
 
 
-const loginUser = async (email, password) => {
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return { success: false, error: "Invalid username or password." };
-    }
-    if (user.blocked) {
-      return { success: false,blocked:true};
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return { success: false, error: "Invalid username or password." };
-    }
-
-    return { success: true, user };
-  } catch (error) {
-    console.error("Error in loginUser helper:", error);
-    return { success: false, error: "Internal server error." };
+async function loginUser({ email, password }) {
+  const user = await User.findOne({ email });
+  console.log(user)
+  if (!user) {
+    return { success: false}; 
   }
-};
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return { success: false }; 
+  }
+
+  if (user.blocked) {
+    return { success: false, blocked: true };
+  }
+  return {
+    success: true,
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phone:user.phone,
+    dateOfBirth:user.dateOfBirth,
+    gender:user.gender,
+    blocked: false,
+  };
+}
 
 
 const generateResetToken = async (email) => {
@@ -131,15 +142,23 @@ const resetPassword = async (password, token) => {
   user.resetTokenExpires = undefined; 
   await user.save();
 };
-const getUsers = async ()=>{
+const getUsers = async (page,limit)=>{
   try{
-    const users = await User.find({}, { name: 1, email: 1 ,blocked:1,phone:1,isVerified:1}).lean();
-    return users
+    const skip = (page - 1) * limit;
+    const users = await User.find({}, { name: 1, email: 1 ,blocked:1,phone:1,isVerified:1})
+    .skip(skip)
+    .limit(limit)
+    .lean();
+    const count = await User.countDocuments()
+    return {users,totalPages: Math.ceil(count / limit)}
   }
   catch (err) {
     console.error('Error fetching users:', err);
   }
 }
+
+
+
 const blockUser = async(userId)=>{
   try{
     return await User.findByIdAndUpdate(userId,{blocked:true})
@@ -158,7 +177,43 @@ const unblockUser = async(userId)=>{
   }
 }
 
+
+const authenticateGoogle = passport.authenticate('google', {
+  scope: ['profile', 'email'],
+});
+
+
+const handleGoogleCallback = (req, res, next) => {
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      req.session.message = info?.message || 'Authentication failed.';
+      return res.redirect('/login');
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      req.session.user = user;
+      res.redirect('/');
+    });
+  })(req, res, next);
+};
+
+const logoutUser = (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      return res.status(500).send('Unable to log out');
+    }
+    res.redirect('/');
+  });
+};
+
+
 module.exports = { registerUser,loginUser,getUsers,blockUser,
   unblockUser,verifyEmail,generateResetToken,
-  resetPassword};
+  resetPassword,logoutUser,authenticateGoogle};
 

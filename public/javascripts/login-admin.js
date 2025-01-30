@@ -1,5 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("Login loaded");
 
   const adminLoginForm = document.getElementById('adminLoginForm');
   const usernameField = document.getElementById('username');
@@ -75,5 +73,5 @@ document.addEventListener('DOMContentLoaded', () => {
       globalErrorMessage.textContent = 'An unexpected error occurred. Please try again.';
     }
   });
-});
+
 

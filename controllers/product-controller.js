@@ -1,7 +1,7 @@
 const Product = require('../models/product-schema');
 const path = require('path');
 const fs = require('fs');
-const categoryHelper = require('../controllers/cateogory-helper');
+const categoryHelper = require('./cateogory-controller');
 
 const getAllProduct = async(page,perPage,searchQuery)=>{
   try{
@@ -9,7 +9,6 @@ const getAllProduct = async(page,perPage,searchQuery)=>{
     const totalProducts = await Product.countDocuments();
     const totalPages = Math.ceil(totalProducts/perPage)
     const products = await Product.find().skip((page-1)*perPage).limit(perPage).lean()
-    console.log('Filtered Products:', products);
 
     const pages = Array.from({length:totalPages},(_,i)=>i+1)
     const prevPage = page > 1 ? page - 1 : null;
@@ -24,8 +23,11 @@ const getAllProduct = async(page,perPage,searchQuery)=>{
 
 const addProduct = async (productData,files)=>{
   try{
-    const {name,price,piece,category,gender,size,description} = productData;
-    const sizes = productData['size[]'] || [];
+    const {name,price,category,gender,sizes,description} = productData;
+    const sizeQuantities = Object.keys(sizes).map(size => ({
+      size,
+      quantity: parseInt(sizes[size], 10) || 0
+    }));
     const latestCollection = productData.latestCollection === 'true'; 
     const bestSeller = productData.bestSeller === 'true';
     let imagePath = [];
@@ -37,9 +39,8 @@ const addProduct = async (productData,files)=>{
       name,
       category,
       price,
-      piece,
       gender,
-      size: sizes,
+      sizes: sizeQuantities,
       description,
       images:imagePath,
       latestCollection,
@@ -67,11 +68,7 @@ async function getEditProduct(productId) {
 const updateProduct = async (productId, productData, files) => {
   try {
     const { name, price, piece, category, bestSeller, latestCollection } = productData;
-
-    // Fetch existing product to retain its current images
     const existingProduct = await Product.findById(productId);
-
-    // Prepare updated images array
     let updatedImages = existingProduct.images || [];
     if (files && files.length > 0) {
       const newImages = files.map(file => '/uploads/' + file.filename);

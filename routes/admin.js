@@ -1,12 +1,12 @@
 var express = require('express');
 var router = express.Router();
-const userHelper = require('../controllers/user-helper');
-const productHelper = require('../controllers/product-helper');
+const userHelper = require('../controllers/user-controller');
+const productHelper = require('../controllers/product-controller');
 const {upload} = require('../controllers/multer-middleware');
-const adminHelper = require('../controllers/admin-helper');
+const adminHelper = require('../controllers/admin-controller');
 const Category = require('../models/cateogory-schema');
 const Admin = require('../models/admin-schema');
-const categoryHelper = require('../controllers/cateogory-helper');
+const categoryHelper = require('../controllers/cateogory-controller');
 const bcrypt = require('bcrypt')
 
 /*admin-login*/
@@ -94,8 +94,6 @@ router.get('/products', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const perPage = 10;
   const searchQuery = req.query.searchQuery || '';
-  console.log('Search Query:', searchQuery);
-  console.log('Page:', page);
   try {
     const data = await productHelper.getAllProduct(page,perPage,searchQuery);
     
@@ -114,7 +112,8 @@ router.get('/products', async (req, res) => {
 /*add-product*/
 router.get('/add-product', async (req, res, next)=>{
   const categories = await categoryHelper.getAllcategories();
-  res.render('admin/add-product',{categories,admin:true,isAdminLogin:false})
+  const availableSizes = ['S', 'M', 'L', 'XL'];
+  res.render('admin/add-product',{categories,availableSizes,admin:true,isAdminLogin:false})
 });
 router.post('/add-product', upload, async (req, res) => {
   try {
@@ -131,7 +130,6 @@ router.post('/add-product', upload, async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
 /*product-edit*/
 router.get('/edit-product/:id', async (req, res) => {
   try {
@@ -216,12 +214,25 @@ router.delete('/delete-category/:id', async (req, res) => {
 });
 
 /*user-management */
+
+
+
 router.get('/user', async (req, res) => {
   try{
-    const users = await userHelper.getUsers();
-    res.render('admin/user', { users ,admin:true,isAdminLogin:false});
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    console.log(`Page: ${page}, Limit: ${limit}`); // Log the values
+    const { users, totalPages } = await userHelper.getUsers(page, limit);
+    const pagination = {
+      currentPage: page,
+      next: page < totalPages ? page + 1 : null,
+      previous: page > 1 ? page - 1 : null,
+      pages: Array.from({ length: totalPages }, (_, i) => i + 1),
+    };
+    res.render('admin/user', { users ,pagination,admin:true,isAdminLogin:false});
   }
   catch{
+    console.error('Error in /user route:', err);
     res.status(500).send('Internal Server Error');
   }
 });

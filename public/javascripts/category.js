@@ -7,9 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
   addCategoryForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = categoryNameInput.value.trim();
+    const nameRegex = /^[A-Za-z\s]+$/
 
     if (!name) {
       categoryError.textContent = 'This field is required';
+      return;
+    }
+    if(!nameRegex.test(name)){
+      categoryError.textContent = "Category name must only contain letters and spaces";
       return;
     }
 

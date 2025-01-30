@@ -1,18 +1,52 @@
 <div class="container">
   <div class="d-flex justify-content-between align-items-center mb-4 pt-5">
+    
     <div>
        <h4 class="my-3" style="color: rgb(228, 178, 117)">Users</h4>
+       <div class="d-flex justify-content-between align-items-center mt-4">
+   <nav aria-label="Page navigation example">
+    <ul class="pagination">
+  {{#if pagination.previous}}
+  <li class="page-item">
+    <a class="page-link" href="/admin/user?page={{pagination.previous}}" aria-label="Previous" 
+       style="background-color: rgb(228, 178, 117); color: white; border-color: rgb(228, 178, 117);">
+      <span aria-hidden="true">&laquo;</span>
+    </a>
+  </li>
+  {{/if}}
+
+  {{#each pagination.pages}}
+  <li class="page-item {{#ifEquals ../pagination.currentPage this}}active{{/ifEquals}}">
+    <a class="page-link" href="/admin/user?page={{this}}" 
+       style="background-color: {{#ifEquals ../pagination.currentPage this}}rgb(228, 178, 117){{else}}transparent{{/ifEquals}}; 
+              color: {{#ifEquals ../pagination.currentPage this}}white{{else}}black{{/ifEquals}}; 
+              border: 1px solid rgb(228, 178, 117);">
+      {{this}}
+    </a>
+  </li>
+  {{/each}}
+
+  {{#if pagination.next}}
+  <li class="page-item">
+    <a class="page-link" href="/admin/user?page={{pagination.next}}" aria-label="Next" 
+       style="background-color: rgb(228, 178, 117); color: white; border-color: rgb(228, 178, 117);">
+      <span aria-hidden="true">&raquo;</span>
+    </a>
+  </li>
+  {{/if}}
+</ul>
+</div>
+
     </div>
   </div>
   <div class="table-responsive pt-3">
     <table class="table table-bordered">
       <thead>
         <tr>
-          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">No:</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Name</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Email</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Mobile No</th>
-          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">isVerified</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Verified</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117);"></th>
           <th class="text-center"style="background-color: rgb(228, 178, 117);"></th>
         </tr>
@@ -20,7 +54,6 @@
       <tbody>
         {{#each users}}
         <tr>
-          <td class="text-center">{{@index}}</td>
           <td class="text-center">{{this.name}}</td>
           <td class="text-center">{{this.email}}</td>
           <td class="text-center">{{this.phone}}</td>

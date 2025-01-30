@@ -21,7 +21,9 @@ const userSchema = new mongoose.Schema({
   verificationToken: {type: String, required: false,},
   verificationTokenExpires: {type: Date,required: false,},
   resetToken: {type:String,default:null},
-  resetTokenExpires: {type: Date,default:null,}
+  resetTokenExpires: {type: Date,default:null,},
+  gender: { type: String,enum: ['Male', 'Female'],},
+  dateOfBirth: Date
 });
 
 const User = mongoose.model('User', userSchema);

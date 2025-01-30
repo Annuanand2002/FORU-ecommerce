@@ -4,11 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
   const phoneInput = document.getElementById('phone');
+  const messageDiv = document.getElementById('message');
 
   const nameError = document.getElementById('nameError');
   const emailError = document.getElementById('emailError');
   const passwordError = document.getElementById('passwordError');
   const phoneError = document.getElementById('phoneError');
+
 
 
   const togglePassword = document.getElementById('togglePassword');
@@ -38,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
     emailError.textContent = '';
     passwordError.textContent = '';
     phoneError.textContent = '';
+
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = ''; 
+    messageDiv.className = ''; 
 
     let isValid = true;
 
@@ -78,28 +84,49 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, phone }),
         });
-
+      
         const result = await response.json();
+        if (response.ok) {
+          messageDiv.textContent = result.message || 'Registration successful!';
+          messageDiv.classList.remove('error');
+          messageDiv.classList.add('success');
+          messageDiv.style.display = 'block'; 
+          registerForm.reset();
+        } else {
 
-        if (!response.ok) {
-          if (response.status === 400 && result.message.includes('Email already in use')) {
-            emailError.textContent = result.message; // Display specific error
+          if (response.status === 400) {
+            if (result.message.includes('Email already in use')) {
+              emailError.textContent = result.message; 
+              phoneError.textContent = ''; 
+            } else if (result.message.includes('Phone number already in use')) {
+              phoneError.textContent = result.message; 
+              emailError.textContent = ''; 
+            } else {
+              messageDiv.textContent = result.message || 'Validation error occurred.';
+              messageDiv.classList.remove('success');
+              messageDiv.classList.add('error');
+              messageDiv.style.display = 'block'; 
+            }
           } else {
-            alert(result.message); // Generic error message
+            messageDiv.textContent = result.message || 'An error occurred. Please try again.';
+            messageDiv.classList.remove('success');
+            messageDiv.classList.add('error');
+            messageDiv.style.display = 'block'; 
           }
-          return;
         }
 
-        alert(result.message); // Success message
-        form.reset();
-        emailError.textContent = '';
-
+        setTimeout(() => {
+          messageDiv.style.display = 'none';
+        }, 10000);
       } catch (error) {
         console.error('Error during registration:', error);
+        messageDiv.textContent = 'Something went wrong. Please try again later.';
+        messageDiv.classList.add('error');
       }
+      
     }
   });
-});
+})
 
 
 

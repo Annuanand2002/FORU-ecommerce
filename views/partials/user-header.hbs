@@ -1,36 +1,59 @@
+<div class="user-layout">
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+      <!-- Logo -->
+      <a class="navbar-brand" href="#">FORU</a>
 
-  <header>
-    <nav class="navbar navbar-expand bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">FORU</a>
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">HOME</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/collections">COLLECTIONS</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">ABOUT</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">CONTACT</a>
-          </li>
-          
-        </ul>
-        <form class="d-flex me-0.5" role="search">
-          <input class="form-control me-2 search-bar" type="search" placeholder="Search for products"
-            aria-label="Search">
-        </form>
-        <div class="d-flex align-items-center">
-          <a href="#" class="btn me-0.5">
-            <i class="fa-regular fa-heart fa-xl"></i>
-          </a>
-          <a href="#" class="btn me-0.5">
-            <i class="fa-solid fa-cart-shopping fa-xl"></i>
-          </a>
-          <a href="/register" class="btn login-register">Login/Register</a>
-        </div>
+      <!-- Navbar links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">HOME</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/collections">COLLECTIONS</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">ABOUT</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">CONTACT</a>
+        </li>
+      </ul>
+
+      <!-- Search bar -->
+      <form class="d-flex me-0.5" role="search" method="GET" action="/collections">
+  <input class="form-control me-2 search-bar" type="search" name="gender" placeholder="Search for products" aria-label="Search">
+  <button class="btn btn-outline-success" type="submit" style="color:white;margin-right:20px">Search</button>
+</form>
+
+      <!-- Icon buttons and login/register link -->
+      <div class="d-flex align-items-center">
+        <a href="#" class="btn me-2" title="Wishlist">
+          <i class="fa-regular fa-heart fa-xl"></i>
+        </a>
+        <a href="#" class="btn me-2" title="Shopping Cart">
+          <i class="fa-solid fa-cart-shopping fa-xl"></i>
+        </a>
+        {{#if user}}
+        <div class="d-flex align-items-center dropdown">
+            <span class="text-light me-2">Hi, {{user.name}}</span>
+            
+            <a href="#" class="btn dropdown-toggle p-0" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa-regular fa-user-circle" style="color: black; font-size: 2.5rem;"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li><a class="dropdown-item" href="/account">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+          </div>
+          {{else}}
+        <a href="/register" class="btn btn-outline-light login-register">Login/Register</a>
+        {{/if}}
       </div>
-    </nav>
-  </header>
+    </div>
+  </nav>
+</header>
+</div>
+

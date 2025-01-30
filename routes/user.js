@@ -1,20 +1,23 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword} = require('../controllers/user-helper'); 
+const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword,logoutUser} = require('../controllers/user-controller'); 
 const Product = require('../models/product-schema');
 const Category = require('../models/cateogory-schema');
 const passport = require('passport');
 const User = require('../models/user-schema');
+const {checkAuthentication,checkUserBlocked}= require('../controllers/auth-middleware')
+const pagination= require('../controllers/pagination-middleware')
 const nodemailer = require('nodemailer');
+const {getFilteredProducts }= require('../controllers/getFilteredProduct')
+const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
 
 /* GET home page. */
-
 router.get('/',async (req,res,next)=>{
-  
   const bestseller = await Product.find({ bestSeller: true }).lean();
   const latestCollection = await Product.find({ latestCollection: true }).lean()
   res.render('user/home',{latestCollection,bestseller,admin:false})
 })
+
 /**register */
 
 router.get('/register',(req,res,next)=>{
@@ -27,11 +30,13 @@ router.post('/register', async (req, res) => {
   try {
     const result = await registerUser({ name, email, password, phone });
 
-    return res.json(result); 
-  } catch (error) {
-    if (error.message.includes('Email already in use')) {
-      return res.status(400).json({ success: false, message: error.message });
+    if (result.success) {
+      return res.status(200).json({ success: true, message: result.message });
+    } else {
+      return res.status(400).json({ success: false, message: result.message });
     }
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error. Please try again later.' });
   }
 });
 router.get('/verify', async (req, res) => {
@@ -48,40 +53,70 @@ router.get('/verify', async (req, res) => {
 router.get('/auth/google', passport.authenticate('google', {
   scope: ['profile', 'email'] 
 }));
-router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }), 
-  (req, res) => {
-    res.redirect('/'); 
+router.get(
+  '/auth/google/callback',
+  (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+      if (err) {
+        return next(err); 
+      }
+      if (!user) {
+        req.session.message = info?.message || 'Authentication failed.';
+        return res.redirect('/login');
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        req.session.user = user;
+        res.redirect('/');
+      });
+    })(req, res, next); 
   }
 );
+
+
 
 /**login */
 
 
 router.get('/login',(req,res,next)=>{
-  res.render('user/login',{isAdminLogin:true})
+  const message = req.session.message || '';
+  req.session.message = []
+  res.render('user/login',{isAdminLogin:true,message})
 })
 router.post('/login',async (req,res,next)=>{
   const { email, password } = req.body;
-  console.log(req.body)
-
+ 
   if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
+    return res.status(400).json({success:false, error: "Email and password are required." });
   }
 
   try{
-    const result = await loginUser(email,password);
+    const result = await loginUser({email,password});
     if (result.blocked) {
-      return res.status(403).json({ error: "You have been blocked. Please contact support." });
+      return res.status(403).json({success:false, error: "You have been blocked. Please contact support." });
     }
     if(!result.success){
-      return res.status(401).json({ error: "Invalid username or password." });
+
+      return res.status(401).json({ success:false,error: "Invalid username or password." });
     }
-    return res.status(200).json({message: "Login successful"})
+    if(result.success){
+      req.session.user = ({
+        _id:result._id,
+        name:result.name,
+        email:result.email,
+        phone:result.phone,
+        dateOfBirth:result.dateOfBirth,
+        gender:result.gender,
+      })
+      return res.status(200).json({success:true,message: "Login successful"})
+    }
   }
   catch(error){
     console.log("Login error:", error);
-    return res.status(500).json({ error: "An internal server error occurred." });
+   
+    return res.status(500).json({success:false,error: "An internal server error occurred." });
   }
 })
 
@@ -144,58 +179,20 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-router.get('/collections', async (req, res) => {
-  const categories = await Category.find().lean();
-  const page = parseInt(req.query.page) || 1;
-  const limit = 9;
-  const skip = (page - 1) * limit;
-
-  let selectedCategories = req.query.categories || [];
-  let selectedGender = req.query.gender || null;
-
-  if (typeof selectedCategories === 'string') {
-    selectedCategories = selectedCategories.split(',');
-  }
-
-  let productQuery = {};
-
-  if (selectedCategories.length > 0) {
-    productQuery.category = { $in: selectedCategories }; 
-  }
-
-  // Apply gender filter
-  if (selectedGender) {
-    productQuery.gender = selectedGender; 
-  }
-
-  const products = await Product.find(productQuery)
-    .skip(skip)
-    .limit(limit)
-    .lean();
-
-  const totalProducts = await Product.countDocuments(productQuery);
-  const totalPages = Math.ceil(totalProducts / limit);
-
-  const prevPage = page > 1 ? page - 1 : null;
-  const nextPage = page < totalPages ? page + 1 : null;
-  const pages = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push(i);
-  }
-
-  res.render('user/collections', {
-    admin: false,
-    categories: categories,
-    products: products,
-    prevPage: prevPage,
-    nextPage: nextPage,
-    pages: pages,
-    currentPage: page,
-    selectedCategories: selectedCategories,  
-    selectedGender: selectedGender         
-  });
-});
-
-
+router.get('/collections',getFilteredProducts);
+router.get('/account',checkAuthentication,(req,res)=>{
+  const user = req.session.user;
+  res.render('user/user-account',{user,isUser:true})
+})
+router.get('/edit-profile',checkAuthentication,(req,res)=>{
+  const user = req.session.user;
+  res.render('user/edit-userProfile',{user,isUser:true})
+})
+router.post('/edit-profile',updateProfile);
+router.get('/delete-account',checkAuthentication,(req,res)=>{
+  res.render('user/delete-account',{isUser:true})
+})
+router.post('/delete-account', deleteAccount);
+router.get('/logout', logoutUser);
 
 module.exports = router;

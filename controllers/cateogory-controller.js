@@ -16,7 +16,6 @@ exports.addCategory = async (data)=>{
 
 exports.deleteCategory = async (id)=>{
    await Category.findByIdAndDelete(id);
-   await Product.deleteMany({categoryId:id})
  
 
 }

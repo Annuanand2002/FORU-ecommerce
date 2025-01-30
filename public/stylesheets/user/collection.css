@@ -1,0 +1,57 @@
+/* Sidebar Styling */
+.sidebar {
+  background: linear-gradient(to bottom, #f5f5f5, #d6a57a); /* Gradient similar to header and footer */
+  color: #4e4e4e; /* Soft dark gray text */
+  padding: 20px; /* Spacing for inner content */
+  border-right: 1px solid #ccc; /* Subtle border to separate from main content */
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+/* Sidebar Heading */
+.sidebar h4 {
+  font-size: 1.2rem;
+  font-weight: 600; /* Slightly bold for emphasis */
+  color: #4e4e4e;
+  margin-bottom: 20px;
+}
+
+/* Sidebar Form Check Styling */
+.sidebar .form-check {
+  margin-bottom: 15px;
+}
+
+.sidebar .form-check-label {
+  color: #4e4e4e; /* Dark gray text */
+  font-size: 1rem;
+  transition: color 0.3s ease; /* Smooth hover effect */
+}
+
+.sidebar .form-check-input:checked + .form-check-label {
+  color: #d6a57a; /* Highlighted color for selected checkboxes */
+  font-weight: bold;
+}
+
+/* Sidebar Button Styling */
+.sidebar .btn {
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #d6a57a; /* Light brown background */
+  border: none; /* Clean, no border */
+  color: #fff; /* White text */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+}
+
+.sidebar .btn:hover {
+  background-color: #b77d4a; /* Darker brown on hover */
+  color: #fff; /* Keep white text */
+}
+
+/* Sidebar Filter Section */
+.sidebar .filter-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  border-radius: 8px; /* Rounded corners for smoother feel */
+  background-color: rgba(255, 255, 255, 0.8); /* Subtle background for sections */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for section depth */
+}

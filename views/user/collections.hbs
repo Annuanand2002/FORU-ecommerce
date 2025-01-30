@@ -1,57 +1,118 @@
+<style>
+/* Card styling */
+.card {
+  position: relative;
+  /* Other styles */
+}
+
+/* Initial state: hide buttons and position them */
+.hover-buttons {
+  display: flex;
+  justify-content: center; /* Center the button horizontally */
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Show buttons on card hover */
+.card:hover .hover-buttons {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Button styling */
+.hover-buttons .btn {
+  background-color: transparent;
+  border: 2px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+/* Optional: Change border color on hover */
+.hover-buttons .btn:hover {
+  border-color: #999;
+}
+
+
+
+</style>
 <section class="main-content d-flex">
   <aside class="sidebar col-md-3">
     <div class="sidebar-content">
       <!-- Categories Filter -->
-      <div class="filter-section">
-        <h4>Categories</h4>
-        <form id="category-form" method="get" action="/collections">
-          <input type="hidden" name="page" value="{{currentPage}}">
-          <input type="hidden" name="searchQuery" value="{{searchQuery}}">
-          {{#each categories}}
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" 
-                     name="categories" value="{{this.name}}" 
-                     id="{{this.name}}"
-                     {{#if (arrayContains ../selectedCategories this.name)}}checked{{/if}}>
-              <label class="form-check-label" for="{{this.name}}">
-                {{this.name}}
-              </label>
-            </div>
-          {{/each}}
-          <button type="submit" class="btn btn-primary">Apply Filters</button>
-        </form>
+      
+<div class="filter-section">
+  <h4>Categories</h4>
+  <form id="filter-form" method="get" action="/collections">
+    <input type="hidden" name="page" value="{{currentPage}}">
+    <input type="hidden" name="searchQuery" value="{{searchQuery}}">
+    
+    <!-- Categories Filter -->
+    {{#each categories}}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" 
+               name="categories" value="{{this.name}}" 
+               id="{{this.name}}"
+               {{#if (arrayContains ../selectedCategories this.name)}}checked{{/if}}>
+        <label class="form-check-label" for="{{this.name}}">
+          {{this.name}}
+        </label>
       </div>
+    {{/each}}
 
-      <!-- Gender Filter -->
-      <div class="filter-section">
-        <h4>Gender</h4>
-        <form id="gender-form" method="get" action="/collections">
-          <input type="hidden" name="page" value="{{currentPage}}">
-          <input type="hidden" name="searchQuery" value="{{searchQuery}}">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="gender" value="Men" id="men" {{#ifEquals selectedGender "Men"}}checked{{/ifEquals}}>
-            <label class="form-check-label" for="men">Men</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="gender" value="Women" id="women" {{#ifEquals selectedGender "Women"}}checked{{/ifEquals}}>
-            <label class="form-check-label" for="women">Women</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="gender" value="Girl" id="girl" {{#ifEquals selectedGender "Girl"}}checked{{/ifEquals}}>
-            <label class="form-check-label" for="women">Girl</label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="gender" value="Boy" id="boy" {{#ifEquals selectedGender "Boy"}}checked{{/ifEquals}}>
-            <label class="form-check-label" for="women">Boy</label>
-          </div>
-          <button type="submit" class="btn btn-primary">Apply Filters</button>
-        </form>
-      </div>
+    <!-- Gender Filter -->
+    <h4>Gender</h4>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="gender" value="Men" id="men" {{#ifEquals selectedGender "Men"}}checked{{/ifEquals}}>
+      <label class="form-check-label" for="men">Men</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="gender" value="Women" id="women" {{#ifEquals selectedGender "Women"}}checked{{/ifEquals}}>
+      <label class="form-check-label" for="women">Women</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="gender" value="Girl" id="girl" {{#ifEquals selectedGender "Girl"}}checked{{/ifEquals}}>
+      <label class="form-check-label" for="girl">Girl</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="gender" value="Boy" id="boy" {{#ifEquals selectedGender "Boy"}}checked{{/ifEquals}}>
+      <label class="form-check-label" for="boy">Boy</label>
+    </div>
+
+    <!-- Apply Filters Button -->
+    <button type="submit" class="btn btn-primary">Apply Filters</button>
+  </form>
+</div>
+
     </div>
   </aside>
 
   <!-- Product Cards Section -->
   <section class="product-section col-md-9" style="margin-top: 30px;">
+    <div class="container">
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div class="col-md-3 text-right">
+            <div class="sort-by-container" style="margin-bottom:30px; position:relative;">
+                <label for="sort-by" style="font-weight:bold; font-size:1rem; margin-right:10px; color:#333;">Sort By:</label>
+                <select id="sort-by" name="sort-by" style="padding:10px 15px; font-size:1rem; border:1px solid #ddd; border-radius:5px; background-color:#f9f9f9; box-shadow:0px 2px 5px rgba(0, 0, 0, 0.1);">
+                    <option value="popularity" {{#ifEquals sortOption 'popularity'}}selected{{/ifEquals}}>Popularity</option>
+                    <option value="price-asc" {{#ifEquals sortOption 'price-asc'}}selected{{/ifEquals}}>Price: Low to High</option>
+                    <option value="price-desc" {{#ifEquals sortOption 'price-desc'}}selected{{/ifEquals}}>Price: High to Low</option>
+                    <option value="new-arrivals"{{#ifEquals sortOption 'new-arrivals'}}selected{{/ifEquals}}>New Arrivals</option>
+                    <option value="A-Z" {{#ifEquals sortOption 'A-Z'}}selected{{/ifEquals}}>A-Z</option>
+                    <option value="Z-A"{{#ifEquals sortOption 'Z-A'}}selected{{/ifEquals}}>Z-A</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="container">
       <div class="row">
         {{#each products}}
@@ -67,8 +128,13 @@
               {{/if}}
 
               <div class="card-body">
-                <p class="card-title" style="font-size: 16px; font-weight: bold;">{{this.name}}</p>
+                <p class="card-title" style="font-size: 16px; font-weight: bold;font-family:'Times New Roman'">{{this.name}}</p>
                 <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+               <div class="hover-buttons">
+    <button class="btn wishlist-btn" aria-label="Add to Wishlist" style="margin-bottom:5px">
+      <i class="fas fa-heart"></i> Wishlist
+    </button>
+  </div>
               </div>
             </div>
           </div>
@@ -119,3 +185,20 @@
     </ul>
   </nav>
 </div>
+<script>
+  document.getElementById("sort-by").addEventListener('change',function(){
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort',this.value);
+    window.location.search = urlParams.toString();
+  })
+document.querySelectorAll('.product-card').forEach(card => {
+  card.addEventListener('mouseover', () => {
+    card.querySelector('.hover-buttons').style.display = 'block';
+  });
+  card.addEventListener('mouseout', () => {
+    card.querySelector('.hover-buttons').style.display = 'none';
+  });
+});
+
+
+</script>
