@@ -1,5 +1,8 @@
 <style>
 /* Card styling */
+a{
+  text-decoration: none;
+}
 .card {
   position: relative;
   /* Other styles */
@@ -113,17 +116,19 @@
     </div>
 </div>
 
-    <div class="container">
+<div class="container">
       <div class="row">
         {{#each products}}
           <div class="col-md-4 mb-4 product-card" style="display: block;" data-categories='{{json this.categories}}'>
             <div class="card" style="width: 18rem;">
+              <a href="/product/{{this._id}}" style="text-decoration: none; color: inherit;">
               <!-- Display the first image -->
               {{#if this.images}}
                 {{#each this.images}}
                   {{#if @first}}
                     <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto;">
                   {{/if}}
+                  </a>
                 {{/each}}
               {{/if}}
 
@@ -131,16 +136,16 @@
                 <p class="card-title" style="font-size: 16px; font-weight: bold;font-family:'Times New Roman'">{{this.name}}</p>
                 <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
                <div class="hover-buttons">
-    <button class="btn wishlist-btn" aria-label="Add to Wishlist" style="margin-bottom:5px">
-      <i class="fas fa-heart"></i> Wishlist
-    </button>
-  </div>
+                
+               </div>
               </div>
             </div>
           </div>
         {{/each}}
       </div>
     </div>
+
+    
   </section>
 
 </section>
@@ -199,6 +204,5 @@ document.querySelectorAll('.product-card').forEach(card => {
     card.querySelector('.hover-buttons').style.display = 'none';
   });
 });
-
 
 </script>

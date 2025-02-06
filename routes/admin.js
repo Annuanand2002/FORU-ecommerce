@@ -112,24 +112,38 @@ router.get('/products', async (req, res) => {
 /*add-product*/
 router.get('/add-product', async (req, res, next)=>{
   const categories = await categoryHelper.getAllcategories();
-  const availableSizes = ['S', 'M', 'L', 'XL'];
-  res.render('admin/add-product',{categories,availableSizes,admin:true,isAdminLogin:false})
+  res.render('admin/add-product',{categories,admin:true,isAdminLogin:false})
 });
 router.post('/add-product', upload, async (req, res) => {
   try {
     const productData = req.body;
-    const files = req.files
-    const result = await productHelper.addProduct(productData,files);
+    const files = req.files;
+
+    const sizeNames = productData.sizeName || [];
+    const sizeQuantities = productData.sizeQuantity || [];
+
+    const sizes = sizeNames.map((size, index) => ({
+      size: size,
+      quantity: parseInt(sizeQuantities[index], 10) || 0
+    }));
+    productData.sizes = sizes;
+    
+    if (!files || files.length === 0) {
+      throw new Error('No files uploaded.');
+    }
+
+    const result = await productHelper.addProduct(productData, files);
     if (result.success) {
-      res.redirect('/admin/products'); 
+      res.redirect('/admin/products');
     } else {
-      throw result.error; 
+      throw result.error;
     }
   } catch (err) {
     console.error('Error in add-product route:', err);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send(err.message || 'Internal Server Error');
   }
 });
+
 /*product-edit*/
 router.get('/edit-product/:id', async (req, res) => {
   try {

@@ -8,8 +8,15 @@ const productSchema =new mongoose.Schema({
   gender: { type: String, required: true },
   sizes: [
     {
-      size: { type: String, enum: ['S', 'M', 'L', 'XL', 'XXL'], required: true },
-      quantity: { type: Number, required: true, min: 0 }
+      size: {
+        type: String,
+        required: true
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 0
+      }
     }
   ], 
   description: { type: String },

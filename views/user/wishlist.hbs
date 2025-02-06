@@ -1,0 +1,65 @@
+<div class="wishlist-container" style="margin-top: 20px; margin-left: 20px;">
+  {{#if wishlistProduct}}
+    <div class="row">
+      {{#each wishlistProduct}}
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div class="card" style="width: 100%; height: 100%;">
+            {{#if this.product.images}}
+            
+              {{#each this.product.images}}
+                {{#if @first}}
+                  <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto; object-fit: contain;">
+                {{/if}}
+              {{/each}}
+                 
+            {{/if}}
+            <a href="/product/{{this.product.productId}}" style="text-decoration: none; color: inherit;">
+            <div class="card-body">
+              <h5 class="card-title" style="font-family: 'Times New Roman', Times, serif;">{{this.product.name}}</h5>
+              <p class="card-text">₹{{this.product.price}}</p>
+              <button class="btn btn-danger remove-item" data-product-id="{{this.product._id}}">Remove</button>
+            </div>
+            </a>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="empty-wishlist-container text-center" style="margin-top: 20px;">
+      <img src="/images/wishlist.jpeg" alt="Empty Wishlist" class="empty-wishlist-image" style="width: 50%; max-width: 300px;">
+      <h4 style="font-family:'Times New Roman', Times, serif;color:rgb(80, 75, 75); margin-top: 15px;">You have no items in your wishlist. Start adding!</h4>
+      <a href="/collections" class="btn" style="background-color: rgb(228, 178, 117); color:white;margin-top:15px;">Browse Products</a>
+    </div>
+  {{/if}}
+</div>
+
+<div id="toast" style="position: fixed; top: 20px; right: 20px; background-color: #28a745; color: white; padding: 15px; border-radius: 5px; display: none; font-family: 'Arial', sans-serif;">
+  Item removed from wishlist.
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const removeButtons = document.querySelectorAll('.remove-item');
+
+    removeButtons.forEach(button => {
+        button.addEventListener('click', async function () {
+            const productId = this.getAttribute('data-product-id');
+
+            const response = await fetch('/remove-from-wishlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                window.location.reload(); 
+            } else {
+                alert(data.error);
+            }
+        });
+    });
+});
+
+
+</script>

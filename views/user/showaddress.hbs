@@ -1,0 +1,169 @@
+
+    <style>
+        body {
+            background: linear-gradient(to right, #f5f5f5, #d6a57a);
+            color: #4e4e4e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .account-menu {
+            width: 250px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+        }
+
+        .account-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-menu li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .account-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .account-menu li.active {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .main-content {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .address-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .address-container h3 {
+            margin-top: 0;
+        }
+
+        .address-details {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .address-details p{
+            margin: 5px 0;
+        }
+
+        .address-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 20px;
+        }
+
+        .address-actions button {
+            border-radius: 50px; /* Rounded buttons */
+            padding: 8px 16px;
+            font-size: 1rem;
+            background-color: transparent;
+            border: 1px solid #d6a57a; /* Brown border */
+            color: #4e4e4e;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .address-actions button:hover {
+            background-color: rgba(214, 165, 122, 0.1); /* Light brown hover background */
+            border-color: #f02061;
+            color: #d6a57a;
+        }
+
+        .add-new-address {
+            text-align: right;
+        }
+
+        .add-new-address button {
+            border-radius: 50px; /* Rounded button */
+            padding: 8px 16px;
+            font-size: 1rem;
+            background-color: #ff4081; /* Brown background */
+            color: #f5f5f5; /* Off-white text */
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-new-address button:hover {
+            background-color: #f02061;/* Darker brown on hover */
+        }
+
+        .default-label {
+            float: right;
+            font-size: small;
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        a{
+text-decoration: none;
+color: black;
+        }
+    </style>
+<body>
+
+<div class="container">
+     <div class="container">
+         <div class="account-menu">
+        <ul>
+            <li  ><a href="/account">Profile</a></li>
+            <li  class="active"><a href="/address">Addresses</a></li>
+            <li><a href="/delete-account">Delete Account</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h2>Saved Addresses</h2>
+        <div class="add-new-address">
+            <a href="/add-address" style="text-decoration: none;"><button>+ ADD NEW ADDRESS</button></a>
+        </div>
+
+        {{#if addresses.length}}
+                {{#each addresses}}
+        <div class="address-container">
+            <h3>DEFAULT ADDRESS <span class="default-label">HOME</span></h3>
+            <div class="address-details">
+                <p>{{this.name}}</p>
+                <p>{{this.house}}, {{this.city}}</p>
+                <p>{{this.city}}</p>
+                <p>{{this.city}} - {{this.postalCode}}</p>
+                <p>{{this.state}}</p>
+                <p>Mobile: {{this.phone}}</p>
+            </div>
+            <div class="address-actions">
+                <a href="/edit-address"><button>EDIT</button></a>
+                <form action="/address/remove/{{this._id}}" method="POST" style="display:inline;">
+            <button type="submit">REMOVE</button>
+        </form>
+            </div>
+        </div>
+        {{/each}}
+        {{else}}
+                <p>No addresses found.</p>
+            {{/if}}
+    </div>
+</div>
+
+</body>

@@ -23,7 +23,23 @@ const userSchema = new mongoose.Schema({
   resetToken: {type:String,default:null},
   resetTokenExpires: {type: Date,default:null,},
   gender: { type: String,enum: ['Male', 'Female'],},
-  dateOfBirth: Date
+  dateOfBirth: Date,
+  cart: [{
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    size: String,
+    quantity: { type: Number, default: 1 }
+}],
+wishlist: [{
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+}],
+addresses: [{
+  name:{type: String, required: true},
+  phone:{type: String, required: true},
+  house : { type: String, required: true },
+  city: { type: String, required: true },
+  state: { type: String, required: true },
+  postalCode: { type: String, required: true },
+}]
 });
 
 const User = mongoose.model('User', userSchema);

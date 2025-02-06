@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword,logoutUser} = require('../controllers/user-controller'); 
+const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword,logoutUser,addToWishlist,addToBag,getWishlist,removeFromWishlist} = require('../controllers/user-controller'); 
 const Product = require('../models/product-schema');
 const Category = require('../models/cateogory-schema');
 const passport = require('passport');
@@ -8,8 +8,11 @@ const User = require('../models/user-schema');
 const {checkAuthentication,checkUserBlocked}= require('../controllers/auth-middleware')
 const pagination= require('../controllers/pagination-middleware')
 const nodemailer = require('nodemailer');
-const {getFilteredProducts }= require('../controllers/getFilteredProduct')
+const {getFilteredProducts }= require('../controllers/getFilteredProduct');
+const {getSingleProduct}= require('../controllers/product-controller');
 const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
+const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress} = require('../controllers/address-middleware')
+
 
 /* GET home page. */
 router.get('/',async (req,res,next)=>{
@@ -184,7 +187,7 @@ router.get('/account',checkAuthentication,(req,res)=>{
   const user = req.session.user;
   res.render('user/user-account',{user,isUser:true})
 })
-router.get('/edit-profile',checkAuthentication,(req,res)=>{
+router.get('/edit-profile',checkAuthentication,checkUserBlocked,(req,res)=>{
   const user = req.session.user;
   res.render('user/edit-userProfile',{user,isUser:true})
 })
@@ -193,6 +196,24 @@ router.get('/delete-account',checkAuthentication,(req,res)=>{
   res.render('user/delete-account',{isUser:true})
 })
 router.post('/delete-account', deleteAccount);
+
 router.get('/logout', logoutUser);
+
+router.get('/product/:id',checkAuthentication,getSingleProduct);
+router.post('/add-to-bag', checkAuthentication,addToBag);
+router.get('/wishlist',checkAuthentication,getWishlist)
+router.post('/add-to-wishlist', checkAuthentication,addToWishlist);
+router.post('/remove-from-wishlist', checkAuthentication,removeFromWishlist);
+router.get('/cart',(req,res)=>{
+  res.render('user/cart',{isAdminLogin:true})
+})
+router.get('/address',checkAuthentication,getAddresses)
+router.get('/add-address',checkAuthentication,(req,res)=>{
+  res.render('user/address',{isUser:true})
+});
+router.post('/add-address',addAddress);
+router.post('/address/remove/:id',removeAddress);
+router.get('/edit-address',checkAuthentication,getEditAddresses);
+router.post('/edit-address',editAddress)
 
 module.exports = router;

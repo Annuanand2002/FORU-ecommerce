@@ -1,59 +1,95 @@
 <div class="user-layout">
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-    <div class="container-fluid">
-      <!-- Logo -->
-      <a class="navbar-brand" href="#">FORU</a>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+      <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand" href="#">FORU</a>
 
-      <!-- Navbar links -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">HOME</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/collections">COLLECTIONS</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">ABOUT</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">CONTACT</a>
-        </li>
-      </ul>
+        <!-- Navbar Toggler for Mobile -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <!-- Search bar -->
-      <form class="d-flex me-0.5" role="search" method="GET" action="/collections">
-  <input class="form-control me-2 search-bar" type="search" name="gender" placeholder="Search for products" aria-label="Search">
-  <button class="btn btn-outline-success" type="submit" style="color:white;margin-right:20px">Search</button>
-</form>
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/">HOME</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/collections">COLLECTIONS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">ABOUT</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">CONTACT</a>
+            </li>
+          </ul>
 
-      <!-- Icon buttons and login/register link -->
-      <div class="d-flex align-items-center">
-        <a href="#" class="btn me-2" title="Wishlist">
-          <i class="fa-regular fa-heart fa-xl"></i>
-        </a>
-        <a href="#" class="btn me-2" title="Shopping Cart">
-          <i class="fa-solid fa-cart-shopping fa-xl"></i>
-        </a>
-        {{#if user}}
-        <div class="d-flex align-items-center dropdown">
-            <span class="text-light me-2">Hi, {{user.name}}</span>
-            
-            <a href="#" class="btn dropdown-toggle p-0" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa-regular fa-user-circle" style="color: black; font-size: 2.5rem;"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-              <li><a class="dropdown-item" href="/account">Profile</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/logout">Logout</a></li>
-            </ul>
-          </div>
+          <!-- Search bar -->
+          <form class="d-flex me-2 mb-2 mb-lg-0" role="search" method="GET" action="/collections">
+            <input
+              class="form-control me-2 search-bar"
+              type="search"
+              name="gender"
+              placeholder="Search for products"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit" style="color: white">
+              Search
+            </button>
+          </form>
+        </div>
+
+        <!-- Icon buttons and login/register link (outside the collapse) -->
+        <div class="d-flex align-items-center">
+          <!-- Wishlist Icon -->
+          <a href="/wishlist" class="btn me-2" title="Wishlist">
+            <i class="fa-regular fa-heart fa-xl"></i>
+          </a>
+
+          <!-- Cart Icon -->
+          <a href="/cart" class="btn me-2" title="Shopping Cart">
+            <i class="fa-solid fa-cart-shopping fa-xl"></i>
+          </a>
+
+          <!-- User Account Section -->
+          {{#if user}}
+            <div class="d-flex align-items-center dropdown">
+              <span class="text-light me-2">Hi, {{user.name}}</span>
+              <a
+                href="#"
+                class="btn dropdown-toggle p-0"
+                id="userDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i
+                  class="fa-regular fa-user-circle"
+                  style="color: black; font-size: 2.5rem;"
+                ></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="/account">Profile</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+              </ul>
+            </div>
           {{else}}
-        <a href="/register" class="btn btn-outline-light login-register">Login/Register</a>
-        {{/if}}
+            <a href="/register" class="btn btn-outline-light login-register">Login/Register</a>
+          {{/if}}
+        </div>
       </div>
-    </div>
-  </nav>
-</header>
+    </nav>
+  </header>
 </div>
-

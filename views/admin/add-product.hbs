@@ -1,81 +1,159 @@
+
+    <style>
+        .card-header {
+            background-color: rgb(228, 178, 117);
+            color: white;
+        }
+
+        .btn-primary-custom {
+            background-color: rgb(228, 178, 117);
+            color: white;
+        }
+
+        .error-message {
+            color: red;
+            font-size: small;
+        }
+    </style>
+
+<body>
+
 <div class="container mt-4">
-  <div class="row">
-    <div class="col-md-6">
-      <h4 class="my-3 pt-5" style="color: rgb(228, 178, 117);">Add Products</h4>
-      <h6 class="my-3 pt-5" style="color: rgb(39, 38, 38); font-weight: 600;">Product Details</h6>
-
-      <div class="form-box mb-5" style="border: 1px solid #ddd; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <form action="/admin/add-product" method="post" enctype="multipart/form-data" id="add-product-form">
-          <div class="row" style="gap: 30px;">
-            <div class="col-md-6">
-
-              <input type="text" name="name" placeholder="Product Name" class="form-control mb-3">
-              <div class="error-message"></div>
-
-              <select name="category" class="form-control mb-3">
-                <option value="" disabled selected>Select Category</option>
-                {{#each categories}}
-                <option value="{{this.name}}">{{this.name}}</option>
-                {{/each}}
-                <div class="error-message"></div>
-              </select>
-
-              <div class="form-group">
-  <label for="sizes">Available Sizes and Quantities</label>
-  {{#each availableSizes}}
-    <div class="size-group">
-      <label for="size-{{this}}">{{this}}</label>
-      <input type="number" name="sizes[{{this}}]" id="size-{{this}}" class="form-control mb-3" placeholder="Quantity" min="0">
-    </div>
-  {{/each}}
-</div>
-
-
-              <input type="number" name="price" placeholder="Price" class="form-control mb-3 mt-3">
-              <div class="error-message"></div>
-            </div>
-
-
-              <select name="gender" class="form-control mb-3">
-                <option value="" disabled selected>Select Gender</option>
-                <div class="error-message"></div>
-                <option value="Men">Men</option>
-                <option value="Women">Women</option>
-                <option value="Girl">Girl</option>
-                <option value="Boy">Boy</option>
-              </select>
-
-
-              <div style="margin-top: 10px;">
-                <label for="description">Description</label>
-                <textarea name="description" id="description" class="form-control mb-3" rows="4" placeholder="Enter product description"></textarea>
-              </div>
-
-              <label for="image" style="margin-top: 12px;">Images</label>
-              <input type="file" name="images" class="form-control mb-3" multiple>
-
-              <div style="margin-top: 15px;">
-                <label for="additionalCategories">Additional Categories</label>
-                <div id="additionalCategories" class="form-group d-flex flex-wrap" style="gap: 15px;">
-                  <div>
-                    <input type="checkbox" name="latestCollection" value="true" id="latestCollection">
-                    <label for="latestCollection">Latest Collection</label>
-                  </div>
-                  <div>
-                    <input type="checkbox" name="bestSeller" value="true" id="bestSeller">
-                    <label for="bestSeller">Best Seller</label>
-                  </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">Add Product</h4>
                 </div>
-              </div>
+                <div class="card-body">
+                    <form action="/admin/add-product" method="post" enctype="multipart/form-data" id="add-product-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Product Name</label>
+                                <input type="text" name="name" id="name" class="form-control" placeholder="Product Name">
+                                <div class="error-message"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Category</label>
+                                <select name="category" id="category" class="form-control">
+                                    <option value="" disabled selected>Select Category</option>
+                                    {{#each categories}}
+                                    <option value="{{this.name}}">{{this.name}}</option>
+                                    {{/each}}
+                                </select>
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
 
-              <button type="submit" class="btn mt-4" style="background-color:rgb(228, 178, 117);color:white">Submit</button>
-              <a href="/admin/products" class="btn mt-4" style="background-color:rgb(228, 178, 117);color:white">Cancel</a>
+                        <div class="mb-3">
+                            <label class="form-label">Available Sizes and Quantities</label>
+
+                            <div id="sizes-container">
+                              <div class="row mb-2 size-group">
+                                <div class="col-md-5">
+                                  <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name">
+                                </div>
+                                <div class="col-md-5">
+                                  <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0">
+                                </div>
+                                <div class="col-md-2">
+                                  <button type="button" class="btn btn-danger remove-size">Remove</button>
+                                </div>
+                              </div>
+                            </div>
+                            <button type="button" id="add-size" class="btn" style="background-color:  rgb(228, 178, 117);color:white;">Add Size</button>
+                        </div>
+
+
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="price" class="form-label">Price</label>
+                                <input type="number" name="price" id="price" class="form-control" placeholder="Price" min="0">
+                                <div class="error-message"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select name="gender" id="gender" class="form-control">
+                                    <option value="" disabled selected>Select Gender</option>
+                                    <option value="Men">Men</option>
+                                    <option value="Women">Women</option>
+                                    <option value="Girl">Girl</option>
+                                    <option value="Boy">Boy</option>
+                                </select>
+                                <div class="error-message"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-control" rows="3"
+                                      placeholder="Enter product description"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Images</label>
+                            <input type="file" name="images" id="image" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Categories</label>
+                            <div class="d-flex">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="checkbox" name="latestCollection"
+                                           value="true" id="latestCollection">
+                                    <label class="form-check-label" for="latestCollection">Latest Collection</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="bestSeller" value="true"
+                                           id="bestSeller">
+                                    <label class="form-check-label" for="bestSeller">Best Seller</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom">Submit</button>
+                            <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
             </div>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addSizeButton = document.getElementById('add-size');
+        const sizesContainer = document.getElementById('sizes-container');
+
+        addSizeButton.addEventListener('click', function () {
+            const newSizeGroup = document.createElement('div');
+            newSizeGroup.classList.add('row', 'mb-2', 'size-group');
+
+            newSizeGroup.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name" required>
+                </div>
+                <div class="col-md-5">
+                    <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-size">Remove</button>
+                </div>
+            `;
+
+            sizesContainer.appendChild(newSizeGroup);
+        });
+
+        sizesContainer.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-size')) {
+                event.target.parentElement.parentElement.remove();
+            }
+        });
+    });
+</script>
+
+</body>

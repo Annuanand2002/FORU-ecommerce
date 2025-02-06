@@ -1,0 +1,260 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f8f8;
+    }
+    .breadcrumb {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+    }
+    .breadcrumb a {
+        color: #666;
+        text-decoration: none;
+    }
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    .product-rating {
+        font-size: 16px;
+        color: #ffa41c;
+        margin-bottom: 10px;
+    }
+    .product-price {
+        font-size: 20px;
+        color: #ff4141;
+        margin-bottom: 20px;
+    }
+    .product-price del {
+        color: #666;
+        margin-left: 10px;
+    }
+    .size-option {
+        display: inline-block;
+        padding: 10px 15px;
+        margin: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .size-option.selected {
+        border-color: #ff3f6c;
+        background-color: #ff3f6c;
+        color: #fff;
+    }
+    .product-actions .btn {
+        margin-right: 10px;
+    }
+    .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .card-img-top {
+        border-radius: 8px;
+    }
+   /* Centering carousel and limiting width */
+/* Centering carousel and limiting width */
+.carousel {
+    max-width: 100%;
+    max-height: 500px;
+    margin: auto;
+    position: relative;
+}
+
+/* Adjusting image size */
+.carousel-item img {
+    max-width: 100%;
+    max-height: 500px; /* Ensures clarity */
+    object-fit: contain; /* Maintains aspect ratio */
+    border-radius: 8px;
+    display: block;
+    margin: auto;
+}
+
+/* Move arrow buttons closer to the image */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 40px; /* Reduce button area */
+    height: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5); /* Dark background for visibility */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Position arrows inside the image */
+.carousel-control-prev {
+    left: 10px;
+}
+
+.carousel-control-next {
+    right: 10px;
+}
+
+/* Ensure arrow icons are visible */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+
+
+</style>
+<div class="container my-5">
+    <div class="row">
+        <!-- Product Image Section -->
+        <div class="col-md-6">
+            <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {{#each product.images}}
+                        <div class="carousel-item {{#if @first}}active{{/if}}">
+                            <img src="{{this}}" class="d-block w-100" alt="Product Image">
+                        </div>
+                    {{/each}}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Product Details Section -->
+        <div class="col-md-6">
+            <h1 class="product-title mb-3" style="font-family: 'Times New Roman', Times, serif;">{{product.name}}</h1>
+            <div class="product-price mb-4 fs-4 fw-bold">₹{{product.price}}</div>
+
+            <div class="product-colors mb-2"><strong>Sizes</strong></div>
+             <div class="product-sizes mb-4 d-flex gap-2" id="size-options">
+                {{#each product.sizes}}
+                    <div class="size-option border p-2" data-size="{{this.size}}" data-quantity="{{this.quantity}}">
+                        {{this.size}}
+                    </div>
+                {{/each}}
+            </div>
+            <div class="alert alert-warning" id="sizeMessage" style="display:none;">Please select a size.</div>
+            <div class="product-actions d-flex gap-3 mb-4">
+                <button class="btn btn-danger px-4 py-2" id="addToBag">ADD TO BAG</button>
+                <button class="wishlist-button btn btn-outline-secondary px-4 py-2" data-product-id="{{product._id}}" id="wishlist">WISHLIST</button>
+            </div>
+
+            <!-- Description Section -->
+            <div class="product-description">
+                <div class="product-colors mb-2"><strong style="font-size: 18px;">Description</strong></div>
+                <p class="text-muted" style="font-size: 14px;">{{product.description}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5" style="margin-top: 100px !important;">
+    <h3 class="mb-3" style="font-family: 'Times New Roman', Times, serif;">Similar Products</h3>
+    <div class="row my-5">
+        {{#each similarProduct}}
+        <div class="col-md-3">
+            <div class="card">
+                <img src="{{this.images.[0]}}" class="card-img-top" alt="Similar Product">
+                <div class="card-body text-center">
+                    <p class="card-title" style="font-size: 16px;font-family:'Times New Roman'">{{this.name}}</p>
+                    <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+                    <a href="/product/{{this._id}}" class="btn btn-sm" style="background-color: rgb(228, 178, 117);">View Product</a>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
+ 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sizeOptions = document.querySelectorAll('.size-option');
+    let selectedSize = null;
+
+    // Handle size selection
+    sizeOptions.forEach(option => {
+        option.addEventListener('click', function () {
+            sizeOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedSize = this.getAttribute('data-size');
+        });
+    });
+
+    function showPopup(message, color) {
+        const popup = document.createElement('div');
+        popup.textContent = message;
+        popup.style.position = 'fixed';
+        popup.style.bottom = '20px';
+        popup.style.left = '50%';
+        popup.style.transform = 'translateX(-50%)';
+        popup.style.backgroundColor = color;
+        popup.style.color = 'white';
+        popup.style.padding = '10px 20px';
+        popup.style.borderRadius = '5px';
+        popup.style.zIndex = '1000';
+        document.body.appendChild(popup);
+
+        setTimeout(() => {
+            popup.remove();
+        }, 5000);
+    }
+
+    async function handleAction(url, productId) {
+        if (!selectedSize) {
+            document.getElementById("sizeMessage").style.display = "block"; // Display message to select size
+            return; // Stop further execution if no size is selected
+        }
+
+        document.getElementById("sizeMessage").style.display = "none"; // Hide size selection message
+
+        // Prepare data for the request
+        const data = {
+            productId: productId,
+            size: selectedSize
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showPopup(result.message, 'green'); // Success message
+                selectedSize = null; // Reset selected size
+                sizeOptions.forEach(opt => opt.classList.remove('selected')); // Deselect size options
+            } else {
+                showPopup(result.error, 'red'); // Error message
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showPopup('An error occurred. Please try again.', 'red');
+        }
+    }
+
+    // Add to Bag
+    document.getElementById("addToBag").addEventListener("click", function () {
+        const productId = "{{product._id}}";
+        handleAction('/add-to-bag', productId); 
+    });
+
+    // Add to Wishlist
+    document.getElementById("wishlist").addEventListener("click", function () {
+        const productId = "{{product._id}}";
+        handleAction('/add-to-wishlist', productId); // Trigger the function for adding to wishlist
+    });
+});
+
+
+</script>
+
+

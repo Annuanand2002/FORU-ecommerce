@@ -1,0 +1,328 @@
+
+    <style>
+        body {
+            background: linear-gradient(to right, #f5f5f5, #d6a57a);
+            color: #4e4e4e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .account-menu {
+    width: 250px;
+    padding: 20px;
+    border-right: 1px solid #eee;
+}
+
+        .account-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-menu li {
+            padding: 10px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .account-menu li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .account-menu li.active {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+        .edit-details {
+            border: 1px solid #ddd;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .edit-details h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .input-container { /* Container for input and change button */
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 8px;
+        }
+
+        .input-container input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .input-container button {
+            white-space: nowrap;
+            margin-left: 10px;
+            background-color: transparent;
+            border: 1px solid #d6a57a;
+            color: #4e4e4e;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .input-container button:hover {
+            background-color: rgba(214, 165, 122, 0.1);
+            border-color: #d6a57a;
+            color: #d6a57a;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: 1px solid #ff4081;
+        }
+
+        .gender-options {
+            display: flex;
+            align-items: center;
+        }
+
+        .gender-options label {
+            margin-bottom: 0;
+            margin-right: 15px;
+            white-space: nowrap;
+        }
+
+        .gender-options input[type="radio"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+            margin-right: 5px;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        .gender-options input[type="radio"]:checked::before {
+            position: absolute;
+            content: '';
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background-color: #ff4081;
+            border-radius: 50%;
+        }
+
+        .save-details {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .save-details button {
+            background-color: #ff4081;
+            color: white;
+            padding: 14px 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+            width: 100%;
+            max-width: 250px;
+            font-size: 1.1rem;
+            margin-right: 30px;
+        }
+
+        .save-details button:hover {
+            background-color: #f02061;
+        }
+        .form-group input[type="date"]{
+            padding: 10px;
+        }
+        h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    margin-left:10px;
+}
+.account-menu a{
+  text-decoration: none;
+  color:black
+}
+    </style>
+
+
+<body>
+    <div class="container">
+        <div class="account-menu">
+            <ul>
+                <li><a href="/account">Profile</a></li>
+                <li class="active"><a href="/addresses">Addresses</a></li>
+                <li><a href="/delete-account">Delete Account</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div><h2>Add new Address</h2></div>
+            <div class="add-address">
+                <form id="add-address-form" method="post" action="add-address">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <div class="change-mobile">
+                            <input type="text" id="name" name="name"/>
+                            <span id="nameError" style="color: red; display: none;"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Mobile number</label>
+                        <input type="tel" id="phone" name="phone"/>
+                        <span id="phoneError" style="color: red; display: none;"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="house">House name</label>
+                        <input type="text" id="house" name="house"/>
+                        <span id="houseError" style="color: red; display: none;"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="postalCode">Pincode</label>
+                        <input type="tel" id="postalCode" name="postalCode"/>
+                        <span id="postalError" style="color: red; display: none;"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city"/>
+                        <span id="cityError" style="color: red; display: none;"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state"/>
+                        <span id="stateError" style="color: red; display: none;"></span>
+                    </div>
+
+                    <div class="save-details">
+                        <button type="submit">SAVE DETAILS</button>
+                    </div>
+                </form>
+
+                <div class="save-details">
+                    <a href="/account" style="margin-left: 10px;"><button>Cancel</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('add-address-form').addEventListener('submit', function(event) {
+            // Clear all previous errors
+            const errors = document.querySelectorAll('.form-group span');
+            errors.forEach(error => error.style.display = 'none');
+
+            let isValid = true;
+
+            // Validate Name
+            const name = document.getElementById('name').value;
+            if (!name) {
+                document.getElementById('nameError').textContent = "Name is required.";
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate Phone Number (must be 10 digits starting with 9)
+            const phone = document.getElementById('phone').value;
+            const phonePattern = /^[9][0-9]{9}$/;
+            if (!phone || !phone.match(phonePattern)) {
+                document.getElementById('phoneError').textContent = "Phone number should be 10 digits and start with 9.";
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate House Name
+            const house = document.getElementById('house').value;
+            if (!house) {
+                document.getElementById('houseError').textContent = "House name is required.";
+                document.getElementById('houseError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate Postal Code (must be 6 digits starting with 6)
+            const postalCode = document.getElementById('postalCode').value;
+            const postalPattern = /^[6][0-9]{5}$/;
+            if (!postalCode || !postalCode.match(postalPattern)) {
+                document.getElementById('postalError').textContent = "Pincode should be 6 digits starting with 6.";
+                document.getElementById('postalError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate City
+            const city = document.getElementById('city').value;
+            if (!city) {
+                document.getElementById('cityError').textContent = "City is required.";
+                document.getElementById('cityError').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validate State
+            const state = document.getElementById('state').value;
+            if (!state) {
+                document.getElementById('stateError').textContent = "State is required.";
+                document.getElementById('stateError').style.display = 'block';
+                isValid = false;
+            }
+
+            // If any validation failed, prevent form submission
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>

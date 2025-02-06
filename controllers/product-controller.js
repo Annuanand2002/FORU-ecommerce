@@ -24,10 +24,7 @@ const getAllProduct = async(page,perPage,searchQuery)=>{
 const addProduct = async (productData,files)=>{
   try{
     const {name,price,category,gender,sizes,description} = productData;
-    const sizeQuantities = Object.keys(sizes).map(size => ({
-      size,
-      quantity: parseInt(sizes[size], 10) || 0
-    }));
+    
     const latestCollection = productData.latestCollection === 'true'; 
     const bestSeller = productData.bestSeller === 'true';
     let imagePath = [];
@@ -40,7 +37,7 @@ const addProduct = async (productData,files)=>{
       category,
       price,
       gender,
-      sizes: sizeQuantities,
+      sizes,
       description,
       images:imagePath,
       latestCollection,
@@ -67,8 +64,20 @@ async function getEditProduct(productId) {
 
 const updateProduct = async (productId, productData, files) => {
   try {
-    const { name, price, piece, category, bestSeller, latestCollection } = productData;
+    const { name, price, category, bestSeller, latestCollection,sizeName,sizeQuantity,description } = productData;
+    let sizes = [];
+    if (Array.isArray(sizeName) && Array.isArray(sizeQuantity) && sizeName.length === sizeQuantity.length) {
+      sizes = sizeName.map((size, index) => ({
+        size,
+        quantity: parseInt(sizeQuantity[index], 10), 
+      }));
+    }
+    
     const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return { success: false, error: 'Product not found' };
+    }
+
     let updatedImages = existingProduct.images || [];
     if (files && files.length > 0) {
       const newImages = files.map(file => '/uploads/' + file.filename);
@@ -78,13 +87,14 @@ const updateProduct = async (productId, productData, files) => {
     const updatedData = {
       name,
       price,
-      piece,
       category,
       images: updatedImages, 
       bestSeller: bestSeller === 'on',
       latestCollection: latestCollection === 'on',
+      sizes,
+      description
     };
-
+    
     const updatedProduct = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
     return { success: true, product: updatedProduct };
   } catch (err) {
@@ -103,5 +113,23 @@ const deleteProduct = async (productId)=>{
     throw new Error ("Error deleting product",error)
   }
 }
+const getSingleProduct = async(req,res)=>{
+  try{
+    const { id } = req.params;
+    const product = await Product.findById(id).lean();
+    if(!product){
+      return res.status(404).send('product not found');
+    }
+    const similarProduct = await Product.find({
+      category:product.category,
+      gender:product.gender,
+      _id:{$ne:product._id}
+    }).limit(4).lean()
+    res.render('user/single-product',{product,similarProduct,admin:false})
+  }catch(error){
+    console.log("error occured",error);
+    res.status(500).send("server error")
+  }
+}
 
-module.exports = { getAllProduct,getEditProduct,addProduct,updateProduct,deleteProduct,};
+module.exports = { getAllProduct,getEditProduct,addProduct,updateProduct,deleteProduct,getSingleProduct};
