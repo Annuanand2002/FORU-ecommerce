@@ -24,14 +24,12 @@ const userSchema = new mongoose.Schema({
   resetTokenExpires: {type: Date,default:null,},
   gender: { type: String,enum: ['Male', 'Female'],},
   dateOfBirth: Date,
-  cart: [{
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    size: String,
-    quantity: { type: Number, default: 1 }
-}],
-wishlist: [{
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-}],
+  cart: {
+    type:mongoose.Schema.Types.ObjectId, ref:"Cart"
+},
+wishlist: {
+    type:mongoose.Schema.Types.ObjectId, ref:"Wishlist"
+},
 addresses: [{
   name:{type: String, required: true},
   phone:{type: String, required: true},
@@ -39,6 +37,7 @@ addresses: [{
   city: { type: String, required: true },
   state: { type: String, required: true },
   postalCode: { type: String, required: true },
+  isDefault: { type: Boolean, default: false }
 }]
 });
 

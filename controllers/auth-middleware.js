@@ -32,5 +32,11 @@ function checkUserBlocked(req,res,next){
   }
 }
 
-module.exports = {checkAuthentication,checkUserBlocked};
+const adminAuth = (req,res,next)=>{
+  if(!req.session.admin){
+    return res.redirect('/admin/login')
+  }
+  next()
+}
+module.exports = {checkAuthentication,checkUserBlocked,adminAuth};
 

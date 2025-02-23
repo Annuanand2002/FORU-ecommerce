@@ -1,54 +1,9 @@
-<style>
-/* Card styling */
-a{
-  text-decoration: none;
-}
-.card {
-  position: relative;
-  /* Other styles */
-}
 
-/* Initial state: hide buttons and position them */
-.hover-buttons {
-  display: flex;
-  justify-content: center; /* Center the button horizontally */
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Show buttons on card hover */
-.card:hover .hover-buttons {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Button styling */
-.hover-buttons .btn {
-  background-color: transparent;
-  border: 2px solid #ccc;
-  color: #333;
-  padding: 8px 12px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-}
-
-/* Optional: Change border color on hover */
-.hover-buttons .btn:hover {
-  border-color: #999;
-}
-
-
-
-</style>
 <section class="main-content d-flex">
   <aside class="sidebar col-md-3">
     <div class="sidebar-content">
       <!-- Categories Filter -->
-      
+     
 <div class="filter-section">
   <h4>Categories</h4>
   <form id="filter-form" method="get" action="/collections">
@@ -96,7 +51,7 @@ a{
   </aside>
 
   <!-- Product Cards Section -->
-  <section class="product-section col-md-9" style="margin-top: 30px;">
+  <section class="product-section col-md-9" style="margin-top: 30px; ">
     <div class="container">
     <div class="row">
         <div class="col-md-9"></div>
@@ -119,28 +74,36 @@ a{
 <div class="container">
       <div class="row">
         {{#each products}}
-          <div class="col-md-4 mb-4 product-card" style="display: block;" data-categories='{{json this.categories}}'>
-            <div class="card" style="width: 18rem;">
-              <a href="/product/{{this._id}}" style="text-decoration: none; color: inherit;">
-              <!-- Display the first image -->
-              {{#if this.images}}
-                {{#each this.images}}
-                  {{#if @first}}
-                    <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto;">
-                  {{/if}}
-                  </a>
-                {{/each}}
-              {{/if}}
-
-              <div class="card-body">
-                <p class="card-title" style="font-size: 16px; font-weight: bold;font-family:'Times New Roman'">{{this.name}}</p>
-                <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
-               <div class="hover-buttons">
-                
-               </div>
-              </div>
-            </div>
-          </div>
+          <div class="col-md-4 mb-4 product-card" style="display: block;" data-categories='{{json this.categories}}' data-product-id="{{this._id}}">
+  <div class="card" style="width: 18rem;">
+    <button class="love-button" data-product-id="{{this._id}}">
+      <i class="fa-solid fa-heart fa-lg"></i>
+    </button>
+    <a href="/product/{{this._id}}" style="text-decoration: none; color: inherit;">
+      {{#if this.images}}
+        {{#each this.images}}
+          {{#if @first}}
+            <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto;">
+          {{/if}}
+        {{/each}}
+      {{/if}}
+    </a>
+    <div class="card-body">
+      <p class="card-title" style="font-size: 16px; font-weight: bold;font-family:'Times New Roman'">{{this.name}}</p>
+      <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+      <div class="hover-content">
+  <div class="sizes">
+  {{#each this.sizes}}
+    <span class="size-option" data-size="{{this.size}}" data-quantity="{{this.quantity}}">{{this.size}}</span>
+  {{/each}}
+</div>
+  <div class="size-message" style="color: red; font-size: 12px; display: none;">Please select a size</div>
+  <div class="out-of-stock-message" style="color: red; font-size: 14px; display: none;">Out of Stock</div>
+        <button class="add-to-cart-btn">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+</div>
         {{/each}}
       </div>
     </div>
@@ -188,20 +151,184 @@ a{
         </li>
       {{/if}}
     </ul>
+    <div id="popup-message" class="popup">
+  <span id="popup-text"></span>
+</div> 
   </nav>
 </div>
 <script>
-  document.getElementById("sort-by").addEventListener('change',function(){
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('sort',this.value);
-    window.location.search = urlParams.toString();
-  })
-document.querySelectorAll('.product-card').forEach(card => {
-  card.addEventListener('mouseover', () => {
-    card.querySelector('.hover-buttons').style.display = 'block';
+// Function to show the popup message
+function showPopup(message, type = 'success') {
+  const popup = document.getElementById('popup-message');
+  const popupText = document.getElementById('popup-text');
+
+  popupText.textContent = message;
+  popup.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336';
+
+  popup.style.display = 'block';
+  popup.style.animation = 'slideIn 0.5s ease-out';
+
+  setTimeout(() => {
+    popup.style.animation = 'slideOut 0.5s ease-out';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 500);
+  }, 3000);
+}
+
+// Function to fetch and restore wishlist state
+async function restoreWishlistState() {
+  try {
+    const response = await fetch('/wishlist/data');
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      const wishlist = result.wishlist;
+
+      document.querySelectorAll('.love-button').forEach(button => {
+        const productId = button.getAttribute('data-product-id');
+        const heartIcon = button.querySelector('i');
+
+        if (wishlist.some(product => product._id === productId)) {
+          button.classList.add('loved');
+          heartIcon.style.color = 'red';
+        } else {
+          button.classList.remove('loved');
+          heartIcon.style.color = '#ccc';
+        }
+      });
+    } else {
+      console.error('Failed to fetch wishlist:', result.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', restoreWishlistState);
+
+// Heart button click event
+document.querySelectorAll('.love-button').forEach(button => {
+  button.addEventListener('click', async function () {
+    const productId = this.getAttribute('data-product-id');
+    const heartIcon = this.querySelector('i');
+
+    try {
+      const response = await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        this.classList.toggle('loved');
+        if (result.action === 'added') {
+          heartIcon.style.color = 'red';
+          showPopup('Product added to wishlist', 'success');
+        } else if (result.action === 'removed') {
+          heartIcon.style.color = '#ccc';
+          showPopup('Product removed from wishlist', 'success');
+        }
+      } else {
+        showPopup(result.message || 'An error occurred', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showPopup('An error occurred while updating the wishlist', 'error');
+    }
   });
-  card.addEventListener('mouseout', () => {
-    card.querySelector('.hover-buttons').style.display = 'none';
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const productCards = document.querySelectorAll('.product-card');
+
+  productCards.forEach(productCard => {
+    const sizeOptions = productCard.querySelectorAll('.size-option');
+    const addToCartButton = productCard.querySelector('.add-to-cart-btn');
+    const outOfStockMessage = productCard.querySelector('.out-of-stock-message');
+    let selectedSize = null;
+
+    // Function to check if all sizes are out of stock
+    function checkAllSizesOutOfStock() {
+      let allOutOfStock = true;
+      sizeOptions.forEach(option => {
+        const quantity = parseInt(option.getAttribute('data-quantity'));
+        if (quantity > 0) {
+          allOutOfStock = false; // At least one size is available
+        }
+      });
+      return allOutOfStock;
+    }
+
+    // Disable sizes with zero quantity
+    sizeOptions.forEach(option => {
+      const quantity = parseInt(option.getAttribute('data-quantity'));
+      if (quantity === 0) {
+        option.style.opacity = '0.5'; // Make the size option look disabled
+        option.style.pointerEvents = 'none'; // Disable click events
+      }
+    });
+
+    // Show "Out of Stock" message only if all sizes are unavailable
+    if (checkAllSizesOutOfStock()) {
+      outOfStockMessage.style.display = 'block';
+      addToCartButton.disabled = true; // Disable the "Add to Cart" button
+      addToCartButton.style.opacity = '0.5'; // Make the button look disabled
+    }
+
+    // Handle size selection
+    sizeOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        sizeOptions.forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedSize = this.getAttribute('data-size');
+      });
+    });
+
+    // Handle "Add to Cart" button click
+    addToCartButton.addEventListener('click', async function () {
+      // Check if a size is selected
+      if (!selectedSize) {
+        const sizeMessage = productCard.querySelector('.size-message');
+        sizeMessage.style.display = 'block';
+        setTimeout(() => {
+          sizeMessage.style.display = 'none';
+        }, 3000);
+        return;
+      }
+
+      const productId = productCard.getAttribute('data-product-id');
+
+      try {
+        const response = await fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId, size: selectedSize }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          if (result.action === 'added') {
+            showPopup('Product added to cart', 'success');
+            
+          } else if (result.action === 'increased') {
+            showPopup('Product already in cart, quantity increased', 'success');
+          }
+        } else {
+          showPopup(result.message || 'An error occurred', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showPopup('An error occurred while adding to cart', 'error');
+      }
+    });
   });
 });
 

@@ -1,0 +1,102 @@
+<div class="col-md-10 p-4">
+  <h4 class="my-3" style="color: rgb(228, 178, 117);">Coupons</h4>
+  <div class="d-flex justify-content-between align-items-center mb-4 pt-5">
+
+    <!-- Pagination Buttons -->
+<div class="pagination-container">
+  <nav aria-label="Page navigation" class="d-flex justify-content-center">
+    <ul class="pagination">
+      <!-- Previous Page Link -->
+      {{#if prevPage}}
+        <li class="page-item">
+          <a class="page-link" href="/admin/products?page={{prevPage}}" 
+            style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">
+            &laquo; Previous
+          </a>
+        </li>
+      {{else}}
+        <li class="page-item disabled">
+          <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">
+            &laquo; Previous
+          </span>
+        </li>
+      {{/if}}
+
+      <!-- Page Numbers -->
+      {{#each pages}}
+        <li class="page-item {{#ifEquals this ../currentPage}}active{{/ifEquals}}">
+          <a class="page-link" href="/admin/products?page={{this}}" 
+            style="background-color: {{#ifEquals this ../currentPage}}rgb(228, 178, 117){{else}}transparent{{/ifEquals}}; 
+                   color: {{#ifEquals this ../currentPage}}white{{else}}black{{/ifEquals}}; 
+                   border: 2px solid {{#ifEquals this ../currentPage}}rgb(255, 224, 178){{else}}transparent{{/ifEquals}};">
+            {{this}}
+          </a>
+        </li>
+      {{/each}}
+
+      <!-- Next Page Link -->
+      {{#if nextPage}}
+        <li class="page-item">
+          <a class="page-link" href="/admin/products?page={{nextPage}}" 
+            style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">
+            Next &raquo;
+          </a>
+        </li>
+      {{else}}
+        <li class="page-item disabled">
+          <span class="page-link" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178));">
+            Next &raquo;
+          </span>
+        </li>
+      {{/if}}
+    </ul>
+  </nav>
+</div>
+
+
+    <!-- Add Product Button -->
+    <div>
+      <button class="btn" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white" onclick="window.location.href='/admin/add-coupon';">Add coupon</button>
+    </div>
+  </div>
+  
+  <!-- Table -->
+  <div class="table-responsive pt-3">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Coupon name</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Amount</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Minimum purchase amount</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Expiry At</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Active</th>
+          
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each coupons}}
+            <tr>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.couponName}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.discountAmount}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.minPurchaseAmount}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{formatDate this.expiryDate}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">{{#if this.isActive}}Active{{else}}Expired{{/if}}</td>
+              
+              <td style="text-align: center; vertical-align: middle;">
+                <a href="/admin/edit-coupon/{{this._id}}" class="btn" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;" aria-label="Edit product">
+    Edit
+</a>
+              </td>
+              <td style="text-align: center; vertical-align: middle;">
+                <form action="/admin/delete-coupon/{{this._id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this coupon?')">
+                  <button type="submit" class="btn" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

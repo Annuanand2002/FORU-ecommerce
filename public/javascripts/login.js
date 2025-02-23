@@ -50,7 +50,6 @@
       body: JSON.stringify({ email, password }),
     });
     const result = await response.json();
-    console.log('Backend response:', result); 
     if (response.ok) {
       window.location.href = "/"; 
     }  if (response.status === 403) {

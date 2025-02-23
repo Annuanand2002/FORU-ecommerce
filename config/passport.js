@@ -47,7 +47,7 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-  done(null, user.id); // Store user ID in the session
+  done(null, user.id); 
 });
 
 passport.deserializeUser(async (id, done) => {

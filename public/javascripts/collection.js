@@ -25,3 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   filterProducts();
 });
+document.getElementById("sort-by").addEventListener('change',function(){
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.set('sort',this.value);
+  window.location.search = urlParams.toString();
+})

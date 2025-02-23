@@ -19,13 +19,37 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');                                
 
 hbs.create({}).handlebars.registerHelper('ifEquals', function(value1, value2, options) {
+  
   if (value1 === value2) {
     return options.fn(this); 
   } else {
     return options.inverse(this); 
   }
 });
+hbs.create({}).handlebars.registerHelper('formatDate', function (date) {
+  return new Date(date).toLocaleDateString(); // Format the date
+});
+hbs.create({}).handlebars.registerHelper('isGreaterThan', function (a, b, options) {
+  if (a > b) {
+    return options.fn(this); // Execute the block if a > b
+  } else {
+    return options.inverse(this); // Execute the else block if a <= b
+  }
+});
+hbs.create({}).handlebars.registerHelper('subtract', function (a, b) {
+  return a - b;
+});
 
+hbs.create({}).handlebars.registerHelper('add', function (a, b) {
+  return a + b;
+});
+hbs.create({}).handlebars.registerHelper('times', function (n, block) {
+  let accum = '';
+  for (let i = 1; i <= n; i++) {
+    accum += block.fn(i);
+  }
+  return accum;
+});
 handlebars.registerHelper('json', function(context) {
   return JSON.stringify(context);
 });

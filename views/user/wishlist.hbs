@@ -1,65 +1,433 @@
-<div class="wishlist-container" style="margin-top: 20px; margin-left: 20px;">
-  {{#if wishlistProduct}}
-    <div class="row">
-      {{#each wishlistProduct}}
-        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-          <div class="card" style="width: 100%; height: 100%;">
-            {{#if this.product.images}}
-            
-              {{#each this.product.images}}
-                {{#if @first}}
-                  <img src="{{this}}" class="card-img-top" alt="Product Image" style="width: 100%; height: auto; object-fit: contain;">
-                {{/if}}
-              {{/each}}
-                 
-            {{/if}}
-            <a href="/product/{{this.product.productId}}" style="text-decoration: none; color: inherit;">
-            <div class="card-body">
-              <h5 class="card-title" style="font-family: 'Times New Roman', Times, serif;">{{this.product.name}}</h5>
-              <p class="card-text">₹{{this.product.price}}</p>
-              <button class="btn btn-danger remove-item" data-product-id="{{this.product._id}}">Remove</button>
+<style>
+.wishlist-section {
+  padding: 20px;
+}
+
+.wishlist-title {
+  font-family: 'Times New Roman', Times, serif;
+  margin-bottom: 50px;
+  margin-left: 100px;
+  margin-top: 20px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 30px; /* Increased gap */
+}
+
+.wishlist-product-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  display: flex; /* Enable flexbox for card content */
+  flex-direction: column; /* Arrange content vertically */
+}
+
+.card-header {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.remove-from-wishlist {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-from-wishlist svg {
+  width: 16px;
+  height: 16px;
+  fill: #888;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  object-fit: cover;
+}
+
+.product-name {
+  margin-bottom: 5px;
+  color: #1e1d1d;
+  font-size: 18px;
+}
+
+.product-price {
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.card-actions {
+  margin-top: auto; /* Push "Move to Bag" to the bottom */
+  display: flex;
+  justify-content: center; /* Center the button */
+  padding: 10px; /* Add some padding around the button */
+}
+
+.move-to-bag {
+  background-color: #f0f0f0; /* Light gray background */
+  color: #333; /* Dark gray text */
+  border: 1px solid #ccc; /* Light gray border */
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.move-to-bag:hover {
+  background-color: #e0e0e0; /* Slightly darker gray on hover */
+}
+/* Popup Styles */
+.popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  background-color: #4caf50; /* Green background for success messages */
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: none; /* Hidden by default */
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Popup Text */
+.popup span {
+  font-size: 14px;
+}
+
+/* Slide-in Animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Slide-out Animation */
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 20px; /* Consistent gap on mobile */
+  }
+}
+/* Hover Content Styling */
+.hover-content {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show sizes and Add to Cart button on card hover */
+.wishlist-product-card:hover .hover-content {
+  opacity: 1;
+}
+
+/* Sizes Styling */
+.sizes {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.sizes span {
+  padding: 5px 10px;
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sizes span:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.sizes span.selected {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Add to Cart Button Styling */
+.add-to-cart-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #333;
+}
+</style>
+
+<section class="wishlist-section">
+  <h3 class="wishlist-title">My Wishlist</h3>
+  <div class="wishlist-products">
+    {{#if products.length}}
+      <div class="product-grid">
+        {{#each products}}
+          <div class="wishlist-product-card">
+            <div class="card-header">
+              <button class="remove-from-wishlist" data-product-id="{{this._id}}" aria-label="Remove {{this.name}} from wishlist">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </button>
             </div>
+            <a href="/product/{{this._id}}">
+              <img src="{{this.images.[0]}}" alt="{{this.name}}" class="product-image">
+              <p class="product-name">{{this.name}}</p>
+              <p class="product-price">₹{{this.price}}</p>
             </a>
+
+            <!-- Hover Content: Sizes and Add to Cart Button -->
+            <div class="hover-content">
+              <div class="sizes">
+    {{#each this.sizes}}
+      <span class="size-option" data-size="{{this.size}}" data-quantity="{{this.quantity}}">{{this.size}}</span>
+    {{/each}}
+  </div>
+              <div class="size-message" style="color: red; font-size: 12px; display: none;">Please select a size</div>
+              <div class="out-of-stock-message" style="color: red; font-size: 14px; display: none;">Out of Stock</div>
+              <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
           </div>
-        </div>
-      {{/each}}
-    </div>
-  {{else}}
-    <div class="empty-wishlist-container text-center" style="margin-top: 20px;">
-      <img src="/images/wishlist.jpeg" alt="Empty Wishlist" class="empty-wishlist-image" style="width: 50%; max-width: 300px;">
-      <h4 style="font-family:'Times New Roman', Times, serif;color:rgb(80, 75, 75); margin-top: 15px;">You have no items in your wishlist. Start adding!</h4>
-      <a href="/collections" class="btn" style="background-color: rgb(228, 178, 117); color:white;margin-top:15px;">Browse Products</a>
-    </div>
-  {{/if}}
-</div>
+        {{/each}}
+      </div>
+    {{else}}
+      <p>Your wishlist is empty.</p>
+    {{/if}}
+  </div>
 
-<div id="toast" style="position: fixed; top: 20px; right: 20px; background-color: #28a745; color: white; padding: 15px; border-radius: 5px; display: none; font-family: 'Arial', sans-serif;">
-  Item removed from wishlist.
-</div>
-
+  <!-- Popup Container -->
+  <div id="popup-message" class="popup">
+    <span id="popup-text"></span>
+  </div>
+</section>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const removeButtons = document.querySelectorAll('.remove-item');
+// Function to show the popup message
+function showPopup(message, type = 'success') {
+  const popup = document.getElementById('popup-message');
+  const popupText = document.getElementById('popup-text');
 
-    removeButtons.forEach(button => {
-        button.addEventListener('click', async function () {
-            const productId = this.getAttribute('data-product-id');
+  // Set the message and style based on type
+  popupText.textContent = message;
+  popup.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336'; // Green for success, red for error
 
-            const response = await fetch('/remove-from-wishlist', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId })
-            });
+  // Show the popup
+  popup.style.display = 'block';
+  popup.style.animation = 'slideIn 0.5s ease-out';
 
-            const data = await response.json();
-            if (response.ok) {
-                window.location.reload(); 
-            } else {
-                alert(data.error);
-            }
-        });
-    });
+  // Hide the popup after 3 seconds
+  setTimeout(() => {
+    popup.style.animation = 'slideOut 0.5s ease-out';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 500); // Wait for the slide-out animation to finish
+  }, 3000);
+}
+
+// Remove product from wishlist
+document.querySelectorAll('.remove-from-wishlist').forEach(button => {
+  button.addEventListener('click', async function () {
+    const productId = this.getAttribute('data-product-id');
+
+    try {
+      const response = await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        if (result.action === 'removed') {
+          this.closest('.wishlist-product-card').remove();
+          showPopup('Product removed from wishlist', 'success');
+        }
+      } else {
+        showPopup(result.message || 'An error occurred', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showPopup('An error occurred while updating the wishlist', 'error');
+    }
+  });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  // Handle size selection
+  
+  const productCards = document.querySelectorAll('.wishlist-product-card');
 
+  productCards.forEach(productCard => {
+    const sizeOptions = productCard.querySelectorAll('.size-option');
+    const addToCartButton = productCard.querySelector('.add-to-cart-btn');
+    const outOfStockMessage = productCard.querySelector('.out-of-stock-message');
+    let selectedSize = null;
+
+    // Function to check if all sizes are out of stock
+    function checkAllSizesOutOfStock() {
+      let allOutOfStock = true;
+      sizeOptions.forEach(option => {
+        const quantity = parseInt(option.getAttribute('data-quantity'));
+        if (quantity > 0) {
+          allOutOfStock = false; // At least one size is available
+        }
+      });
+      return allOutOfStock;
+    }
+
+    // Disable sizes with zero quantity
+    sizeOptions.forEach(option => {
+      const quantity = parseInt(option.getAttribute('data-quantity'));
+      if (quantity === 0) {
+        option.style.opacity = '0.5'; // Make the size option look disabled
+        option.style.pointerEvents = 'none'; // Disable click events
+      }
+    });
+
+    // Show "Out of Stock" message only if all sizes are unavailable
+    if (checkAllSizesOutOfStock()) {
+      outOfStockMessage.style.display = 'block';
+      addToCartButton.disabled = true; // Disable the "Add to Cart" button
+      addToCartButton.style.opacity = '0.5'; // Make the button look disabled
+    }
+
+    // Handle size selection
+    sizeOptions.forEach(option => {
+      option.addEventListener('click', function () {
+        sizeOptions.forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedSize = this.getAttribute('data-size');
+      });
+    });
+
+    // Handle "Add to Cart" button click
+    addToCartButton.addEventListener('click', async function () {
+      // Check if a size is selected
+      if (!selectedSize) {
+        const sizeMessage = productCard.querySelector('.size-message');
+        sizeMessage.style.display = 'block';
+        setTimeout(() => {
+          sizeMessage.style.display = 'none';
+        }, 3000);
+        return;
+      }
+
+      const productId = productCard.querySelector('.remove-from-wishlist').getAttribute('data-product-id');
+
+      try {
+        // Add the product to the cart
+        const cartResponse = await fetch('/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ productId, size: selectedSize }),
+        });
+
+        const cartResult = await cartResponse.json();
+
+        if (cartResponse.ok) {
+          if (cartResult.action === 'added') {
+            showPopup('Product added to bag', 'success');
+
+            // Remove the product from the wishlist silently
+            try {
+              const wishlistResponse = await fetch('/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId }),
+              });
+
+              const wishlistResult = await wishlistResponse.json();
+
+              if (wishlistResponse.ok && wishlistResult.action === 'removed') {
+                // Remove the product card from the DOM
+                productCard.remove();
+              }
+            } catch (wishlistError) {
+              console.error('Error removing from wishlist:', wishlistError);
+            }
+          } else if (cartResult.action === 'increased') {
+            showPopup('Product already in cart, quantity increased', 'success');
+          }
+        } else {
+          showPopup(cartResult.message || 'An error occurred', 'error');
+          try {
+              const wishlistResponse = await fetch('/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId }),
+              });
+
+              const wishlistResult = await wishlistResponse.json();
+
+              if (wishlistResponse.ok && wishlistResult.action === 'removed') {
+                // Remove the product card from the DOM
+                productCard.remove();
+              }
+            } catch (wishlistError) {
+              console.error('Error removing from wishlist:', wishlistError);
+            }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showPopup('An error occurred while adding to cart', 'error');
+      }
+    });
+  });
+});
 </script>

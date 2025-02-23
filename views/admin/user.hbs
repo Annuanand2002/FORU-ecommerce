@@ -47,7 +47,7 @@
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Email</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Mobile No</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Verified</th>
-          <th class="text-center" style="background-color: rgb(228, 178, 117);"></th>
+          <!--<th class="text-center" style="background-color: rgb(228, 178, 117);"></th>-->
           <th class="text-center"style="background-color: rgb(228, 178, 117);"></th>
         </tr>
       </thead>
@@ -58,9 +58,9 @@
           <td class="text-center">{{this.email}}</td>
           <td class="text-center">{{this.phone}}</td>
           <td class="text-center">{{this.isVerified}}</td>
-          <td class="text-center">
+          <!--<td class="text-center">
             <button class="btn" style="background: linear-gradient(to top left, rgb(228, 178, 117), rgb(255, 224, 178)); color:white">View Details</button>
-          </td>
+          </td>-->
           <td class="text-center">
             {{#if this.blocked}} 
               <form action="/admin/user/unblock/{{this._id}}" method="POST">

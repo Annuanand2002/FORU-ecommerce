@@ -1,0 +1,413 @@
+
+<style>
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(to right, #f5f5f5, #d6a57a);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    background-color: white;
+}
+
+.left-column {
+    flex: 2; /* Takes 2/3 of the space */
+    border: 1px solid #ddd; /* Add border to left column */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Add padding for spacing */
+}
+
+.right-column {
+    flex: 1; /* Takes 1/3 of the space */
+    border: 1px solid #ddd; /* Add border to right column */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Add padding for spacing */
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left img {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.header-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.header-right a {
+    margin: 0 15px;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.address {
+    margin-bottom: 20px;
+    background-color: rgb(232, 218, 200);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.address-content {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.item {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.item img {
+    width: 100px;
+    margin-right: 10px;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: bold;
+}
+
+.item-options {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.item-options select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 10px;
+}
+
+.item-options button {
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.price-details {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.price-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.total-amount {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.place-order {
+    background-color: rgb(228, 178, 117);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-column,
+    .right-column {
+        flex: 1;
+    }
+
+    .item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item img {
+        width: 80px;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .item-options {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-options select {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+.modal {
+display: none; /* Hidden by default */
+position: fixed;
+z-index: 1;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: auto;
+background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+background-color: #fefefe;
+margin: 15% auto;
+padding: 20px;
+border: 1px solid #888;
+width: 30%; /* Adjust as needed */
+position: relative; /* For positioning close button */
+border-radius: 8px; /* Add rounded corners */
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.close-btn {
+position: absolute;
+top: 10px;
+right: 15px;
+font-size: 20px;
+font-weight: bold;
+color: #aaa;
+cursor: pointer;
+}
+
+/* Style the address boxes */
+.address-box {
+border: 1px solid #ccc;
+padding: 15px;
+margin-bottom: 10px;
+border-radius: 5px;
+}
+
+.address-box label {
+display: block; /* Make labels clickable */
+cursor: pointer;
+}
+
+.address-box input[type="radio"] {
+margin-right: 10px;
+vertical-align: middle; /* Align radio button with text */
+}
+
+.home-label {
+background-color: #eee;
+color: #666;
+padding: 3px 8px;
+border-radius: 3px;
+font-size: 12px;
+margin-left: 10px;
+}
+
+/* Style buttons */
+button {
+padding: 8px 15px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}
+
+.deliver-btn {
+background-color: #007bff; /* Blue */
+color: white;
+}
+
+.edit-btn {
+background-color: #ffc107; /* Yellow */
+}
+
+.delete-btn {
+background-color: #dc3545; /* Red */
+color: white;
+}
+
+/* Position action buttons in the address box */
+.address-actions {
+margin-top: 10px;
+}
+
+.address-actions button {
+margin-right: 5px;
+}
+</style>
+
+<body>
+<div class="container">
+<!-- Left Column -->
+<div class="left-column">
+    <div class="header">
+        <div class="header-left">
+            <a class="navbar-brand" href="#">FORU</a>
+        </div>
+        <div class="header-right">
+            <a href="/cart" style="color: rgb(216, 214, 214);">Bag</a>
+            <a href="/address-cart">2.Address</a>
+            <a style="color: rgb(216, 214, 214);">Payment</a>
+        </div>
+    </div>
+
+ <div class="address">
+            <div class="address-header">
+                <h3>Delivery Address</h3>
+             <!--   <a href="/add-address" style="text-decoration: none;"><button id="add-address-btn" class="deliver-btn" style="background-color:#d6a57a">+ Add New Address</button></a>-->
+            </div>
+            <div class="address-content">
+                {{#if user.addresses.length}}
+                    {{#each user.addresses}}
+                        <div class="address-box">
+                            <label>   
+                                <input type="radio" name="addressID" value="{{this._id}}">{{#if this.isDefault}}<span class="home-label">Home</span>{{/if}} {{this.name}} {{this.house}}, <br>{{this.city}}, {{this.state}} - {{this.postalCode}}
+                            </label>
+                            <!--<div class="address-actions">
+                                <button class="edit-btn " data-address-id="{{this.id}}">Edit</button>
+  <form action="/remove-cart/{{this._id}}" method="POST" onsubmit="return confirmDelete(event)" style="display:inline;">
+  <button class="delete-btn" onclick="removeAddress('{{this._id}}')">REMOVE</button>
+</form>
+                            </div>-->
+                        </div>
+                    {{/each}}
+                {{else}}
+                    <p>No addresses found. Please add a new address.</p>
+                {{/if}}
+            </div>
+        </div>
+
+
+</div>
+
+<!-- Right Column -->
+<div class="right-column">
+    <div class="price-details">
+        <div class="price-summary">
+            <span>Total MRP</span>
+            <span>₹{{totalPrice}}</span>
+        </div>
+        <!---<div class="price-summary">
+            <span>Coupon Discount</span>
+            <span>Apply Coupon</span>
+        </div>-->
+        <div class="price-summary">
+            <span>Shipping Fee</span>
+            <span>{{shippingFee}}</span>
+        </div>
+        <div class="price-summary total-amount">
+            <span>Total Amount</span>
+            <span>₹{{totalPrice}}</span>
+        </div>
+    </div>
+
+    <button class="place-order">PLACE ORDER</button>
+</div>
+<div id="popup-message" class="popup">
+<span id="popup-text"></span>
+</div> 
+</div>
+<script>
+ document.querySelectorAll('input[name="addressID"]').forEach((radio) => {
+    radio.addEventListener('change', function() {
+        localStorage.setItem('selectedAddressId', this.value);
+    });
+});
+document.querySelector('.place-order').addEventListener('click', function() {
+    const selectedAddressId = localStorage.getItem('selectedAddressId');
+
+    if (!selectedAddressId) {
+        showPopup('Please select a delivery address.');
+        return;
+    }
+
+    // Redirect to the payment page with the address ID
+    window.location.href = `/payment?addressId=${selectedAddressId}`;
+});
+function showPopup(message) {
+    const popup = document.getElementById('popup-message');
+    const popupText = document.getElementById('popup-text');
+    popupText.textContent = message;
+    popup.style.display = 'block';
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 3000);
+}function confirmDelete(event) {
+  if (!confirm('Are you sure you want to delete this address?')) {
+    event.preventDefault(); // Prevent form submission if user cancels
+  }
+}
+async function removeAddress(addressId) {
+  if (!confirm('Are you sure you want to delete this address?')) {
+    return; // Exit if the user cancels the confirmation
+  }
+
+  try {
+    const response = await fetch(`/remove-address/${addressId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      // Remove the address from the DOM
+      const addressBox = document.querySelector(`[data-address-id="${addressId}"]`);
+      if (addressBox) {
+        addressBox.remove();
+      }
+      showPopup('Address removed successfully.');
+    } else {
+      showPopup(result.message || 'Failed to remove address.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showPopup('An error occurred while removing the address.');
+  }
+}
+</script>

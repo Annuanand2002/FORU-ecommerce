@@ -13,13 +13,16 @@ async function addAddress(req,res){
     if (!user) {
       return res.status(404).send('User not found');
   }
+  
+  const isFirstAddress = user.addresses.length === 0;
   user.addresses.push({
     name,
     phone,
     house,
     city,
     state,
-    postalCode
+    postalCode,
+    isDefault: isFirstAddress || isFirstAddress
 });
 
 await user.save();
@@ -61,7 +64,7 @@ async function removeAddress(req, res) {
       user.addresses = user.addresses.filter(address => address._id.toString() !== addressId);
       await user.save();
 
-      res.redirect('/address');
+      res.redirect('back');
   } catch (error) {
       console.error(error);
       res.status(500).send('Server error');
@@ -115,7 +118,36 @@ async function editAddress(req, res) {
     res.status(500).send('Server error');
   }
 }
+async function setDefaultAddress(req, res) {
+  const userId = req.session.user._id;
+  const addressId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    user.addresses.forEach(address => address.isDefault = false);
+
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      return res.status(404).send('Address not found');
+    }
+
+    address.isDefault = true;
+    await user.save();
+
+    res.redirect('/address');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+}
 
 
 
-module.exports = {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress}
+
+
+module.exports = {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress}

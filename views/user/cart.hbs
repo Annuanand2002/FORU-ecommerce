@@ -185,6 +185,122 @@
                 margin-bottom: 10px;
             }
         }
+        .modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%; /* Adjust as needed */
+    position: relative; /* For positioning close button */
+    border-radius: 8px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+/* Style the address boxes */
+.address-box {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.address-box label {
+    display: block; /* Make labels clickable */
+    cursor: pointer;
+}
+
+.address-box input[type="radio"] {
+    margin-right: 10px;
+    vertical-align: middle; /* Align radio button with text */
+}
+
+.home-label {
+    background-color: #eee;
+    color: #666;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+/* Style buttons */
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.deliver-btn {
+    background-color: #007bff; /* Blue */
+    color: white;
+}
+
+.edit-btn {
+    background-color: #ffc107; /* Yellow */
+}
+
+.delete-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+
+/* Position action buttons in the address box */
+.address-actions {
+    margin-top: 10px;
+}
+
+.address-actions button {
+    margin-right: 5px;
+}
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantity-controls button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.quantity-controls button:hover {
+    background-color: #e9ecef;
+}
+
+.quantity {
+    font-size: 16px;
+    font-weight: bold;
+}
     </style>
 
 <body>
@@ -197,45 +313,56 @@
                 </div>
                 <div class="header-right">
                     <a href="/cart">1.Bag</a>
-                    <a href="#" style="color: rgb(216, 214, 214);">Address</a>
-                    <a href="#" style="color: rgb(216, 214, 214);">Payment</a>
+                    <a  style="color: rgb(216, 214, 214);">Address</a>
+                    <a  style="color: rgb(216, 214, 214);">Payment</a>
                 </div>
             </div>
 
             <div class="address">
+                {{#if user.addresses.length}}
                 <div class="address-header">
-                    <span>Deliver to: Abhay V Anil, 576104</span>
+                    <span>Deliver to: {{user.addresses.[0].name}}, {{user.addresses.[0].postalCode}}</span>
                     <a href="#">
-                        <button class="btn" style="background-color: rgb(228, 178, 117); color:white; border-radius: 5px; padding: 8px 15px; border: none; cursor: pointer;">CHANGE ADDRESS</button>
                     </a>
                 </div>
                 <div class="address-content">
-                    Room No 216 Reg No: 230962109, 16th Block, Mit Hostels Manipal UDUPPI Kornata....
-                </div>
-            </div>
+                    {{user.addresses.[0].house}}, {{user.addresses.[0].city}}, {{user.addresses.[0].state}}
 
+                </div>
+                {{else}}
+        <p>No saved address found.</p>
+    {{/if}}
+            </div>
+            {{#if cart.items.length}}
+            {{#each cart.items}}
             <div class="card mb-3">
                 <div class="row g-0">
                     <div class="col-md-4">
-                        <img src="product_image.jpg" class="img-fluid rounded-start" alt="Product Image">
+                        <img src="{{this.productId.images.[0]}}" class="img-fluid rounded-start" alt="{{this.productId.images.[0]}}">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
-                            <h5 class="card-title">U.S. Polo Assn.</h5>
-                            <p class="card-text">US Polo Assn Men Maroon Polo Collar T shirt</p>
-                            <p class="card-text"><small class="text-muted">Size: 3XL</small></p>
+                            <h5 class="card-title">{{this.productId.gender}}</h5>
+                            <p class="card-text">{{this.productId.name}}</p>
+                            <p class="card-text"><small class="text-muted">Size: {{this.size}}</small></p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <select class="form-select" style="width: auto;">
-                                    <option>Qty: 1</option>
-                                </select>
-                                <button class="btn btn-danger btn-sm">REMOVE</button>
-                                <button class="btn btn-warning btn-sm">MOVE TO WISHLIST</button>
+                                 <div class="quantity-controls">
+                        <button class="btn btn-sm btn-outline-secondary decrease-quantity" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">-</button>
+                        <span class="quantity">{{this.quantity}}</span>
+                        <button class="btn btn-sm btn-outline-secondary increase-quantity" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">+</button>
+                    </div>
+                                <button class="btn btn-danger btn-sm remove-from-cart" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">REMOVE</button>
+                                <button class="btn btn-warning btn-sm move-to-wishlist" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">MOVE TO WISHLIST</button>
                             </div>
+                            <div class="out-of-stock-message" style="color: red; font-size: 12px; display: none;">Out of Stock</div>
                         </div>
                     </div>
                 </div>
             </div>
-
+            {{/each}}
+        {{else}}
+            <p>Your cart is empty.</p>
+        {{/if}}
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p style="margin: 0;">Add more from wishlist</p>
                 <a href="/wishlist">
@@ -249,23 +376,237 @@
             <div class="price-details">
                 <div class="price-summary">
                     <span>Total MRP</span>
-                    <span>₹1,899</span>
+                    <span>₹{{totalPrice}}</span>
                 </div>
-                <div class="price-summary">
+                <!---<div class="price-summary">
                     <span>Coupon Discount</span>
                     <span>Apply Coupon</span>
-                </div>
+                </div>-->
                 <div class="price-summary">
                     <span>Shipping Fee</span>
-                    <span>FREE</span>
+                    <span>{{shippingFee}}</span>
                 </div>
                 <div class="price-summary total-amount">
                     <span>Total Amount</span>
-                    <span>₹1,919</span>
+                    <span>₹{{totalPrice}}</span>
                 </div>
             </div>
 
-            <button class="place-order">PLACE ORDER</button>
+            <a href="/address-cart" style="text-decoration: none;"><button class="place-order" id="place-order-btn">PLACE ORDER</button></a>
         </div>
+        <div id="popup-message" class="popup">
+  <span id="popup-text"></span>
+</div> 
     </div>
+
+    <script>
+       document.addEventListener("DOMContentLoaded", function () {
+    // Function to show the popup message
+    function showPopup(message, type = 'success') {
+        const popup = document.getElementById('popup-message');
+        const popupText = document.getElementById('popup-text');
+        popupText.textContent = message;
+        popup.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336';
+        popup.style.display = 'block';
+        popup.style.animation = 'slideIn 0.5s ease-out';
+
+        setTimeout(() => {
+            popup.style.animation = 'slideOut 0.5s ease-out';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 500);
+        }, 3000);
+    }
+
+
+    async function fetchAvailableQuantity(productId, size) {
+        try {
+            const response = await fetch(`/product/${productId}/size/${size}/quantity`);
+            const result = await response.json();
+
+            if (response.ok) {
+                return result.quantity; 
+            } else {
+                console.error('Failed to fetch available quantity:', result.message);
+                return 0; 
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            return 0; 
+        }
+    }
+
+    // Function to update the quantity in the cart
+    async function updateQuantity(productId, size, newQuantity) {
+        try {
+            const response = await fetch('/cart/update-quantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, size, quantity: newQuantity }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                window.location.reload(); 
+            } else {
+                showPopup(result.message || 'An error occurred', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showPopup('An error occurred while updating quantity', 'error');
+        }
+    }
+
+    // Handle increase quantity button click
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', async function () {
+            const productId = this.getAttribute('data-product-id');
+            const size = this.getAttribute('data-size');
+            const quantityElement = this.parentElement.querySelector('.quantity');
+            const outOfStockMessage = this.closest('.card').querySelector('.out-of-stock-message');
+
+            // Fetch the available quantity for the selected size
+            const availableQuantity = await fetchAvailableQuantity(productId, size);
+            let quantity = parseInt(quantityElement.textContent);
+
+            // Check if the quantity can be increased
+            if (quantity < availableQuantity) {
+                quantity += 1;
+                quantityElement.textContent = quantity;
+
+                // Update the quantity in the cart
+                await updateQuantity(productId, size, quantity);
+
+                // Hide the "Out of Stock" message if it was previously shown
+                outOfStockMessage.style.display = 'none';
+            } else {
+                showPopup('Cannot increase quantity. Maximum stock reached.', 'error');
+            }
+        });
+    });
+
+    // Handle decrease quantity button click
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', async function () {
+            const productId = this.getAttribute('data-product-id');
+            const size = this.getAttribute('data-size');
+            const quantityElement = this.parentElement.querySelector('.quantity');
+            const outOfStockMessage = this.closest('.card').querySelector('.out-of-stock-message');
+
+            let quantity = parseInt(quantityElement.textContent);
+
+            if (quantity > 1) {
+                quantity -= 1;
+                quantityElement.textContent = quantity;
+
+                // Update the quantity in the cart
+                await updateQuantity(productId, size, quantity);
+
+                // Hide the "Out of Stock" message if it was previously shown
+                outOfStockMessage.style.display = 'none';
+            } else {
+                // Show the "Out of Stock" message if the quantity becomes zero
+                outOfStockMessage.style.display = 'block';
+            }
+        });
+    });
+
+    // Handle remove from cart button click
+    document.querySelectorAll('.remove-from-cart').forEach(button => {
+        button.addEventListener('click', async function () {
+            const productId = this.getAttribute('data-product-id');
+            const size = this.getAttribute('data-size');
+
+            try {
+                const response = await fetch('/cart/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId, size }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showPopup('Product removed from cart', 'success');
+                    this.closest('.card').remove();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    showPopup(result.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showPopup('An error occurred while removing from cart', 'error');
+            }
+        });
+    });
+
+    // Handle move to wishlist button click
+    document.querySelectorAll('.move-to-wishlist').forEach(button => {
+        button.addEventListener('click', async function () {
+            const productId = this.getAttribute('data-product-id');
+            const size = this.getAttribute('data-size');
+
+            try {
+                // Add the product to the wishlist
+                const wishlistResponse = await fetch('/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId }),
+                });
+
+                const wishlistResult = await wishlistResponse.json();
+
+                if (wishlistResponse.ok && wishlistResult.action === 'added') {
+                    // Remove the product from the cart
+                    const cartResponse = await fetch('/cart/remove', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId, size }),
+                    });
+
+                    const cartResult = await cartResponse.json();
+
+                    if (cartResponse.ok) {
+                        showPopup('Product moved to wishlist', 'success');
+                        // Remove the product card from the DOM
+                        this.closest('.card').remove();
+                    } else {
+                        showPopup(cartResult.message || 'An error occurred', 'error');
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showPopup(wishlistResult.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showPopup('An error occurred while moving to wishlist', 'error');
+            }
+        });
+    });
+    const placeOrderButton = document.getElementById('place-order-btn');
+    if (placeOrderButton) {
+        placeOrderButton.addEventListener('click', function (event) {
+            const totalPrice = parseFloat("{{totalPrice}}"); 
+
+            if (totalPrice <= 0) {
+                event.preventDefault(); 
+                showPopup('Your cart is empty. Add items to proceed.', 'error');
+            }
+        });
+    }
+});
+    </script>
 </body>

@@ -93,9 +93,51 @@ const handleResetPassword = async (token, password, confirmPassword) => {
   }
 };
 
+const login =  async (req, res, next) =>{
+  if(req.session.admin){
+    return res.redirect('/admin/dashboard')
+  }
+  res.render('admin/login',{admin:true,isAdminLogin:true})
+}
+
+const adminLogin =  async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+
+    const admin = await Admin.findOne({ username });
+    if (!admin) {
+      return res.status(400).json({ error: 'Invalid username or password.' });
+    }
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid username or password.' });
+    }
+
+    req.session.admin = admin;
+    res.status(200).json({ message: 'Login successful!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error, please try again later.' });
+  }
+}
+
+const dashboard = async (req, res, next)=> {
+  res.render('admin/dashboard',{admin:true,isAdminLogin:false})
+};
+const logoutAdmin = (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      return res.status(500).send('Unable to log out');
+    }
+    res.redirect('/admin/login');
+  });
+};
+
 module.exports = {
   addAdmin,handleForgotPassword,
-  handleResetPassword
+  handleResetPassword,adminLogin,login,dashboard,logoutAdmin
 };
 
 

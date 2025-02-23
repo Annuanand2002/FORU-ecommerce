@@ -55,3 +55,201 @@
   background-color: rgba(255, 255, 255, 0.8); /* Subtle background for sections */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for section depth */
 }
+a {
+  text-decoration: none;
+}
+
+.card {
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.love-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  padding: 0;
+}
+
+.love-button i {
+  color: #ccc; /* Default gray color */
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.love-button.loved i {
+  color: red; /* Red color when loved */
+}
+.popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: none;
+  animation: slideIn 0.5s ease-out;
+}
+
+.popup span {
+  font-size: 14px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.hover-content {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show sizes and Add to Cart button on card hover */
+.card:hover .hover-content {
+  opacity: 1;
+}
+
+/* Sizes Styling */
+.sizes {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.sizes span {
+  padding: 5px 10px;
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.size-option {
+  padding: 5px 10px;
+  background-color: #f1f1f1;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.size-option.selected {
+  background-color: #000;
+  color: #fff;
+}
+.sizes span:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.sizes span.selected {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Add to Cart Button Styling */
+.add-to-cart-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #333;
+}
+/* Responsive Styles */
+@media (max-width: 767.98px) {
+  .sidebar {
+    display: block; /* Show sidebar on mobile */
+    width: 100%; /* Full width on mobile */
+  }
+
+  .product-section {
+    margin-top: 10px !important;
+  }
+
+  .card {
+    width: 48% !important; /* Two cards per row on mobile */
+    margin: 1%; /* Adjust margin for spacing */
+  }
+
+  .card-title {
+    font-size: 14px !important; /* Smaller font size for mobile */
+  }
+
+  .card-text {
+    font-size: 12px !important;
+  }
+
+  .hover-buttons button {
+    padding: 8px 16px; /* Smaller button on mobile */
+    font-size: 12px;
+  }
+
+  .sizes span {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .sort-by-container {
+    margin-bottom: 20px !important;
+    width: 100%; /* Full width on mobile */
+  }
+
+  .sort-by-container label {
+    font-size: 14px !important;
+  }
+
+  .sort-by-container select {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 100%; /* Full width on mobile */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .col-md-4 {
+    flex: 0 0 50%; /* 2 cards per row on tablets */
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 992px) {
+  .col-md-4 {
+    flex: 0 0 33.33%; /* 3 cards per row on desktop */
+    max-width: 33.33%;
+  }
+}

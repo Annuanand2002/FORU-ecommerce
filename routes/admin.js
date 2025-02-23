@@ -7,32 +7,14 @@ const adminHelper = require('../controllers/admin-controller');
 const Category = require('../models/cateogory-schema');
 const Admin = require('../models/admin-schema');
 const categoryHelper = require('../controllers/cateogory-controller');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const {adminAuth} = require('../controllers/auth-middleware')
+const {orderAdmin,updateOrderAdmin,orderPageUpdate} = require('../controllers/order-controller')
+const couponHelper = require('../controllers/coupon-middleware')
 
 /*admin-login*/
-router.get('/login', function(req, res, next) {
-  res.render('admin/login',{admin:true,isAdminLogin:true})
-});
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
-      return res.status(400).json({ error: 'Invalid username or password.' });
-    }
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid username or password.' });
-    }
-    res.status(200).json({ message: 'Login successful!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error, please try again later.' });
-  }
-});
-
+router.get('/login',adminHelper.login);
+router.post('/login',adminHelper.adminLogin);
 router.get('/forgot-password', (req, res) => {
   res.render('admin/forgot-password',{isAdminLogin:true});
 });
@@ -73,9 +55,7 @@ router.post('/reset-password/:token', async (req, res) => {
 });
 
 /*admin-dashboard*/
-router.get('/dashboard', function(req, res, next) {
-  res.render('admin/dashboard',{admin:true,isAdminLogin:false})
-});
+router.get('/dashboard',adminAuth,adminHelper.dashboard);
 router.post('/add-admin', async (req, res) => {
   const { username, password } = req.body;
   
@@ -90,7 +70,7 @@ router.post('/add-admin', async (req, res) => {
 });
 
 /*admin-product*/
-router.get('/products', async (req, res) => {
+router.get('/products', adminAuth,async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const perPage = 10;
   const searchQuery = req.query.searchQuery || '';
@@ -110,7 +90,7 @@ router.get('/products', async (req, res) => {
 
 
 /*add-product*/
-router.get('/add-product', async (req, res, next)=>{
+router.get('/add-product', adminAuth,async (req, res, next)=>{
   const categories = await categoryHelper.getAllcategories();
   res.render('admin/add-product',{categories,admin:true,isAdminLogin:false})
 });
@@ -145,7 +125,7 @@ router.post('/add-product', upload, async (req, res) => {
 });
 
 /*product-edit*/
-router.get('/edit-product/:id', async (req, res) => {
+router.get('/edit-product/:id', adminAuth,async (req, res) => {
   try {
     const productId = req.params.id; 
     const { product,categories} = await productHelper.getEditProduct(productId); 
@@ -189,7 +169,7 @@ router.post('/delete-product/:id', async (req, res) => {
 })
 
 /*category-mangement*/
-router.get('/category',async (req,res)=>{
+router.get('/category',adminAuth,async (req,res)=>{
   try{
     const categories = await categoryHelper.getAllcategories();
     res.render('admin/category',{categories,admin:true,isAdminLogin:false})
@@ -231,7 +211,7 @@ router.delete('/delete-category/:id', async (req, res) => {
 
 
 
-router.get('/user', async (req, res) => {
+router.get('/user',adminAuth, async (req, res) => {
   try{
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
@@ -272,6 +252,17 @@ router.post("/user/unblock/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+router.get('/order',adminAuth,orderAdmin)
+router.post('/admin/update-order-status/:orderId',adminAuth,orderPageUpdate);
 
+/**coupon */
+router.get('/coupon',couponHelper.showCouponPage)
+router.get('/add-coupon',couponHelper.getaddCoupon)
+router.post('/add-coupon',couponHelper.addCoupon)
+router.get('/admin/edit-coupon',(req,res)=>{
+  res.render('admin/edit-coupon')
+})
+router.get('/admin/delete-coupon/:id',couponHelper.deleteCoupon)
+router.get('/logout',adminHelper.logoutAdmin)
 
 module.exports = router;

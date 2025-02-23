@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword,logoutUser,addToWishlist,addToBag,getWishlist,removeFromWishlist} = require('../controllers/user-controller'); 
+const { registerUser,loginUser,verifyEmail,generateResetToken, resetPassword,logoutUser} = require('../controllers/user-controller'); 
 const Product = require('../models/product-schema');
 const Category = require('../models/cateogory-schema');
 const passport = require('passport');
@@ -11,8 +11,10 @@ const nodemailer = require('nodemailer');
 const {getFilteredProducts }= require('../controllers/getFilteredProduct');
 const {getSingleProduct}= require('../controllers/product-controller');
 const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
-const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress} = require('../controllers/address-middleware')
-
+const {wishlistMangement, getWishlistData, fetchProductWishlist,getWishlist}= require('../controllers/wishlist-middleware')
+const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress} = require('../controllers/address-middleware')
+const {addToCart,getCart,removeCart,updateCartQunatity,getAddressCart,addressCart,removeCartAddress,cartQuantityCheck} = require('../controllers/cart-middleware')
+const {getPaymentPage,placeOrder,orderConfirmed} = require('../controllers/order-controller')
 
 /* GET home page. */
 router.get('/',async (req,res,next)=>{
@@ -112,6 +114,7 @@ router.post('/login',async (req,res,next)=>{
         phone:result.phone,
         dateOfBirth:result.dateOfBirth,
         gender:result.gender,
+        blocked:result.blocked
       })
       return res.status(200).json({success:true,message: "Login successful"})
     }
@@ -183,6 +186,8 @@ router.post('/reset-password', async (req, res) => {
 });
 
 router.get('/collections',getFilteredProducts);
+
+/**profile-mangement */
 router.get('/account',checkAuthentication,(req,res)=>{
   const user = req.session.user;
   res.render('user/user-account',{user,isUser:true})
@@ -192,28 +197,45 @@ router.get('/edit-profile',checkAuthentication,checkUserBlocked,(req,res)=>{
   res.render('user/edit-userProfile',{user,isUser:true})
 })
 router.post('/edit-profile',updateProfile);
-router.get('/delete-account',checkAuthentication,(req,res)=>{
-  res.render('user/delete-account',{isUser:true})
-})
-router.post('/delete-account', deleteAccount);
-
-router.get('/logout', logoutUser);
-
-router.get('/product/:id',checkAuthentication,getSingleProduct);
-router.post('/add-to-bag', checkAuthentication,addToBag);
-router.get('/wishlist',checkAuthentication,getWishlist)
-router.post('/add-to-wishlist', checkAuthentication,addToWishlist);
-router.post('/remove-from-wishlist', checkAuthentication,removeFromWishlist);
-router.get('/cart',(req,res)=>{
-  res.render('user/cart',{isAdminLogin:true})
-})
+/**address */
 router.get('/address',checkAuthentication,getAddresses)
 router.get('/add-address',checkAuthentication,(req,res)=>{
   res.render('user/address',{isUser:true})
 });
 router.post('/add-address',addAddress);
+router.post('/address/set-default/:id', setDefaultAddress);
 router.post('/address/remove/:id',removeAddress);
 router.get('/edit-address',checkAuthentication,getEditAddresses);
 router.post('/edit-address',editAddress)
 
+/**delete-account */
+router.get('/delete-account',checkAuthentication,(req,res)=>{
+  res.render('user/delete-account',{isUser:true})
+})
+router.post('/delete-account', deleteAccount);
+
+/**logout */
+router.get('/logout', logoutUser);
+
+/**single-productpage */
+router.get('/product/:id',checkAuthentication,getSingleProduct);
+
+/**wishlist mangement */
+router.get('/wishlist/products',fetchProductWishlist)
+router.get('/wishlist/data',checkAuthentication,getWishlistData)
+router.get('/wishlist',checkAuthentication,getWishlist)
+router.post('/wishlist/toggle',checkAuthentication,wishlistMangement)
+
+/**cart-mangement */
+router.post('/cart/add',checkAuthentication,addToCart)
+router.get('/cart',checkAuthentication,getCart)
+router.post('/cart/remove',removeCart)
+router.post('/cart/update-quantity',updateCartQunatity)
+router.get('/address-cart',checkAuthentication,addressCart)
+router.get('/product/:productId/size/:size/quantity',cartQuantityCheck)
+router
+
+router.get('/payment',checkAuthentication,getPaymentPage)
+router.post('/place-order',placeOrder)
+router.get('/order-confirmation/:orderId',checkAuthentication,orderConfirmed)
 module.exports = router;
