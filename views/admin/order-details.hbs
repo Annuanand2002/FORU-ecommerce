@@ -1,0 +1,80 @@
+
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h2 class="text-center mb-4" style="color: #d6a57a;;">Order Details</h2>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Order ID</th>
+                    <td>{{order._id}}</td>
+                </tr>
+                <tr>
+                    <th>Customer Name</th>
+                    <td>{{order.userId.name}}</td>
+                </tr>
+                <tr>
+                    <th>Total Price</th>
+                    <td>₹{{order.totalPrice}}</td>
+                </tr>
+                <tr>
+                    <th>Shipping Fee</th>
+                    <td>₹{{order.shippingFee}}</td>
+                </tr>
+                <tr>
+                    <th>Payment Method</th>
+                    <td class="payment-method">
+  {{order.payment}}<br>
+  {{#if (eq order.payment "online payment")}}
+    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
+      {{order.paymentStatus}}
+    </span>
+  {{/if}}
+</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td><span class="badge bg-success">{{order.status}}
+  </span></td>
+                </tr>
+                <tr>
+                    <th>Order Date</th>
+                    <td>{{formatDate order.createdAt}}</td>
+                </tr>
+                <tr>
+                    <th>Delivery Address</th>
+                    <td>
+                        <strong>{{order.deliveryAddress.name}}</strong><br>
+                        {{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},<br>
+                        {{order.deliveryAddress.state}} - {{order.deliveryAddress.postalCode}}
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="2" class="text-center">Ordered Items</th>
+                </tr>
+                <tr>
+                    <th>Product</th>
+                    <th>Details</th>
+                </tr>
+                {{#each order.items}}
+                <tr>
+                    <td>
+                        <img src="{{this.productId.images.[0]}}" alt="{{this.productId.name}}" style="width: 100px; height: 100px; object-fit: cover;">
+                    </td>
+                    <td>
+                        <strong>{{this.productId.name}}</strong><br>
+                        Quantity: {{this.quantity}}<br>
+                        Price: ₹{{this.price}}<br>
+                        Size: {{this.size}}
+                    </td>
+                </tr>
+                {{/each}}
+            </table>
+
+            <div class="mt-4 text-center">
+                <a href="/admin/order" class="btn" style="background-color: #d6a57a; color:white;">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+
+   
+

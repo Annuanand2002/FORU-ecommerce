@@ -50,13 +50,49 @@ hbs.create({}).handlebars.registerHelper('times', function (n, block) {
   }
   return accum;
 });
+handlebars.registerHelper('gt', function (a, b) {
+  return a > b;
+});
+handlebars.registerHelper('lt', function (a, b) {
+  return a < b;
+});
+handlebars.registerHelper('eq', function (a, b) {
+  return a === b;
+});
+handlebars.registerHelper('range', function (start, end) {
+  const result = [];
+  for (let i = start; i <= end; i++) {
+      result.push(i);
+  }
+  return result;
+});
+handlebars.registerHelper('neq', function (a, b) {
+  return a !== b;
+});
 handlebars.registerHelper('json', function(context) {
   return JSON.stringify(context);
 });
 handlebars.registerHelper('arrayContains', function(array, value) {
   return array.indexOf(value) !== -1;
 });
-
+handlebars.registerHelper('or', function () {
+  const args = Array.prototype.slice.call(arguments, 0, -1);
+  return args.some(Boolean);
+});
+handlebars.registerHelper('statusColor', function (status) {
+  switch (status) {
+    case 'Pending':
+      return 'warning'; // Yellow
+    case 'Shipped':
+      return 'primary'; // Blue
+    case 'Completed':
+      return 'success'; // Green
+    case 'Cancelled':
+      return 'danger'; // Red
+    default:
+      return 'secondary'; // Gray (default)
+  }
+});
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

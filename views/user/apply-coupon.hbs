@@ -1,0 +1,79 @@
+<div class="container mt-4">
+    <h4>Apply Coupon</h4>
+    <p>Total Price: ₹{{totalPrice}}</p>
+    <div id="error-message" class="alert alert-danger" style="display: none;"></div> <!-- Error message container -->
+    <div class="row">
+        {{#each coupons}}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{this.couponName}}</h5>
+                        <p class="card-text">
+                            Discount: ₹{{this.discountAmount}}<br>
+                            Minimum Purchase: ₹{{this.minPurchaseAmount}}<br>
+                            Expiry: {{formatDate this.expiryDate 'YYYY-MM-DD'}}<br>
+                            Description: {{this.description}}
+                        </p>
+                        <div class="form-check">
+                            <input class="form-check-input coupon-radio" type="radio" name="couponId" value="{{this._id}}" id="coupon-{{this._id}}">
+                            <label class="form-check-label" for="coupon-{{this._id}}">
+                                Select this coupon
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{else}}
+            <p>No coupons available for this order.</p>
+        {{/each}}
+    </div>
+    <div class="mt-4">
+        <button type="button" id="apply-coupon-btn" class="btn btn-primary" style="background-color: #d6a57a; color:white;">Apply Coupon</button>
+        <a href="/cart" class="btn btn-secondary">Cancel</a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const applyButton = document.getElementById('apply-coupon-btn');
+    const errorMessage = document.getElementById('error-message');
+
+    // Handle apply button click
+    applyButton.addEventListener('click', function () {
+        const selectedCoupon = document.querySelector('.coupon-radio:checked');
+
+        if (!selectedCoupon) {
+            errorMessage.textContent = 'Please select a coupon.';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        const couponId = selectedCoupon.value;
+        console.log('Selected Coupon ID:', couponId); // Debugging
+
+        // Submit the selected coupon ID to the server
+        fetch('/apply-coupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ couponId }), 
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            if (data.success) {
+                window.location.href = '/cart'; // Redirect to cart page after applying the coupon
+            } else {
+                errorMessage.textContent = data.message || 'An error occurred while applying the coupon.';
+                errorMessage.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error); // Debugging
+            errorMessage.textContent = 'An error occurred while applying the coupon.';
+            errorMessage.style.display = 'block';
+        });
+    });
+});
+</script>

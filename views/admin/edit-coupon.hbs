@@ -1,0 +1,75 @@
+    <style>
+        .card-header {
+            background-color: rgb(228, 178, 117);
+            color: white;
+        }
+
+        .btn-primary-custom {
+            background-color: rgb(228, 178, 117);
+            color: white;
+        }
+
+        .error-message {
+            color: red;
+            font-size: small;
+            margin-top: 5px;
+        }
+    </style>
+
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Coupon</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/edit-coupon/{{coupon._id}}" method="post" id="edit-coupon-form">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="couponName" class="form-label">Coupon Name</label>
+                                <input type="text" name="couponName" id="name" class="form-control" placeholder="Coupon Name" value="{{coupon.couponName}}">
+                                <div class="error-message" id="name-error"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="discountAmount" class="form-label">Discount Amount</label>
+                                <input type="number" name="discountAmount" id="amount" class="form-control" min="1" value="{{coupon.discountAmount}}">
+                                <div class="error-message" id="amount-error"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="minPurchaseAmount" class="form-label">Minimum Purchase Amount</label>
+                                <input type="number" name="minPurchaseAmount" id="minAmount" class="form-control" . min="200" value="{{coupon.minPurchaseAmount}}">
+                                <div class="error-message" id="minAmount-error"></div>
+                            </div>
+                        </div>
+
+                       <div class="form-group">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input type="date" id="expiryDate" name="expiryDate" value="{{formatDate coupon.expiryDater 'YYYY-MM-DD'}}">
+                            <div class="error-message" id="expiryDate-error"></div>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" class="form-control" rows="4">{{coupon.description}}</textarea>
+                            <div class="error-message" id="description-error"></div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary-custom">Submit</button>
+                            <a href="/admin/coupon" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -13,8 +13,9 @@ const {getSingleProduct}= require('../controllers/product-controller');
 const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
 const {wishlistMangement, getWishlistData, fetchProductWishlist,getWishlist}= require('../controllers/wishlist-middleware')
 const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress} = require('../controllers/address-middleware')
-const {addToCart,getCart,removeCart,updateCartQunatity,getAddressCart,addressCart,removeCartAddress,cartQuantityCheck} = require('../controllers/cart-middleware')
-const {getPaymentPage,placeOrder,orderConfirmed} = require('../controllers/order-controller')
+const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon} = require('../controllers/cart-middleware')
+const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses} = require('../controllers/order-controller')
+const couponHelper = require('../controllers/coupon-middleware')
 
 /* GET home page. */
 router.get('/',async (req,res,next)=>{
@@ -214,6 +215,16 @@ router.get('/delete-account',checkAuthentication,(req,res)=>{
 })
 router.post('/delete-account', deleteAccount);
 
+/**order mangement */
+router.get('/orders',checkAuthentication,getOrderPage)
+router.get('/order-details/:orderId/:itemId',checkAuthentication,getOrderDetails)
+router.post('/cancel-order',orderCancel)
+router.post('/return-order',orderReturn)
+router.get('/payment',checkAuthentication,getPaymentPage)
+router.post('/place-order',placeOrder)
+router.post('/handle-payment-response',handlePaymentResponse)
+router.get('/order-confirmation/:orderId',checkAuthentication,orderConfirmed)
+router.post('/add-addresses',checkAuthentication,addAddressses)
 /**logout */
 router.get('/logout', logoutUser);
 
@@ -232,10 +243,11 @@ router.get('/cart',checkAuthentication,getCart)
 router.post('/cart/remove',removeCart)
 router.post('/cart/update-quantity',updateCartQunatity)
 router.get('/address-cart',checkAuthentication,addressCart)
+router.get('/addAddressCart',checkAuthentication,getAddAddressCart)
+router.post('addAddressCart',checkAuthentication,addAddressCart)
 router.get('/product/:productId/size/:size/quantity',cartQuantityCheck)
-router
+router.get('/apply-coupon',couponHelper.getApplyCouponPage)
+router.post('/apply-coupon',applyCoupon)
 
-router.get('/payment',checkAuthentication,getPaymentPage)
-router.post('/place-order',placeOrder)
-router.get('/order-confirmation/:orderId',checkAuthentication,orderConfirmed)
+
 module.exports = router;

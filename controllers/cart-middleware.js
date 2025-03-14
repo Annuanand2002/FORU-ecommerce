@@ -1,7 +1,9 @@
 const Cart = require('../models/cart-schema')
+const Coupon = require('../models/coupon-schema')
 const Wishlist = require('../models/wishlist-schema');
 const Product = require('../models/product-schema')
 const User = require('../models/user-schema')
+
 
   const addToCart =  async (req, res) => {
     const { productId, size } = req.body;
@@ -32,31 +34,63 @@ const User = require('../models/user-schema')
     }
   };
   
-const getCart = async (req,res)=>{
-  try{
-    const userId = req.session.user._id;
-  const cart = await Cart.findOne({userId}).populate('items.productId').lean()
-  const user = await User.findById(userId).populate('addresses').lean();
-  let totalPrice = 0;
-  cart.items.forEach(item=>{
-    totalPrice += item.productId.price *item.quantity
-  })
-  let shippingFee;
-  if(totalPrice>=2000){
-     shippingFee = "FREE"
-  }else if(totalPrice>0 && totalPrice<2000  ){
-     shippingFee = 80
-    totalPrice = totalPrice + shippingFee
-  }else{
-    totalPrice= 0
-    shippingFee = "FREE"
-  }
-  res.render('user/cart',{cart,user,totalPrice,shippingFee,isUser:true})
-  }catch(error){
-    console.error(error);
-    res.status(500).send('Internal Server Error');
-  }
-}
+  const getCart = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const cart = await Cart.findOne({ userId })
+            .populate('items.productId')
+            .populate('appliedCoupons') // Populate the appliedCoupons field
+            .lean();
+
+        const user = await User.findById(userId).populate('addresses').lean();
+
+        let totalPrice = 0;
+        cart.items.forEach(item => {
+            totalPrice += item.productId.price * item.quantity;
+        });
+
+        
+        let discountAmount = 0;
+        if (cart.appliedCoupons) {
+            const coupon = await Coupon.findById(cart.appliedCoupons);
+            if (coupon && coupon.minPurchaseAmount <= totalPrice) {
+                discountAmount = coupon.discountAmount;
+            }
+        }
+
+        // Calculate shipping fee
+        let shippingFee;
+        if (totalPrice >= 2000) {
+            shippingFee = 0;
+        } else if (totalPrice > 0 && totalPrice < 2000) {
+            shippingFee = 80;
+            totalPrice += shippingFee;
+        } else {
+            totalPrice = 0;
+            shippingFee = 0;
+        }
+        totalPrice = totalPrice - shippingFee
+        // Subtract the discount amount from the total price
+        const newTotalPrice = totalPrice - discountAmount + shippingFee;
+
+        await Cart.updateOne({userId},{$set:{totalPrice,shippingFee,newTotalAmount:newTotalPrice,discountAmount}})
+
+        
+
+        res.render('user/cart', {
+            cart,
+            user,
+            totalPrice, // Updated total price
+            shippingFee,
+            newTotalPrice,
+            discountAmount, // Pass discount amount to the view
+            isUser: true,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
 
 const removeCart = async (req,res)=>{
   const userId = req.session.user._id;
@@ -130,21 +164,7 @@ const addressCart = async (req,res)=>{
     const userId = req.session.user._id;
   const cart = await Cart.findOne({userId}).populate('items.productId').lean()
   const user = await User.findById(userId).populate('addresses').lean();
-  let totalPrice = 0;
-  cart.items.forEach(item=>{
-    totalPrice += item.productId.price *item.quantity
-  })
-  let shippingFee;
-  if(totalPrice>=2000){
-     shippingFee = "FREE"
-  }else if(totalPrice>0 && totalPrice<2000  ){
-     shippingFee = 80
-    totalPrice = totalPrice + shippingFee
-  }else{
-    totalPrice= 0
-    shippingFee = "FREE"
-  }
-  res.render('user/address-cart',{cart,user,totalPrice,shippingFee,isUser:true})
+  res.render('user/address-cart',{cart,user,isUser:true})
   }catch(error){
     console.error(error);
     res.status(500).send('Internal Server Error');
@@ -192,4 +212,93 @@ const cartQuantityCheck =  async (req, res) => {
   }
 };
 
-module.exports = {addToCart,getCart,removeCart,updateCartQunatity,addressCart,getAddressCart,removeCartAddress,cartQuantityCheck}
+const applyCoupon = async (req, res) => {
+  try {
+      const { couponId } = req.body; // Single coupon ID
+      const userId = req.session.user._id;
+
+      console.log('Coupon ID:', couponId); // Debugging
+
+      // Fetch the coupon
+      const coupon = await Coupon.findById(couponId);
+      if (!coupon) {
+          return res.status(404).json({ success: false, message: 'Coupon not found.' });
+      }
+
+      // Fetch the cart
+      const cart = await Cart.findOne({ userId }).populate('items.productId');
+      console.log('Cart Before Update:', cart); // Debugging
+
+      // Validate the coupon against the cart total
+      let totalPrice = 0;
+      cart.items.forEach(item => {
+          totalPrice += item.productId.price * item.quantity;
+      });
+
+      if (coupon.minPurchaseAmount > totalPrice) {
+          return res.status(400).json({ success: false, message: 'Coupon not applicable for this order.' });
+      }
+      // Apply the coupon (store as a reference)
+      cart.appliedCoupons = coupon._id;
+      await cart.save()
+
+      res.json({ success: true, message: 'Coupon applied successfully.'});
+  } catch (error) {
+      console.error('Error applying coupon:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+const getAddAddressCart = async (req,res)=>{
+  res.render('user/addAddressCart',{isUser:true})
+}
+const addAddressCart = async (req, res) => {
+  try {
+    const { name, phone, house, postalCode, city, state } = req.body;
+    const userId = req.session.user._id;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    // If user is not found, redirect to login
+    if (!user) {
+      return res.redirect('/login');
+    }
+
+    // Create a new address object
+    const newAddress = {
+      name,
+      phone,
+      house,
+      postalCode,
+      city,
+      state,
+      isDefault: user.addresses.length === 0 // Set as default if it's the first address
+    };
+    console.log("final",newAddress)
+    // Optional: Check if the address already exists
+    const isDuplicate = user.addresses.some(address => 
+      address.name === name &&
+      address.phone === phone &&
+      address.house === house 
+    );
+    if (isDuplicate) {
+      return res.status(400).send('Address already exists');
+    }
+
+    // Add the new address to the user's addresses array
+    user.addresses.push(newAddress);
+
+    // Save the user document with the new address
+    await user.save();
+
+    // Redirect back to the address-cart page
+    res.redirect('/address-cart');
+
+  } catch (error) {
+    console.error('Error adding address:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+module.exports = {addToCart,getCart,removeCart,updateCartQunatity,addressCart,getAddressCart,removeCartAddress,cartQuantityCheck,applyCoupon,getAddAddressCart,addAddressCart}

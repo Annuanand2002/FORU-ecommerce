@@ -1,40 +1,208 @@
-<div class="container-fluid p-4 position-relative">
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .container {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stats-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 20px;
+  }
+
+  .card {
+    flex: 1;
+    max-width: 250px;
+    min-width: 200px;
+  }
+
+  .tables-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .table-wrapper {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .filter-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+
+  .filter-container select {
+    width: 150px;
+    margin-left: 10px;
+  }
+</style>
+
+<body>
+  <div class="container-fluid p-4 position-relative">
     <button type="button" class="btn mt-4" style="background-color: rgb(228, 178, 117); color: white;" 
             data-bs-toggle="modal" data-bs-target="#addAdminModal">Add Admin</button>
-</div>
 
-<!-- Modal -->
-<!-- Modal -->
-<div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addAdminModalLabel">Add Admin</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="container mt-4">
+      <h3 class="text-center" style="color:rgb(228, 178, 117);" >📊 Dashboard</h3>
+
+      <!-- Filter for Stats
+      <div class="filter-container" style="margin-left:800px;">
+        <label for="statsFilter" style="color:rgb(228, 178, 117);">Filter Stats:</label>
+        <select id="statsFilter" class="form-control">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div> -->
+
+      <!-- Stats Cards -->
+      <div class="stats-container mt-4">
+        <div class="card text-white" style="background-color:rgb(228, 178, 117);">
+          <div class="card-body">
+            <h4>Total Sales</h4>
+            <h2 id="totalSales">₹{{totalSales}}</h2>
+          </div>
+        </div>
+        <div class="card text-white" style="background-color:rgb(207, 175, 136);">
+          <div class="card-body">
+            <h4>Total Orders</h4>
+            <h2 id="totalOrders">{{totalOrders}}</h2>
+          </div>
+        </div>
+        <div class="card  text-dark" style="background-color:rgb(186, 204, 167);">
+          <div class="card-body">
+            <h4>Products Sold</h4>
+            <h2 id="totalProductsSold">{{totalProductSold}}</h2>
+          </div>
+        </div>
+        <div class="card text-white" style="background-color:rgb(207, 167, 167);">
+          <div class="card-body">
+            <h4>Pending Orders</h4>
+            <h2 id="pendingOrders">{{pendingOrders}}</h2>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        <form id="addAdminForm">
-          <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" placeholder="Enter username">
-            <div id="usernameError" class="text-danger mt-2"></div>
-          </div>
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Enter password">
-            <div id="passwordError" class="text-danger mt-2"></div>
-          </div>
-          <button type="submit" class="btn" id="saveAdminBtn" style="background-color: rgb(228, 178, 117); color: white;">Save</button>
-        </form>
+
+      <!-- Charts -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Tables (Recent Orders and Top-Selling Products) -->
+      <div class="tables-container mt-4">
+        <div class="table-wrapper">
+          <h4>📦 Recent Orders</h4>
+          <table class="table table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each orders}}
+              <tr>
+                <td>{{this._id}}</td>
+                <td>{{this.userId.name}}</td>
+                <td>₹{{this.totalPrice}}</td>
+                <td><span class="badge bg-{{statusColor this.status}}">{{this.status}}</span></td>
+                <td>{{this.payment}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrapper">
+          <h4>🌟 Top-Selling Products</h4>
+          <table class="table table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th>Product Name</th>
+                <th>Units Sold</th>
+                <th>Total Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each topSellingProducts}}
+              <tr>
+                <td>{{this.productDetails.name}}</td>
+                <td>{{this.unitsSold}}</td>
+                <td>₹{{this.revenue}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  (function preventBack() {
-    window.history.pushState(null, "", window.location.href);
-    window.onpopstate = function () {
-      window.history.pushState(null, "", window.location.href);
+  let salesData = {{{salesData}}}; // Ensure JSON is passed properly
+
+  function formatSalesData(data) {
+    return {
+      labels: data.map(entry => entry._id),
+      amounts: data.map(entry => entry.total)
     };
-  })();
+  }
+
+  let dailySales = formatSalesData(salesData.daily);
+
+  let salesChart = new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+      labels: dailySales.labels,
+      datasets: [{
+        label: 'Sales Revenue',
+        data: dailySales.amounts,
+        borderColor: 'blue',
+        borderWidth: 2,
+        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  function updateSalesChart(period) {
+    let data = formatSalesData(salesData[period]);
+    salesChart.data.labels = data.labels;
+    salesChart.data.datasets[0].data = data.amounts;
+    salesChart.update();
+  }
+
+  document.getElementById('statsFilter').addEventListener('change', function() {
+    updateSalesChart(this.value);
+  });
 </script>
+
+</body>

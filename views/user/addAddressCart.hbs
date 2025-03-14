@@ -529,11 +529,11 @@ margin-right: 5px;
             // Validate Phone Number (must be 10 digits starting with 9)
             const phone = document.getElementById('phone').value;
             const phonePattern = /^[9][0-9]{9}$/;
-            if (!phone || !phone.match(phonePattern)) {
-                document.getElementById('phoneError').textContent = "Phone number should be 10 digits and start with 9.";
-                document.getElementById('phoneError').style.display = 'block';
-                isValid = false;
-            }
+           if (!phone || !/^\d{10}$/.test(phone)) {
+    document.getElementById('phoneError').textContent = "Phone number should be exactly 10 digits.";
+    document.getElementById('phoneError').style.display = 'block';
+    isValid = false;
+}
 
             // Validate House Name
             const house = document.getElementById('house').value;

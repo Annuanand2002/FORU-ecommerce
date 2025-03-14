@@ -293,9 +293,12 @@ margin-right: 5px;
                  {{/if}}
         </div>
         <div class="payment-box">
-    <p style="font-size: 18px;">Payment method</p>
+    <p style="font-size: 18px; color:#605d5d">Payment method</p>
     <label>
-        <input type="radio" name="paymentMethod" value="Cash on Delivery"> <span>Cash on Delivery</span>
+        <input type="radio" name="paymentMethod" value="Cash on Delivery"> <span>Cash on Delivery   </span>
+    </label>
+    <label style="margin-left: 50px;">
+        <input type="radio" name="paymentMethod" value="Online Payment"> <span>  Online Payment</span>
     </label>
 </div>
 </div>
@@ -305,19 +308,34 @@ margin-right: 5px;
     <div class="price-details">
         <div class="price-summary">
             <span>Total MRP</span>
-            <span>₹{{totalPrice}}</span>
+            <span>₹{{cart.totalPrice}}</span>
         </div>
-        <!---<div class="price-summary">
-            <span>Coupon Discount</span>
-            <span>Apply Coupon</span>
-        </div>-->
-        <div class="price-summary">
-            <span>Shipping Fee</span>
-            <span>{{shippingFee}}</span>
-        </div>
+         {{#if cart.discountAmount}}
+                <div class="price-summary">
+                    <span>Coupon discount</span>
+                    <span>-₹{{cart.discountAmount}}</span>
+                </div>
+                
+                {{else}}
+                <div class="price-summary">
+                    <span>Coupon discount</span>
+                    <span>0</span>
+                </div>
+                {{/if}}
+        {{#if cart.shippingFee}}
+                <div class="price-summary">
+                    <span>Shipping Fee</span>
+                    <span>{{cart.shippingFee}}</span>
+                </div>
+                {{else}}
+                <div class="price-summary">
+                    <span>Shipping Fee</span>
+                    <span>FREE</span>
+                </div>
+                {{/if}}
         <div class="price-summary total-amount">
             <span>Total Amount</span>
-            <span>₹{{totalPrice}}</span>
+            <span>₹{{cart.newTotalAmount}}</span>
         </div>
     </div>
 
@@ -327,10 +345,11 @@ margin-right: 5px;
 <span id="popup-text"></span>
 </div> 
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.querySelector('.place-order').addEventListener('click', async function () {
     const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-    const addressId = '{{addressObj._id}}'; // Correctly pass the address ID from the backend
+    const addressId = '{{addressObj._id}}'; 
 
     if (!selectedPaymentMethod) {
         showPopup('Please choose a payment method.');
@@ -359,8 +378,67 @@ document.querySelector('.place-order').addEventListener('click', async function 
         const data = await response.json();
 
         if (response.ok) {
-            // Redirect to the order confirmation page
-            window.location.href = `/order-confirmation/${data.orderId}`;
+            if(paymentMethod === 'Online Payment'){
+                const options = {
+                    key: 'rzp_test_buXTHPZB2Eujic', 
+                    amount: data.amount,
+                    currency: 'INR',
+                    name: 'FORU',
+                    description: 'Payment for your order',
+                    order_id: data.razorpayOrderId,
+                    handler: async function(response){
+                        console.log('Razorpay Response:', response);
+                        const paymentResponse = await fetch('/handle-payment-response',{
+                            method :'POST',
+                            headers:{
+                                'Content-Type': 'application/json',
+                            },
+                            body:JSON.stringify({
+                                orderId: response.razorpay_order_id,
+                                paymentId: response.razorpay_payment_id,
+                                signature: response.razorpay_signature,
+                                status: 'success',
+                                order:data.orderId
+                            })
+                        })
+                        if(paymentResponse.ok){
+                            window.location.href = `/order-confirmation/${data.orderId}`;
+                        }else{
+                            showPopup('Payment verification failed.');
+                        }
+                    },
+                    prefill:{
+                        name: '{{user.name}}',
+                        email: '{{user.email}}', 
+                        contact: '{{user.phone}}'
+                    },
+                    theme:{
+                        color: '#d6a57a'
+                    }
+                }
+                const rzp = new Razorpay(options);
+                rzp.on('payment failed',async function(response){
+                    console.log("haai")
+                    const paymentResponse = await fetch('/handle-payment-response',{
+                        method : 'POST',
+                        headers :{
+                            'Content-Type': 'application/json',
+                        },
+                        body : JSON.stringify({
+                            orderId: order.id,
+                            status: 'failed',
+                        })
+                    })
+                    if(paymentMethod.ok){
+                        showPopup("Payment failed. Please try again.")
+                    }else{
+                        showPopup('Failed to process payment.')
+                    }
+                })
+                rzp.open()
+            }else{
+                window.location.href = `/order-confirmation/${data.orderId}`;
+            }
         } else {
             showPopup(data.message || 'Failed to place order.');
         }

@@ -7,42 +7,49 @@ body {
     margin: 0;
 }
 
-.container {
+.account-page {
     max-width: 960px;
     margin: 20px auto;
     padding: 20px;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    display: flex; /* Use flexbox for main layout */
+    display: flex;
 }
 
-.account-menu {
+.sidebar {
     width: 250px;
     padding: 20px;
     border-right: 1px solid #eee;
 }
 
-.account-menu ul {
+.sidebar-header {
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.sidebar-menu {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.account-menu li {
+.sidebar-menu-item {
     padding: 10px 0;
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.account-menu a{
-  text-decoration: none;
-  color:black
+
+.sidebar-menu-item a {
+    text-decoration: none;
+    color: black;
 }
-.account-menu li:hover {
+
+.sidebar-menu-item:hover {
     background-color: #f0f0f0;
 }
 
-.account-menu li.active {
+.sidebar-menu-item.active {
     font-weight: bold;
     color: #000;
 }
@@ -85,13 +92,25 @@ h2 {
 </style>
 
 <body>
-
-<div class="container">
-    <div class="account-menu">
-        <ul>
-            <li  class="active" ><a href="/account">Profile</a></li>
-            <li><a href="/address">Addresses</a></li>
-            <li><a href="/delete-account">Delete Account</a></li>
+    <div class="account-page">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            Account
+        </div>
+        <ul class="sidebar-menu">
+            
+            <li class="sidebar-menu-item active">
+                <a href="/account">Profile</a>
+            </li>
+            <li class="sidebar-menu-item ">
+                <a href="/orders">Orders & Returns</a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="/address">Addresses</a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="/delete-account">Delete Account</a>
+            </li>    
         </ul>
     </div>
     <div class="main-content">

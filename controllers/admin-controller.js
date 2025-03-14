@@ -2,6 +2,8 @@ const Admin = require('../models/admin-schema');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer')
+const Sales = require('../models/sales-schema')
+const Order = require('../models/order-schema')
 
 const addAdmin = async (username, password) => {
   const existingAdmin = await Admin.findOne({ username: username }); 
@@ -122,9 +124,68 @@ const adminLogin =  async (req, res) => {
   }
 }
 
-const dashboard = async (req, res, next)=> {
-  res.render('admin/dashboard',{admin:true,isAdminLogin:false})
+const dashboard = async (req, res, next) => {
+  try {
+    const totalSales = await Sales.aggregate([
+      { $match: { status: "Completed" } },
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+    ]);
+
+    const totalOrders = await Order.countDocuments().lean();
+
+    const totalProductSold = await Sales.aggregate([
+      { $match: { status: "Completed" } },
+      { $unwind: "$items" },
+      { $group: { _id: null, total: { $sum: "$items.quantity" } } }
+    ]);
+
+    const pendingOrders = await Order.countDocuments({ status: "Pending" }).lean();
+
+    const orders = await Order.find().sort({ createdAt: -1 }).limit(5).populate("userId", "name").lean();
+
+    const topSellingProducts = await Sales.aggregate([
+      { $match: { status: "Completed" } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.productId",
+          unitsSold: { $sum: "$items.quantity" },
+          revenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } }
+        }
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "productDetails"
+        }
+      },
+      { $unwind: "$productDetails" },
+      { $sort: { revenue: -1 } },
+      { $limit: 5 }
+    ]);
+
+   
+
+    res.render("admin/dashboard", {
+      admin: true,
+      isAdminLogin: false,
+      totalSales: totalSales[0]?.total || 0,
+      totalOrders,
+      totalProductSold: (totalProductSold.length > 0) ? totalProductSold[0].total : 0,
+      pendingOrders,
+      orders,
+      topSellingProducts,
+
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
 };
+
 const logoutAdmin = (req, res, next) => {
   req.session.destroy((err) => {
     if (err) {

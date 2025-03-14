@@ -9,7 +9,7 @@ const Admin = require('../models/admin-schema');
 const categoryHelper = require('../controllers/cateogory-controller');
 const bcrypt = require('bcrypt');
 const {adminAuth} = require('../controllers/auth-middleware')
-const {orderAdmin,updateOrderAdmin,orderPageUpdate} = require('../controllers/order-controller')
+const {orderAdmin,updateOrderAdmin,orderPageUpdate,orderDetails} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 
 /*admin-login*/
@@ -253,16 +253,16 @@ router.post("/user/unblock/:id", async (req, res) => {
   }
 });
 router.get('/order',adminAuth,orderAdmin)
-router.post('/admin/update-order-status/:orderId',adminAuth,orderPageUpdate);
+router.post('/update-order-status/:id',adminAuth,orderPageUpdate);
+router.get('/order-details/:id',orderDetails)
 
 /**coupon */
-router.get('/coupon',couponHelper.showCouponPage)
-router.get('/add-coupon',couponHelper.getaddCoupon)
+router.get('/coupon',adminAuth,couponHelper.showCouponPage)
+router.get('/add-coupon',adminAuth,couponHelper.getaddCoupon)
 router.post('/add-coupon',couponHelper.addCoupon)
-router.get('/admin/edit-coupon',(req,res)=>{
-  res.render('admin/edit-coupon')
-})
-router.get('/admin/delete-coupon/:id',couponHelper.deleteCoupon)
+router.get('/edit-coupon/:id',adminAuth,couponHelper.getEditPage)
+router.post('/edit-coupon/:id',couponHelper.editCoupon)
+router.post('/delete-coupon/:id', couponHelper.deleteCoupon)
 router.get('/logout',adminHelper.logoutAdmin)
 
 module.exports = router;

@@ -344,16 +344,19 @@ button {
                         <div class="card-body">
                             <h5 class="card-title">{{this.productId.gender}}</h5>
                             <p class="card-text">{{this.productId.name}}</p>
+                            <span class="quantity" style="font-family: 'Times New Roman', Times, serif; font-size:16px;">₹{{this.productId.price}}</span>
                             <p class="card-text"><small class="text-muted">Size: {{this.size}}</small></p>
                             <div class="d-flex justify-content-between align-items-center">
                                  <div class="quantity-controls">
                         <button class="btn btn-sm btn-outline-secondary decrease-quantity" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">-</button>
                         <span class="quantity">{{this.quantity}}</span>
                         <button class="btn btn-sm btn-outline-secondary increase-quantity" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">+</button>
+                        
                     </div>
                                 <button class="btn btn-danger btn-sm remove-from-cart" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">REMOVE</button>
                                 <button class="btn btn-warning btn-sm move-to-wishlist" data-product-id="{{this.productId._id}}" data-size="{{this.size}}">MOVE TO WISHLIST</button>
                             </div>
+                            
                             <div class="out-of-stock-message" style="color: red; font-size: 12px; display: none;">Out of Stock</div>
                         </div>
                     </div>
@@ -378,17 +381,33 @@ button {
                     <span>Total MRP</span>
                     <span>₹{{totalPrice}}</span>
                 </div>
-                <!---<div class="price-summary">
-                    <span>Coupon Discount</span>
-                    <span>Apply Coupon</span>
-                </div>-->
+
+                {{#if shippingFee}}
                 <div class="price-summary">
                     <span>Shipping Fee</span>
                     <span>{{shippingFee}}</span>
                 </div>
+                {{else}}
+                <div class="price-summary">
+                    <span>Shipping Fee</span>
+                    <span>FREE</span>
+                </div>
+                {{/if}}
+                {{#if discountAmount}}
+                <div class="price-summary">
+                    <span>Coupon discount</span>
+                    <span>-₹{{discountAmount}}</span>
+                </div>
+                
+                {{else}}
+                <div class="price-summary">
+                    <span>Apply coupon</span>
+                    <a href="/apply-coupon?totalPrice={{totalPrice}}">Apply coupon</a>
+                </div>
+                {{/if}}
                 <div class="price-summary total-amount">
                     <span>Total Amount</span>
-                    <span>₹{{totalPrice}}</span>
+                    <span>₹{{newTotalPrice}}</span>
                 </div>
             </div>
 

@@ -24,15 +24,30 @@ items: [{
   price: {
       type: Number,
       required: true
-  }
+  },
+  size: {
+     type: String,
+     required: true },
 }],
 totalPrice: {
   type: Number,
+  default:0,
   required: true
 },
 shippingFee: {
   type: Number,
+  default:0,
   required: true
+},
+discountCouponFee : {
+  type:Number,
+  default:0,
+  required:true
+},
+newTotal:{
+  type:Number,
+  default:0,
+  required:true
 },
 deliveryAddress: {
   type: mongoose.Schema.Types.Mixed, 
@@ -40,17 +55,49 @@ deliveryAddress: {
 },
 status: {
   type: String,
-  enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
   default: 'Pending'
 },
 payment: {
   type : String,
   required :true
 },
+paymentId: { 
+  type: String,
+  default: null
+},
+razorpayOrderId: { 
+  type: String,
+  default: null,
+},
+paymentStatus: { 
+  type: String,
+  default: 'Pending'
+},
 createdAt: {
   type: Date,
   default: Date.now
-}
+},
+cancellationReason: [{
+  itemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  reason: {
+    type: String,
+    required: true
+  }
+}],
+completionDate: { type: Date },
+returnReason: [{
+  itemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  reason: {
+    type: String,
+    required: true
+  }
+}]
 })
 
 module.exports = mongoose.model('Order', orderSchema);
