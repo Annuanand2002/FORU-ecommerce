@@ -11,7 +11,7 @@ const walletSchema = new mongoose.Schema({
     default : 0,
     required : true
   },
-  transaction : [{
+  transactions : [{
     type : {
       type : String,
       enum : ["credit","debit"],
@@ -24,6 +24,10 @@ const walletSchema = new mongoose.Schema({
     description : {
       type : String,
       required : true
+    },
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
     },
     createdAt : {
       type : Date,

@@ -90,7 +90,16 @@
     </a>
     <div class="card-body">
       <p class="card-title" style="font-size: 16px; font-weight: bold;font-family:'Times New Roman'">{{this.name}}</p>
-      <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+      <p class="card-text" style="font-size: 14px;">
+  {{#if this.offerAmount}}
+    <!-- If offerAmount exists, show real price crossed out and offer price -->
+    <span style="text-decoration: line-through; color: gray;">₹{{this.price}}</span>
+    <span style="color: red; margin-left: 5px;">₹{{this.offerAmount}}</span>
+  {{else}}
+    <!-- If no offerAmount, show only real price -->
+    ₹{{this.price}}
+  {{/if}}
+</p>
       <div class="hover-content">
   <div class="sizes">
   {{#each this.sizes}}

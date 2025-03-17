@@ -17,6 +17,14 @@ items: [{
       ref: 'Product',
       required: true
   },
+  productName: { 
+    type: String,
+    required: true
+  },
+  image: { 
+    type: String,
+    required: true
+  },
   quantity: {
       type: Number,
       required: true
@@ -48,6 +56,14 @@ newTotal:{
   type:Number,
   default:0,
   required:true
+},
+walletAmountUsed :{
+  type : Number,
+  default:0
+},
+finalwalletAmountUsed :{
+  type : Number,
+  default:0
 },
 deliveryAddress: {
   type: mongoose.Schema.Types.Mixed, 

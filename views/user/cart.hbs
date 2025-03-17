@@ -301,6 +301,7 @@ button {
     font-size: 16px;
     font-weight: bold;
 }
+
     </style>
 
 <body>
@@ -344,7 +345,16 @@ button {
                         <div class="card-body">
                             <h5 class="card-title">{{this.productId.gender}}</h5>
                             <p class="card-text">{{this.productId.name}}</p>
-                            <span class="quantity" style="font-family: 'Times New Roman', Times, serif; font-size:16px;">₹{{this.productId.price}}</span>
+                           <span class="quantity" style="font-family: 'Times New Roman', Times, serif; font-size:16px;">
+  {{#if this.productId.offerAmount}}
+    <!-- If offerAmount exists, show real price crossed out and offer price -->
+    <span style="text-decoration: line-through; color: gray;">₹{{this.productId.price}}</span>
+    <span style="color: red; margin-left: 5px;">₹{{this.productId.offerAmount}}</span>
+  {{else}}
+    <!-- If no offerAmount, show only real price -->
+    ₹{{this.productId.price}}
+  {{/if}}
+</span>
                             <p class="card-text"><small class="text-muted">Size: {{this.size}}</small></p>
                             <div class="d-flex justify-content-between align-items-center">
                                  <div class="quantity-controls">
@@ -412,6 +422,7 @@ button {
             </div>
 
             <a href="/address-cart" style="text-decoration: none;"><button class="place-order" id="place-order-btn">PLACE ORDER</button></a>
+
         </div>
         <div id="popup-message" class="popup">
   <span id="popup-text"></span>
@@ -627,5 +638,6 @@ button {
         });
     }
 });
+
     </script>
 </body>

@@ -17,7 +17,6 @@ body {
     gap: 20px;
     background-color: white;
 }
-
 .left-column {
     flex: 2; /* Takes 2/3 of the space */
     border: 1px solid #ddd; /* Add border to left column */
@@ -265,6 +264,9 @@ margin-right: 5px;
     z-index: 1000;
     display: none;
 }
+.hidden {
+    display: none;
+}
 </style>
 
 <body>
@@ -335,11 +337,21 @@ margin-right: 5px;
                 {{/if}}
         <div class="price-summary total-amount">
             <span>Total Amount</span>
-            <span>₹{{cart.newTotalAmount}}</span>
+            <span id="newtotal-amount">₹{{cart.newTotalAmount}}</span>
         </div>
     </div>
 
     <button class="place-order">PLACE ORDER</button>
+ <div class="wallet-box" style="margin-top: 20px; background-color: #e1e8ef; padding: 20px; border-radius: 10px;">
+    <input style="margin-bottom: 10px;" type="number" id="amount" name="amount" placeholder="Enter the amount" class="hidden"/>
+    <span id="amount-error" style="color: red; font-size: 12px; display: none;"></span> <!-- Error message -->
+    <button id="add-from-wallet-btn" style="background-color: rgb(231, 187, 134); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">
+        Add From Wallet
+    </button>
+    <div id="wallet-balance" style="margin-top: 10px; font-size: 14px; color: #333;">
+        Remaining Wallet Balance: ₹<span id="wallet-amount">{{wallet.balance}}</span>
+    </div>
+</div>
 </div>
 <div id="popup-message" class="popup">
 <span id="popup-text"></span>
@@ -348,20 +360,31 @@ margin-right: 5px;
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 document.querySelector('.place-order').addEventListener('click', async function () {
-    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-    const addressId = '{{addressObj._id}}'; 
-
-    if (!selectedPaymentMethod) {
-        showPopup('Please choose a payment method.');
-        return;
-    }
+    const addressId = '{{addressObj._id}}';
+    const walletAmountUsed = parseFloat('{{cart.walletAmountUsed}}'); // Get the wallet amount used
+    const newTotalAmount = parseFloat('{{cart.newTotalAmount}}'); // Get the new total amount
 
     if (!addressId) {
         showPopup('Please select a delivery address.');
         return;
     }
 
-    const paymentMethod = selectedPaymentMethod.value;
+    // Check if the wallet covers the full amount
+    const isFullWalletPayment = walletAmountUsed > newTotalAmount;
+    console.log(isFullWalletPayment)
+
+    // Determine the payment method
+    let paymentMethod = isFullWalletPayment ? "Wallet" : null;
+    console.log("paymentMethod",paymentMethod)
+    if (!paymentMethod) {
+        // If not a full wallet payment, require the user to select a payment method
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+        if (!selectedPaymentMethod) {
+            showPopup('Please choose a payment method.');
+            return;
+        }
+        paymentMethod = selectedPaymentMethod.value;
+    }
 
     try {
         const response = await fetch('/place-order', {
@@ -378,65 +401,69 @@ document.querySelector('.place-order').addEventListener('click', async function 
         const data = await response.json();
 
         if (response.ok) {
-            if(paymentMethod === 'Online Payment'){
+            if (paymentMethod === 'Online Payment') {
                 const options = {
-                    key: 'rzp_test_buXTHPZB2Eujic', 
+                    key: 'rzp_test_buXTHPZB2Eujic',
                     amount: data.amount,
                     currency: 'INR',
                     name: 'FORU',
                     description: 'Payment for your order',
                     order_id: data.razorpayOrderId,
-                    handler: async function(response){
+                    handler: async function (response) {
                         console.log('Razorpay Response:', response);
-                        const paymentResponse = await fetch('/handle-payment-response',{
-                            method :'POST',
-                            headers:{
+                        const paymentResponse = await fetch('/handle-payment-response', {
+                            method: 'POST',
+                            headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body:JSON.stringify({
+                            body: JSON.stringify({
                                 orderId: response.razorpay_order_id,
                                 paymentId: response.razorpay_payment_id,
                                 signature: response.razorpay_signature,
                                 status: 'success',
-                                order:data.orderId
-                            })
-                        })
-                        if(paymentResponse.ok){
+                                order: data.orderId,
+                            }),
+                        });
+                        if (paymentResponse.ok) {
                             window.location.href = `/order-confirmation/${data.orderId}`;
-                        }else{
+                        } else {
                             showPopup('Payment verification failed.');
                         }
                     },
-                    prefill:{
+                    prefill: {
                         name: '{{user.name}}',
-                        email: '{{user.email}}', 
-                        contact: '{{user.phone}}'
+                        email: '{{user.email}}',
+                        contact: '{{user.phone}}',
                     },
-                    theme:{
-                        color: '#d6a57a'
-                    }
-                }
+                    theme: {
+                        color: '#d6a57a',
+                    },
+                };
                 const rzp = new Razorpay(options);
-                rzp.on('payment failed',async function(response){
-                    console.log("haai")
-                    const paymentResponse = await fetch('/handle-payment-response',{
-                        method : 'POST',
-                        headers :{
+                rzp.on('payment failed', async function (response) {
+                    console.log("haai");
+                    const paymentResponse = await fetch('/handle-payment-response', {
+                        method: 'POST',
+                        headers: {
                             'Content-Type': 'application/json',
                         },
-                        body : JSON.stringify({
+                        body: JSON.stringify({
                             orderId: order.id,
                             status: 'failed',
-                        })
-                    })
-                    if(paymentMethod.ok){
-                        showPopup("Payment failed. Please try again.")
-                    }else{
-                        showPopup('Failed to process payment.')
+                        }),
+                    });
+                    if (paymentMethod.ok) {
+                        showPopup('Payment failed. Please try again.');
+                    } else {
+                        showPopup('Failed to process payment.');
                     }
-                })
-                rzp.open()
-            }else{
+                });
+                rzp.open();
+            } else if (paymentMethod === 'Wallet') {
+                // Redirect to order confirmation page for full wallet payment
+                window.location.href = `/order-confirmation/${data.orderId}`;
+            } else {
+                // For Cash on Delivery, redirect to order confirmation
                 window.location.href = `/order-confirmation/${data.orderId}`;
             }
         } else {
@@ -460,4 +487,81 @@ function showPopup(message) {
         popup.style.display = 'none';
     }, 3000);
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const addFromWalletButton = document.getElementById("add-from-wallet-btn");
+    const amountInput = document.getElementById("amount");
+    const amountError = document.getElementById("amount-error");
+    const walletAmountElement = document.getElementById("wallet-amount");
+    const newtotalAmountElement = document.getElementById("newtotal-amount");
+    const totalAmountElement = document.querySelector(".total-amount span:last-child");
+
+    if (addFromWalletButton && amountInput) {
+        addFromWalletButton.addEventListener("click", async function () {
+            if (amountInput.classList.contains("hidden")) {
+                // Show the input field
+                amountInput.classList.remove("hidden");
+                amountInput.focus();
+            } else {
+                // Validate and submit the amount
+                const amount = parseFloat(amountInput.value);
+
+                // Check if the amount is valid
+                if (!amount || amount < 1) {
+                    amountError.textContent = "Please enter a valid amount (greater than or equal to 1).";
+                    amountError.style.display = "block";
+                    return;
+                }
+
+                // Get the wallet balance and total order amount
+                const walletBalance = parseFloat(walletAmountElement.textContent);
+                const newtotalAmount = parseFloat(newtotalAmountElement.textContent.replace('₹', '')); // Remove '₹' to parse as number
+
+                // Check if the amount exceeds the wallet balance or the total order amount
+                if (amount > walletBalance) {
+                    amountError.textContent = "Insufficient balance in wallet.";
+                    amountError.style.display = "block";
+                    return;
+                }
+
+                if (amount > newtotalAmount) {
+                    amountError.textContent = "Amount cannot exceed the total order amount.";
+                    amountError.style.display = "block";
+                    return;
+                }
+
+                // Clear any previous error messages
+                amountError.style.display = "none";
+
+                try {
+                    const response = await fetch("/wallet/reduce", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ amount: amount }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Update the displayed total amount
+                        totalAmountElement.textContent = `₹${result.newTotalAmount}`;
+
+                        // Hide the input field and clear the value
+                        amountInput.classList.add("hidden");
+                        amountInput.value = "";
+
+                        // Show success message
+                        showPopup("Amount deducted from wallet successfully.");
+                    } else {
+                        showPopup(result.message || "Failed to deduct amount from wallet.");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    showPopup("An error occurred. Please try again.");
+                }
+            }
+        });
+    }
+});
 </script>

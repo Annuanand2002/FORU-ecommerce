@@ -221,7 +221,16 @@
             <a href="/product/{{this._id}}">
               <img src="{{this.images.[0]}}" alt="{{this.name}}" class="product-image">
               <p class="product-name">{{this.name}}</p>
-              <p class="product-price">₹{{this.price}}</p>
+              <p class="product-price">
+  {{#if this.offerAmount}}
+    <!-- If offerAmount exists, show real price crossed out and offer price -->
+    <span style="text-decoration: line-through; color: gray;">₹{{this.price}}</span>
+    <span style="color: red; margin-left: 5px;">₹{{this.offerAmount}}</span>
+  {{else}}
+    <!-- If no offerAmount, show only real price -->
+    ₹{{this.price}}
+  {{/if}}
+</p>
             </a>
 
             <!-- Hover Content: Sizes and Add to Cart Button -->

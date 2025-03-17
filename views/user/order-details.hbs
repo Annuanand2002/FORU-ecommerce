@@ -241,6 +241,9 @@
                 <a href="/address">Addresses</a>
             </li>
             <li class="sidebar-menu-item">
+                <a href="/wallet">Wallet</a>
+            </li>
+            <li class="sidebar-menu-item">
                 <a href="/delete-account">Delete Account</a>
             </li>
         </ul>
@@ -255,10 +258,10 @@
             <div class="order-item">
                 <div class="order-item-product">
                     <div class="order-item-image">
-                        <img src="{{item.productId.images}}" alt="{{item.productId.name}}">
+                        <img src="{{item.image}}" alt="{{item.productName}}">
                     </div>
                     <div class="order-item-info">
-                        <span class="product-name" style="font-size: 16px; color:#d6a57a">{{item.productId.name}}</span>
+                        <span class="product-name" style="font-size: 16px; color:#d6a57a">{{item.productName}}</span>
                         <br>
                         <span style="color: #4e4e4e; font-size:14px">Size: {{item.size}}</span>
                         <br>
@@ -268,9 +271,12 @@
                     </div>
                 </div>
                 <div class="order-item-meta">
-                    <div class="order-item-status">
-                        <span style="font-size: 16px; color:#d6a57a">Status: {{order.status}}</span>
-                    </div>
+                   <div class="order-item-status">
+  <span style="font-size: 16px; 
+               color: {{#if (eq order.status 'Completed')}}green{{else if (eq order.status 'Cancelled')}}red{{else if (eq order.status 'Returned')}}red{{else}}#d6a57a{{/if}};">
+    Status: {{order.status}}
+  </span>
+</div>
                     <div class="order-item-date" style="margin-left: 50px;">
                         <span style="color: #4e4e4e; font-size:14px">Ordered Date: {{formatDate order.createdAt}}</span>
                     </div>
@@ -288,14 +294,30 @@
             </div>
 
             <!-- Savings and Total Price Section -->
-            <div class="price-details">
-                <div class="total-price">
-                    <h6>Total Item Price:</h6> <span class="price-amount" style="color: #4e4e4e; font-size:14px">₹{{order.newTotal}}</span>
-                </div>
-                <div class="payment-method">
-                    <span style="color: #5aca2e; font-size:14px">Payment method: {{order.payment}}.</span>
-                </div>
-                <button 
+<div class="price-details">
+    <div class="total-price">
+        <h6>Total Amount:</h6>
+        <span class="price-amount" style="color: #4e4e4e; font-size:14px">₹{{add order.newTotal order.walletAmountUsed}}</span>
+    </div>
+
+    {{#if (or (eq order.payment "Online Payment") (eq order.payment "Wallet"))}}
+        <div>
+            <p style="font-size: 12px; color:#a7a3a3">Wallet amount used: ₹{{order.walletAmountUsed}}</p>
+        </div>
+        <div>
+            <p style="font-size: 14px; color:#a7a3a3">Amount paid: ₹{{order.newTotal}}</p>
+        </div>
+    {{else}}
+        <div>
+            <p style="font-size: 14px; color:#a7a3a3">Amount to be paid: ₹{{order.newTotal}}</p>
+        </div>
+    {{/if}}
+
+    <div class="payment-method">
+        <span style="color: #5aca2e; font-size:14px">Payment method: {{order.payment}}.</span>
+    </div>
+
+    <button 
         id="return-order-button" 
         class="get-invoice-button" 
         style="background-color: #d6a57a; color: white;"
@@ -303,14 +325,15 @@
         data-completion-date="{{order.completionDate}}">
         Return Order
     </button>
-               <button 
-    id="cancel-order-button" 
-    class="get-invoice-button" 
-    style="background-color: #d6a57a; color: white;"
-    data-order-status="{{order.status}}">
-    Cancel Order
-</button>
-            </div>
+
+    <button 
+        id="cancel-order-button" 
+        class="get-invoice-button" 
+        style="background-color: #d6a57a; color: white;"
+        data-order-status="{{order.status}}">
+        Cancel Order
+    </button>
+</div>
 <!-- Modal for Cancellation Reason -->
 <div id="cancel-order-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
   <h3>Cancel Order</h3>

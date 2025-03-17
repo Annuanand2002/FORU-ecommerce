@@ -11,6 +11,8 @@ const bcrypt = require('bcrypt');
 const {adminAuth} = require('../controllers/auth-middleware')
 const {orderAdmin,updateOrderAdmin,orderPageUpdate,orderDetails} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
+const offerHelper = require('../controllers/offers-middleware')
+const salesHelper = require('../controllers/sales-middleware')
 
 /*admin-login*/
 router.get('/login',adminHelper.login);
@@ -263,6 +265,23 @@ router.post('/add-coupon',couponHelper.addCoupon)
 router.get('/edit-coupon/:id',adminAuth,couponHelper.getEditPage)
 router.post('/edit-coupon/:id',couponHelper.editCoupon)
 router.post('/delete-coupon/:id', couponHelper.deleteCoupon)
+
+/**offer management */
+router.get('/offers',adminAuth,offerHelper.updateOfferStatus,offerHelper.getOfferPage)
+router.get('/add-offers',adminAuth,offerHelper.getAddOfferPage)
+router.post('/add-offers',offerHelper.addOffer)
+router.get('/edit-offer/:id',adminAuth,offerHelper.getEditOfferPage)
+router.post('/edit-offer/:id',offerHelper.editOffer)
+router.post('/delete-offer/:id',offerHelper.deletOffer)
+router.get('/show-offer/:id',adminAuth,offerHelper.showOfferPage)
+router.post("/apply-offer", offerHelper.applyOffer);
+router.post("/remove-offer", offerHelper.removeOffer);
+
+/***sales-report */
+router.get('/sales-report',adminAuth,salesHelper.getSalesReportPage)
+router.post('/filter-sales',salesHelper.filterSalesData)
+
 router.get('/logout',adminHelper.logoutAdmin)
+
 
 module.exports = router;

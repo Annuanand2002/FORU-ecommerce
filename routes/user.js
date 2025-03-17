@@ -16,6 +16,7 @@ const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDef
 const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon} = require('../controllers/cart-middleware')
 const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
+const walletHelper = require('../controllers/wallet-middleware')
 
 /* GET home page. */
 router.get('/',async (req,res,next)=>{
@@ -248,6 +249,9 @@ router.post('addAddressCart',checkAuthentication,addAddressCart)
 router.get('/product/:productId/size/:size/quantity',cartQuantityCheck)
 router.get('/apply-coupon',couponHelper.getApplyCouponPage)
 router.post('/apply-coupon',applyCoupon)
+router.post('/wallet/reduce',walletHelper.addFromWallet)
 
+/**wallet mangement */
+router.get("/wallet",checkAuthentication,walletHelper.getWallet)
 
 module.exports = router;

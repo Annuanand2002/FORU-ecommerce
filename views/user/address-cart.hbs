@@ -502,25 +502,21 @@ function showPopup(message) {
     }, 3000);
 }
 
-// Add event listener to the "Place Order" button
+
 document.querySelector('.place-order').addEventListener('click', function () {
-    // Get the selected address ID from localStorage
+
     const selectedAddressId = localStorage.getItem('selectedAddressId');
 
-    // Check if an address is selected
     if (!selectedAddressId) {
         showPopup('Please select a delivery address.');
-        return; // Stop further execution if no address is selected
+        return; 
     }
 
-    // Redirect to the payment page with the selected address ID
     window.location.href = `/payment?addressId=${selectedAddressId}`;
 });
 
-// Add event listeners to address radio buttons
 document.querySelectorAll('input[name="addressID"]').forEach((radio) => {
     radio.addEventListener('change', function () {
-        // Save the selected address ID to localStorage
         localStorage.setItem('selectedAddressId', this.value);
     });
 });

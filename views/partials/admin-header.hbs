@@ -1,3 +1,14 @@
+<style>
+  .custom-sidebar {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .custom-sidebar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+</style>
+
 <div class="admin-layout container-fluid">
   <div class="d-flex" style="min-height: 100vh;">
 
@@ -33,6 +44,16 @@
         <li class="nav-item mb-3">
           <a class="nav-link custom-link d-flex align-items-center p-3" href="/admin/coupon" id="couponLink">
             <i class="fa-solid fa-tags fa-lg me-3"></i> Coupon
+          </a>
+        </li>
+        <li class="nav-item mb-3">
+          <a class="nav-link custom-link d-flex align-items-center p-3" href="/admin/offers" id="couponLink">
+            <i class="fa-solid fa-tags fa-lg me-3"></i> Offers
+          </a>
+        </li>
+        <li class="nav-item mb-3">
+          <a class="nav-link custom-link d-flex align-items-center p-3" href="/admin/sales-report" id="couponLink">
+            <i class="fa-solid fa-tags fa-lg me-3"></i> Sales Report
           </a>
         </li>
         <li class="nav-item">

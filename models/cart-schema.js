@@ -16,6 +16,9 @@ totalPrice:{type:Number,default:0},
 shippingFee:{type:Number,default:0},
 discountAmount:{type:Number,default:0},
 newTotalAmount:{type:Number,default:0},
+walletAmountUsed : {type : Number,default :0},
+finalwalletAmountUsed :{type :Number,default :0},
+isFullWalletPayment : {type :Number}
 });
 
 module.exports = mongoose.model('Cart',cartSchema);

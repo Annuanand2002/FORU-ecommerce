@@ -3,7 +3,7 @@ const Coupon = require('../models/coupon-schema')
 const Wishlist = require('../models/wishlist-schema');
 const Product = require('../models/product-schema')
 const User = require('../models/user-schema')
-
+const Wallet = require('../models/wallet-schema')
 
   const addToCart =  async (req, res) => {
     const { productId, size } = req.body;
@@ -46,8 +46,9 @@ const User = require('../models/user-schema')
 
         let totalPrice = 0;
         cart.items.forEach(item => {
-            totalPrice += item.productId.price * item.quantity;
-        });
+          const price = item.productId.offerAmount > 0 ? item.productId.offerAmount : item.productId.price;
+          totalPrice += price * item.quantity;
+      });
 
         
         let discountAmount = 0;
@@ -70,7 +71,7 @@ const User = require('../models/user-schema')
             shippingFee = 0;
         }
         totalPrice = totalPrice - shippingFee
-        // Subtract the discount amount from the total price
+       
         const newTotalPrice = totalPrice - discountAmount + shippingFee;
 
         await Cart.updateOne({userId},{$set:{totalPrice,shippingFee,newTotalAmount:newTotalPrice,discountAmount}})
@@ -80,10 +81,10 @@ const User = require('../models/user-schema')
         res.render('user/cart', {
             cart,
             user,
-            totalPrice, // Updated total price
+            totalPrice, 
             shippingFee,
             newTotalPrice,
-            discountAmount, // Pass discount amount to the view
+            discountAmount,
             isUser: true,
         });
     } catch (error) {
@@ -134,8 +135,9 @@ const updateCartQunatity = async (req, res) => {
 
           let totalPrice = 0;
           cart.items.forEach(item => {
-              totalPrice += item.productId.price * item.quantity;
-          });
+            const price = item.productId.offerAmount > 0 ? item.productId.offerAmount : item.productId.price;
+            totalPrice += price * item.quantity;
+        });
 
           let shippingFee = totalPrice >= 2000 ? "FREE" : 80;
           if (shippingFee !== "FREE") {
@@ -232,8 +234,9 @@ const applyCoupon = async (req, res) => {
       // Validate the coupon against the cart total
       let totalPrice = 0;
       cart.items.forEach(item => {
-          totalPrice += item.productId.price * item.quantity;
-      });
+        const price = item.productId.offerAmount > 0 ? item.productId.offerAmount : item.productId.price;
+        totalPrice += price * item.quantity;
+    });
 
       if (coupon.minPurchaseAmount > totalPrice) {
           return res.status(400).json({ success: false, message: 'Coupon not applicable for this order.' });

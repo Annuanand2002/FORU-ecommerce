@@ -1,420 +1,507 @@
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f8f8;
-    }
-    .breadcrumb {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 20px;
-    }
-    .breadcrumb a {
-        color: #666;
-        text-decoration: none;
-    }
-    .breadcrumb a:hover {
-        text-decoration: underline;
-    }
-    .product-rating {
-        font-size: 16px;
-        color: #ffa41c;
-        margin-bottom: 10px;
-    }
-    .product-price {
-        font-size: 20px;
-        color: #ff4141;
-        margin-bottom: 20px;
-    }
-    .product-price del {
-        color: #666;
-        margin-left: 10px;
-    }
-    .size-option {
-        display: inline-block;
-        padding: 10px 15px;
-        margin: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .size-option.selected {
-        border-color: #ff3f6c;
-        background-color: #ff3f6c;
-        color: #fff;
-    }
-    .product-actions .btn {
-        margin-right: 10px;
-    }
-    .card {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .card-img-top {
-        border-radius: 8px;
-    }
-   /* Centering carousel and limiting width */
-/* Centering carousel and limiting width */
-.carousel {
-    max-width: 100%;
-    max-height: 500px;
-    margin: auto;
-    position: relative;
-}
 
-/* Adjusting image size */
-.carousel-item img {
-    max-width: 100%;
-    max-height: 500px; /* Ensures clarity */
-    object-fit: contain; /* Maintains aspect ratio */
-    border-radius: 8px;
-    display: block;
-    margin: auto;
-}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+        }
+        .breadcrumb {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        .product-rating {
+            font-size: 16px;
+            color: #ffa41c;
+            margin-bottom: 10px;
+        }
+        .product-price {
+            font-size: 20px;
+            color: #ff4141;
+            margin-bottom: 20px;
+        }
+        .product-price del {
+            color: #666;
+            margin-left: 10px;
+        }
+        .size-option {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .size-option.selected {
+            border-color: #ff3f6c;
+            background-color: #ff3f6c;
+            color: #fff;
+        }
+        .product-actions .btn {
+            margin-right: 10px;
+        }
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card-img-top {
+            border-radius: 8px;
+        }
+        /* Centering carousel and limiting width */
+        .carousel {
+            max-width: 100%;
+            max-height: 500px;
+            margin: auto;
+            position: relative;
+        }
+        /* Adjusting image size */
+        .carousel-item img {
+            max-width: 100%;
+            max-height: 500px; /* Ensures clarity */
+            object-fit: contain; /* Maintains aspect ratio */
+            border-radius: 8px;
+            display: block;
+            margin: auto;
+        }
+        /* Move arrow buttons closer to the image */
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 40px; /* Reduce button area */
+            height: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5); /* Dark background for visibility */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Position arrows inside the image */
+        .carousel-control-prev {
+            left: 10px;
+        }
+        .carousel-control-next {
+            right: 10px;
+        }
+        /* Ensure arrow icons are visible */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 20px;
+            height: 20px;
+        }
+        #love-button {
+            border-radius: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        #love-button:hover {
+            background-color: #f0f0f0;
+        }
+        /* Popup Styles */
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        .popup span {
+            font-size: 14px;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(100%);
+            }
+        }
+        /* Add to Cart Button */
+        .add-to-cart-btn {
+            background-color: #ff4141; /* Red color */
+            color: white;
+            padding: 8px 16px; /* Smaller size */
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .add-to-cart-btn:hover {
+            background-color: #e63939; /* Darker red on hover */
+        }
+          .magnifier {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background-repeat: no-repeat;
+        background-size: 200% 200%;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        display: none;
+    }
 
-/* Move arrow buttons closer to the image */
-.carousel-control-prev,
-.carousel-control-next {
-    width: 40px; /* Reduce button area */
-    height: 40px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5); /* Dark background for visibility */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .zoomable-image {
+        cursor: zoom-in;
+    }
+    </style>
 
-/* Position arrows inside the image */
-.carousel-control-prev {
-    left: 10px;
-}
+<body>
+   
+    <div class="container my-5">
+        <div class="row">
+            <!-- Product Image Section -->
+            <div class="col-md-6">
+                <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        {{#each product.images}}
+            <div class="carousel-item {{#if @first}}active{{/if}}">
+                <img src="{{this}}" class="d-block w-100 zoomable-image" alt="Product Image">
+            </div>
+        {{/each}}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+</div>
+            </div>
 
-.carousel-control-next {
-    right: 10px;
-}
+            <!-- Product Details Section -->
+            <div class="col-md-6">
+                <h1 class="product-title mb-3" style="font-family: 'Times New Roman', Times, serif;">{{product.name}}</h1>
+                <div class="product-price mb-4 fs-4 fw-bold">
+  {{#if product.offerAmount}}
+    <!-- If offerAmount exists, show real price crossed out and offer price -->
+    <span style="text-decoration: line-through; color: gray;">₹{{product.price}}</span>
+    <span style="color: red; margin-left: 5px;">₹{{product.offerAmount}}</span>
+  {{else}}
+    <!-- If no offerAmount, show only real price -->
+    ₹{{product.price}}
+  {{/if}}
+</div>
 
-/* Ensure arrow icons are visible */
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    width: 20px;
-    height: 20px;
-}
-
-#love-button{
-    border-radius: 5px;
-    background-color: white;
-}
-/* Popup Styles */
-
-.popup {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 15px 20px;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  display: none;
-  animation: slideIn 0.5s ease-out;
-}
-
-.popup span {
-  font-size: 14px;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-</style>
-<div class="container my-5">
-    <div class="row">
-        <!-- Product Image Section -->
-        <div class="col-md-6">
-            <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    {{#each product.images}}
-                        <div class="carousel-item {{#if @first}}active{{/if}}">
-                            <img src="{{this}}" class="d-block w-100" alt="Product Image">
+                <!-- Size Options -->
+                <div class="product-colors mb-2"><strong>Sizes</strong></div>
+                <div class="product-sizes mb-4 d-flex gap-2" id="size-options">
+                    {{#each product.sizes}}
+                        <div class="size-option border p-2" data-size="{{this.size}}" data-quantity="{{this.quantity}}">
+                            {{this.size}}
                         </div>
                     {{/each}}
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                </button>
-            </div>
-        </div>
+                <div class="size-message" style="color: red; font-size: 12px; display: none;">Please select a size</div>
+                <div class="out-of-stock-message" style="color: red; font-size: 14px; display: none;">Out of Stock</div>
 
-        <!-- Product Details Section -->
-        <div class="col-md-6">
-            <h1 class="product-title mb-3" style="font-family: 'Times New Roman', Times, serif;">{{product.name}}</h1>
-            <div class="product-price mb-4 fs-4 fw-bold">₹{{product.price}}</div>
+                <!-- Description Section -->
+                <div class="product-description mb-4">
+                    <div class="product-colors mb-2"><strong style="font-size: 18px;">Description</strong></div>
+                    <p class="text-muted" style="font-size: 14px;">{{product.description}}</p>
+                </div>
 
-            <div class="product-colors mb-2"><strong>Sizes</strong></div>
-             <div class="product-sizes mb-4 d-flex gap-2" id="size-options">
-                {{#each product.sizes}}
-                    <div class="size-option border p-2" data-size="{{this.size}}" data-quantity="{{this.quantity}}">
-                        {{this.size}}
-                    </div>
-                {{/each}}
-            </div>
-            <div class="size-message" style="color: red; font-size: 12px; display: none;">Please select a size</div>
-            <div class="out-of-stock-message" style="color: red; font-size: 14px; display: none;">Out of Stock</div>
-            <div class="sizes">
-            <div class="product-actions d-flex gap-3 mb-4">
-                <button class="btn btn-danger px-4 py-2 add-to-cart-btn" id="addToBag">ADD TO BAG</button>
-                <button class="love-button" data-product-id="{{product._id}}" id="love-button">
-                <i class="fa-solid fa-heart fa-lg"></i>
-                </button>
-            </div>
-
-            <!-- Description Section -->
-            <div class="product-description">
-                <div class="product-colors mb-2"><strong style="font-size: 18px;">Description</strong></div>
-                <p class="text-muted" style="font-size: 14px;">{{product.description}}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container my-5" style="margin-top: 100px !important;">
-    <h3 class="mb-3" style="font-family: 'Times New Roman', Times, serif;">Similar Products</h3>
-    <div class="row my-5">
-        {{#each similarProduct}}
-        <div class="col-md-3">
-            <div class="card">
-                <img src="{{this.images.[0]}}" class="card-img-top" alt="Similar Product">
-                <div class="card-body text-center">
-                    <p class="card-title" style="font-size: 16px;font-family:'Times New Roman'">{{this.name}}</p>
-                    <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
-                    <a href="/product/{{this._id}}" class="btn btn-sm" style="background-color: rgb(228, 178, 117);">View Product</a>
+                <!-- Add to Cart Button -->
+                <div class="product-actions mb-4">
+                    <button class="btn add-to-cart-btn" id="addToBag" style="width: 200px;">ADD TO BAG</button>
+                   <!-- <button class="love-button" data-product-id="{{product._id}}" id="love-button">
+        <i class="fa-solid fa-heart fa-lg"></i>
+    </button>-->
                 </div>
             </div>
         </div>
-        {{/each}}
     </div>
-     <div id="popup-message" class="popup">
-  <span id="popup-text"></span>
-</div>
-</div>
- 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const sizeOptions = document.querySelectorAll('.size-option');
-    let selectedSize = null;
 
-    // Handle size selection
-    sizeOptions.forEach(option => {
-        option.addEventListener('click', function () {
-            sizeOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedSize = this.getAttribute('data-size');
+    <!-- Similar Products Section -->
+    <div class="container my-5" style="margin-top: 100px !important;">
+        <h3 class="mb-3" style="font-family: 'Times New Roman', Times, serif;">Similar Products</h3>
+        <div class="row my-5">
+            {{#each similarProduct}}
+                <div class="col-md-3">
+                    <div class="card">
+                        <img src="{{this.images.[0]}}" class="card-img-top" alt="Similar Product">
+                        <div class="card-body text-center">
+                            <p class="card-title" style="font-size: 16px;font-family:'Times New Roman'">{{this.name}}</p>
+                            <p class="card-text" style="font-size: 14px;">₹{{this.price}}</p>
+                            <a href="/product/{{this._id}}" class="btn btn-sm" style="background-color: rgb(228, 178, 117);">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+        <div id="popup-message" class="popup">
+            <span id="popup-text"></span>
+        </div>
+    </div>
+
+    <script>
+         // Function to initialize zoom on an image
+    function magnify(img, zoom) {
+        const container = img.parentElement;
+
+        // Create magnifier glass
+        const magnifierGlass = document.createElement("div");
+        magnifierGlass.setAttribute("class", "magnifier");
+        container.appendChild(magnifierGlass);
+
+        // Set background properties for the magnifier
+        magnifierGlass.style.backgroundImage = `url('${img.src}')`;
+        magnifierGlass.style.backgroundSize = `${img.offsetWidth * zoom}px ${img.offsetHeight * zoom}px`;
+
+        // Add mouse and touch move events on the image container
+        img.addEventListener("mousemove", moveMagnifier);
+        img.addEventListener("touchmove", moveMagnifier);
+
+        function moveMagnifier(e) {
+            e.preventDefault();
+
+            // Get cursor position relative to the image
+            const rect = img.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+
+            // Prevent the magnifier from going outside the image boundaries
+            x = Math.max(0, Math.min(x, img.offsetWidth));
+            y = Math.max(0, Math.min(y, img.offsetHeight));
+
+            // Position the magnifier
+            magnifierGlass.style.left = `${x - magnifierGlass.offsetWidth / 2}px`;
+            magnifierGlass.style.top = `${y - magnifierGlass.offsetHeight / 2}px`;
+            magnifierGlass.style.display = "block";
+
+            // Adjust background position for zoom effect
+            magnifierGlass.style.backgroundPosition = `-${x * zoom - magnifierGlass.offsetWidth / 2}px -${y * zoom - magnifierGlass.offsetHeight / 2}px`;
+        }
+
+        // Hide magnifier when mouse leaves the image
+        img.addEventListener("mouseleave", () => {
+            magnifierGlass.style.display = "none";
         });
+    }
+
+    // Function to initialize zoom for the active carousel image
+    function initializeZoomForActiveImage() {
+        const activeImage = document.querySelector("#productCarousel .carousel-item.active .zoomable-image");
+        if (activeImage) {
+            magnify(activeImage, 2); // Zoom level: 2x
+        }
+    }
+
+    // Initialize zoom for the active image when the page loads
+    document.addEventListener("DOMContentLoaded", function () {
+        initializeZoomForActiveImage();
     });
 
-})
+    // Reinitialize zoom when the carousel slides
+    const carousel = document.getElementById("productCarousel");
+    carousel.addEventListener("slid.bs.carousel", function () {
+        initializeZoomForActiveImage();
+    });
+        document.addEventListener("DOMContentLoaded", function () {
+            const sizeOptions = document.querySelectorAll('.size-option');
+            const addToCartButton = document.getElementById('addToBag');
+            const sizeMessage = document.querySelector('.size-message');
+            const outOfStockMessage = document.querySelector('.out-of-stock-message');
+            let selectedSize = null;
 
-function showPopup(message, type = 'success') {
-  const popup = document.getElementById('popup-message');
-  const popupText = document.getElementById('popup-text');
-
-  console.log('Popup Element:', popup); // Debugging
-  console.log('Popup Text Element:', popupText); // Debugging
-
-  if (!popup || !popupText) {
-    console.error('Popup or Popup Text element not found!');
-    return;
-  }
-
-  popupText.textContent = message;
-  popup.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336';
-
-  popup.style.display = 'block';
-  popup.style.animation = 'slideIn 0.5s ease-out';
-
-  setTimeout(() => {
-    popup.style.animation = 'slideOut 0.5s ease-out';
-    setTimeout(() => {
-      popup.style.display = 'none';
-    }, 500);
-  }, 3000);
-}
-
-// Function to fetch and restore wishlist state
-async function restoreWishlistState() {
-  try {
-    const response = await fetch('/wishlist');
-    const result = await response.json();
-
-    if (response.ok && result.success) {
-      const wishlist = result.wishlist;
-
-      document.querySelectorAll('.love-button').forEach(button => {
-        const productId = button.getAttribute('data-product-id');
-        const heartIcon = button.querySelector('i');
-
-        if (wishlist.some(product => product._id === productId)) {
-          button.classList.add('loved');
-          heartIcon.style.color = 'red';
-        } else {
-          button.classList.remove('loved');
-          heartIcon.style.color = '#ccc';
-        }
-      });
-    } else {
-      console.error('Failed to fetch wishlist:', result.message);
-    }
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-// Call the function when the page loads
-document.addEventListener('DOMContentLoaded', restoreWishlistState);
-
-// Heart button click event
-document.querySelectorAll('.love-button').forEach(button => {
-  button.addEventListener('click', async function () {
-    const productId = this.getAttribute('data-product-id');
-    const heartIcon = this.querySelector('i');
-
-    try {
-      const response = await fetch('/wishlist/toggle', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        this.classList.toggle('loved');
-        if (result.action === 'added') {
-          heartIcon.style.color = 'red';
-          showPopup('Product added to wishlist', 'success');
-        } else if (result.action === 'removed') {
-          heartIcon.style.color = '#ccc';
-          showPopup('Product removed from wishlist', 'success');
-        }
-      } else {
-        showPopup(result.message || 'An error occurred', 'error');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      showPopup('An error occurred while updating the wishlist', 'error');
-    }
-  });
-});
-document.addEventListener("DOMContentLoaded", function () {
-    const sizeOptions = document.querySelectorAll('.size-option');
-    const addToCartButton = document.getElementById('addToBag');
-    const sizeMessage = document.querySelector('.size-message');
-    const outOfStockMessage = document.querySelector('.out-of-stock-message');
-    let selectedSize = null;
-
-    // Function to check if all sizes are out of stock
-    function checkAllSizesOutOfStock() {
-        let allOutOfStock = true;
-        sizeOptions.forEach(option => {
-            const quantity = parseInt(option.getAttribute('data-quantity'));
-            if (quantity > 0) {
-                allOutOfStock = false;
+            // Function to check if all sizes are out of stock
+            function checkAllSizesOutOfStock() {
+                let allOutOfStock = true;
+                sizeOptions.forEach(option => {
+                    const quantity = parseInt(option.getAttribute('data-quantity'));
+                    if (quantity > 0) {
+                        allOutOfStock = false;
+                    }
+                });
+                return allOutOfStock;
             }
-        });
-        return allOutOfStock;
-    }
 
-    // Disable sizes with zero quantity and check if all sizes are out of stock
-    sizeOptions.forEach(option => {
-        const quantity = parseInt(option.getAttribute('data-quantity'));
-        if (quantity === 0) {
-            option.style.opacity = '0.5'; // Make the size option look disabled
-            option.style.pointerEvents = 'none'; // Disable click events
-        }
-    });
-
-    // Show "Out of Stock" message if all sizes are unavailable
-    if (checkAllSizesOutOfStock()) {
-        outOfStockMessage.style.display = 'block';
-        addToCartButton.disabled = true; // Disable the "Add to Cart" button
-        addToCartButton.style.opacity = '0.5'; // Make the button look disabled
-    }
-
-    // Handle size selection
-    sizeOptions.forEach(option => {
-        option.addEventListener('click', function () {
-            sizeOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedSize = this.getAttribute('data-size');
-        });
-    });
-
-    // Handle "Add to Cart" button click
-    addToCartButton.addEventListener('click', async function () {
-        // Check if a size is selected
-        if (!selectedSize) {
-            sizeMessage.style.display = 'block';
-            setTimeout(() => {
-                sizeMessage.style.display = 'none';
-            }, 3000);
-            return;
-        }
-
-        const productId = "{{product._id}}"; // Get the product ID from the template
-
-        try {
-            const response = await fetch('/cart/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ productId, size: selectedSize }),
+            // Disable sizes with zero quantity and check if all sizes are out of stock
+            sizeOptions.forEach(option => {
+                const quantity = parseInt(option.getAttribute('data-quantity'));
+                if (quantity === 0) {
+                    option.style.opacity = '0.5'; // Make the size option look disabled
+                    option.style.pointerEvents = 'none'; // Disable click events
+                }
             });
 
-            const result = await response.json();
-
-            if (response.ok) {
-                if (result.action === 'added') {
-                    showPopup('Product added to cart', 'success');
-                    // Remove the product from the wishlist
-                    const loveButton = document.querySelector('.love-button');
-                    if (loveButton.classList.contains('loved')) {
-                        loveButton.click(); // Simulate a click to remove from wishlist
-                    }
-                } else if (result.action === 'increased') {
-                    showPopup('Product already in cart, quantity increased', 'success');
-                }
-            } else {
-                showPopup(result.message || 'An error occurred', 'error');
+            // Show "Out of Stock" message if all sizes are unavailable
+            if (checkAllSizesOutOfStock()) {
+                outOfStockMessage.style.display = 'block';
+                addToCartButton.disabled = true; // Disable the "Add to Cart" button
+                addToCartButton.style.opacity = '0.5'; // Make the button look disabled
             }
-        } catch (error) {
-            console.error('Error:', error);
-            showPopup('An error occurred while adding to cart', 'error');
+
+            // Handle size selection
+            sizeOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    sizeOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSize = this.getAttribute('data-size');
+                });
+            });
+
+            // Handle "Add to Cart" button click
+            addToCartButton.addEventListener('click', async function () {
+                // Check if a size is selected
+                if (!selectedSize) {
+                    sizeMessage.style.display = 'block';
+                    setTimeout(() => {
+                        sizeMessage.style.display = 'none';
+                    }, 3000);
+                    return;
+                }
+
+                const productId = "{{product._id}}"; // Get the product ID from the template
+
+                try {
+                    const response = await fetch('/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId, size: selectedSize }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        if (result.action === 'added') {
+                            showPopup('Product added to cart', 'success');
+                            // Remove the product from the wishlist
+                            const loveButton = document.querySelector('.love-button');
+                            if (loveButton.classList.contains('loved')) {
+                                loveButton.click(); // Simulate a click to remove from wishlist
+                            }
+                        } else if (result.action === 'increased') {
+                            showPopup('Product already in cart, quantity increased', 'success');
+                        }
+                    } else {
+                        showPopup(result.message || 'An error occurred', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showPopup('An error occurred while adding to cart', 'error');
+                }
+            });
+        });
+
+        function showPopup(message, type = 'success') {
+            const popup = document.getElementById('popup-message');
+            const popupText = document.getElementById('popup-text');
+
+            console.log('Popup Element:', popup); // Debugging
+            console.log('Popup Text Element:', popupText); // Debugging
+
+            if (!popup || !popupText) {
+                console.error('Popup or Popup Text element not found!');
+                return;
+            }
+
+            popupText.textContent = message;
+            popup.style.backgroundColor = type === 'success' ? '#4caf50' : '#f44336';
+
+            popup.style.display = 'block';
+            popup.style.animation = 'slideIn 0.5s ease-out';
+
+            setTimeout(() => {
+                popup.style.animation = 'slideOut 0.5s ease-out';
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 500);
+            }, 3000);
         }
-    });
-});
-</script>
 
+        // Function to fetch and restore wishlist state
+        async function restoreWishlistState() {
+            try {
+                const response = await fetch('/wishlist');
+                const result = await response.json();
 
+                if (response.ok && result.success) {
+                    const wishlist = result.wishlist;
+
+                    document.querySelectorAll('.love-button').forEach(button => {
+                        const productId = button.getAttribute('data-product-id');
+                        const heartIcon = button.querySelector('i');
+
+                        if (wishlist.some(product => product._id === productId)) {
+                            button.classList.add('loved');
+                            heartIcon.style.color = 'red';
+                        } else {
+                            button.classList.remove('loved');
+                            heartIcon.style.color = '#ccc';
+                        }
+                    });
+                } else {
+                    console.error('Failed to fetch wishlist:', result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', restoreWishlistState);
+
+        // Heart button click event
+        document.querySelectorAll('.love-button').forEach(button => {
+            button.addEventListener('click', async function () {
+                const productId = this.getAttribute('data-product-id');
+                const heartIcon = this.querySelector('i');
+
+                try {
+                    const response = await fetch('/wishlist/toggle', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ productId }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        this.classList.toggle('loved');
+                        if (result.action === 'added') {
+                            heartIcon.style.color = 'red';
+                            showPopup('Product added to wishlist', 'success');
+                        } else if (result.action === 'removed') {
+                            heartIcon.style.color = '#ccc';
+                            showPopup('Product removed from wishlist', 'success');
+                        }
+                    } else {
+                        showPopup(result.message || 'An error occurred', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showPopup('An error occurred while updating the wishlist', 'error');
+                }
+            });
+        });
+    </script>
+</body>

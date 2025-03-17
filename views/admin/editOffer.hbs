@@ -1,0 +1,232 @@
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        margin: 15% auto;
+        width: 30%;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .close {
+        float: right;
+        font-size: 24px;
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header" style="background-color:rgb(222, 168, 101); color:white">
+                        <h4 class="mb-0">Edit Offer</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/edit-offer/{{offer._id}}" method="post" id="edit-offer-form">
+                            <!-- Offer Name -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Offer Name</label>
+                                    <input type="text" name="name" id="name" class="form-control" placeholder="Offer Name" value="{{offer.name}}">
+                                    <div class="error-message" id="name-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea name="description" id="description" class="form-control" rows="3" placeholder="Enter offer description">{{offer.description}}</textarea>
+                                    <div class="error-message" id="description-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Discount Type -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="discountType" class="form-label">Discount Type</label>
+                                    <select name="discountType" id="discountType" class="form-control">
+                                        <option value="">Select Discount Type</option>
+                                        <option value="percentage" {{#ifEquals offer.discountType "percentage"}}selected{{/ifEquals}}>Percentage</option>
+                                        <option value="fixed" {{#ifEquals offer.discountType "fixed"}}selected{{/ifEquals}}>Fixed Amount</option>
+                                    </select>
+                                    <div class="error-message" id="discountType-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Discount Value -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="discountValue" class="form-label">Discount Value</label>
+                                    <input type="number" name="discountValue" id="discountValue" class="form-control" placeholder="Discount value" min="1" value="{{offer.discountValue}}">
+                                    <div class="error-message" id="discountValue-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Applicable To Dropdown -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="applicableTo" class="form-label">Applicable To</label>
+                                    <select name="applicableTo" id="applicableTo" class="form-control">
+                                        <option value="">Select Applicable Type</option>
+                                        <option value="product" {{#ifEquals offer.applicableTo "product"}}selected{{/ifEquals}}>Product</option>
+                                        <option value="category" {{#ifEquals offer.applicableTo "category"}}selected{{/ifEquals}}>Category</option>
+                                    </select>
+                                    <div class="error-message" id="applicableTo-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Start Date -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" name="startDate" id="startDate" class="form-control" value="{{formatDate offer.startDate}}">
+                                    <div class="error-message" id="startDate-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- End Date -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" name="endDate" id="endDate" class="form-control" value="{{formatDate offer.endDate}}">
+                                    <div class="error-message" id="endDate-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Submit and Cancel Buttons -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary-custom" style="background-color:rgb(222, 168, 101);color:white">Update</button>
+                                <a href="/admin/offers" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for showing errors -->
+    <div id="offerExistsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="offerExistsMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("edit-offer-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Clear previous error messages
+            document.querySelectorAll(".error-message").forEach((el) => (el.textContent = ""));
+
+            // Gather form data
+            const formData = {
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                discountType: document.getElementById("discountType").value,
+                discountValue: parseFloat(document.getElementById("discountValue").value),
+                applicableTo: document.getElementById("applicableTo").value,
+                startDate: document.getElementById("startDate").value,
+                endDate: document.getElementById("endDate").value,
+            };
+
+            // Validate form data
+            let isValid = true;
+
+            if (!formData.name) {
+                document.getElementById("name-error").textContent = "Offer name is required.";
+                isValid = false;
+            }
+
+            if (!formData.discountType) {
+                document.getElementById("discountType-error").textContent = "Discount type is required.";
+                isValid = false;
+            }
+
+            if (!formData.discountValue || formData.discountValue <= 0) {
+                document.getElementById("discountValue-error").textContent = "Discount value must be greater than 0.";
+                isValid = false;
+            }
+
+            if (!formData.applicableTo) {
+                document.getElementById("applicableTo-error").textContent = "Please select if the offer applies to a product or category.";
+                isValid = false;
+            }
+
+            if (!formData.startDate) {
+                document.getElementById("startDate-error").textContent = "Start date is required.";
+                isValid = false;
+            }
+
+            if (!formData.endDate) {
+                document.getElementById("endDate-error").textContent = "End date is required.";
+                isValid = false;
+            } else if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+                document.getElementById("endDate-error").textContent = "End date must be greater than start date.";
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Submit form data
+            try {
+                const response = await fetch("/admin/edit-offer/{{offer._id}}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    window.location.href = "/admin/offers"; 
+                } else {
+                    const error = await response.json();
+                    showOfferExistsPopup(error.message);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+
+        function showOfferExistsPopup(message) {
+            const modal = document.getElementById("offerExistsModal");
+            const messageElement = document.getElementById("offerExistsMessage");
+
+            messageElement.textContent = message;
+            modal.style.display = "block";
+
+            // Close the modal when clicking on the 'X' button
+            document.querySelector(".close").onclick = function () {
+                modal.style.display = "none";
+            };
+
+            // Close the modal when clicking outside of it
+            window.onclick = function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            };
+        }
+    </script>
+</body>

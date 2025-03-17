@@ -4,6 +4,7 @@ const User = require("../models/user-schema");
 const Product = require("../models/product-schema");
 const Razorpay = require("razorpay");
 const Sales = require("../models/sales-schema");
+const Wallet = require("../models/wallet-schema")
 require("dotenv").config();
 const crypto = require("crypto");
 
@@ -44,9 +45,11 @@ const getPaymentPage = async (req, res) => {
       return res.status(404).json({ error: "Address not found" });
     }
     const addressObj = address.toObject();
+    const wallet = await Wallet.findOne({userId}).lean()
     res.render("user/payment", {
       addressObj,
       cart,
+      wallet,
       isUser: true,
     });
   } catch (error) {
@@ -75,6 +78,8 @@ const placeOrder = async (req, res) => {
     if (!deliveryAddress) {
       return res.status(400).json({ message: "Selected address not found." });
     }
+    const isFullWalletPayment = cart.isFullWalletPayment;
+    const finalPaymentMethod = isFullWalletPayment ? "Wallet" : paymentMethod;
 
 
     const order = new Order({
@@ -83,13 +88,16 @@ const placeOrder = async (req, res) => {
       items: cart.items.map((item) => ({
         productId: item.productId._id,
         quantity: item.quantity,
-        price: item.productId.price,
+        price: item.productId.offerAmount > 0 ? item.productId.offerAmount : item.productId.price, 
         size: item.size,
+        productName : item.productId.name,
+        image : item.productId.images[0]
       })),
       totalPrice: cart.totalPrice,
       shippingFee: cart.shippingFee,
       discountCouponFee : cart.discountAmount,
       newTotal:cart.newTotalAmount,
+      walletAmountUsed : cart.walletAmountUsed,
       deliveryAddress: {
         name: deliveryAddress.name,
         house: deliveryAddress.house,
@@ -97,23 +105,36 @@ const placeOrder = async (req, res) => {
         state: deliveryAddress.state,
         postalCode: deliveryAddress.postalCode,
       },
-      payment: paymentMethod,
+      payment: finalPaymentMethod,
       status: "Pending",
     });
-    console.log("place order", order);
     await order.save();
+
+    if(cart.walletAmountUsed>0){
+      const wallet = await Wallet.findOne({userId})
+      if (!wallet || wallet.balance < cart.walletAmountUsed) {
+        return res.status(400).json({ message: "Insufficient wallet balance." });
+      }
+      wallet.balance -= cart.walletAmountUsed;
+      wallet.transactions.push({
+        type : "debit",
+        amount :cart.walletAmountUsed,
+        description : `Deducted for order ${order._id}`
+      })
+      await wallet.save()
+    }
     const salesEntry = new Sales({
       userId: userId,
       orderId: order._id,
       items: cart.items.map((item) => ({
         productId: item.productId._id,
         quantity: item.quantity,
-        price: item.productId.price,
+        price: item.productId.offerAmount > 0 ? item.productId.offerAmount : item.productId.price, 
         size: item.size,
       })),
       totalAmount: cart.newTotalAmount,
       discountCouponFee : cart.discountAmount,
-      payment: paymentMethod,
+      payment: finalPaymentMethod,
       paymentStatus:
         paymentMethod === "Online Payment" ? "Pending" : "Completed",
       status: "Pending",
@@ -135,10 +156,10 @@ const placeOrder = async (req, res) => {
 
     await Cart.updateOne(
       { userId },
-      { $set: { items: [], appliedCoupons: null } }
+      { $set: { items: [], appliedCoupons: null ,totalPrice: 0,shippingFee:0,discountAmount:0,newTotalAmount:0,isFullWalletPayment:0,walletAmountUsed:0} }
     );
 
-    if (paymentMethod === "Online Payment") {
+    if (finalPaymentMethod === "Online Payment") {
       const razorpayOrder = await razorpay.orders.create({
         amount: order.newTotal * 100,
         currency: "INR",
@@ -341,33 +362,52 @@ const orderCancel = async (req, res) => {
   const { orderId, itemId, reason } = req.body;
 
   try {
-    // Find the order
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Find the item in the order
     const item = order.items.find((item) => item._id.toString() === itemId);
     if (!item) {
       return res.status(404).json({ message: "Item not found in order" });
     }
-    
+
     const product = await Product.findById(item.productId);
     if (product) {
       const sizeIndex = product.sizes.findIndex(
         (size) => size.size === item.size
       );
       if (sizeIndex !== -1) {
-        product.sizes[sizeIndex].quantity += item.quantity; 
+        product.sizes[sizeIndex].quantity += item.quantity;
         await product.save();
       }
     }
 
     if (order.payment === "Cash on Delivery") {
-      order.cancellationReason.push({ itemId, reason });
+      if (order.walletAmountUsed > 0) {
+        const wallet = await Wallet.findOne({ userId: order.userId });
+        const refundAmount = order.walletAmountUsed;
+
+          wallet.balance += refundAmount;
+          wallet.transactions.push({
+            type: "credit",
+            amount: refundAmount,
+            description: `Refund for cancelled order ${order._id}`,
+          });
+          await wallet.save();
+        order.walletAmountUsed = 0;
+      }
       order.status = "Cancelled";
+      order.cancellationReason.push({ itemId, reason });
       await order.save();
+
+      const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Cancelled";
+  await sales.save();
+      }
+
       return res.status(200).json({ message: "Order cancelled successfully" });
     } else if (order.payment === "Online Payment") {
       if (!order.paymentId) {
@@ -375,18 +415,81 @@ const orderCancel = async (req, res) => {
       }
 
       try {
+        const razorpayRefundAmount = (order.newTotal - order.shippingFee) * 100; 
+
         const refund = await razorpay.payments.refund(order.paymentId, {
-          amount: item.price * item.quantity * 100,
+          amount: razorpayRefundAmount,
           speed: "normal",
         });
 
+        if (order.walletAmountUsed >0) {
+          const wallet = await Wallet.findOne({ userId: order.userId });
+          const walletRefundAmount = order.walletAmountUsed;
+          const finalAmount = walletRefundAmount  + (razorpayRefundAmount/100)
+          if (!wallet) {
+            const newWallet = new Wallet({
+              userId: order.userId,
+              balance: finalAmount,
+              transactions: [
+                {
+                  type: "credit",
+                  amount: finalAmount,
+                  description: `Refund for cancelled order ${order._id}`,
+                },
+              ],
+            });
+            await newWallet.save();
+          } else {
+            wallet.balance += finalAmount;
+            wallet.transactions.push({
+              type: "credit",
+              amount: razorpayRefundAmount/100,
+              description: `Refund for cancelled order ${order._id}`,
+            });
+            await wallet.save();
+          }
+
+          order.walletAmountUsed = 0;
+        }else{
+          const wallet = await Wallet.findOne({ userId: order.userId });
+          const refundAmount = razorpayRefundAmount/100
+          if(!wallet){
+            const newWallet = new Wallet({
+              userId: order.userId,
+              balance: refundAmount,
+              transactions: [
+                {
+                  type: "credit",
+                  amount: refundAmount,
+                  description: `Refund for cancelled order ${order._id}`,
+                },
+              ],
+            });
+            await newWallet.save();
+          }else {
+            wallet.balance += razorpayRefundAmount/100;
+            wallet.transactions.push({
+              type: "credit",
+              amount: razorpayRefundAmount,
+              description: `Refund for cancelled order ${order._id}`,
+            });
+            await wallet.save();
+          }
+        }
+
+        // Update order status
         order.status = "Cancelled";
         order.paymentStatus = "Refunded";
         order.cancellationReason.push({ itemId, reason });
         await order.save();
+        const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Cancelled";
+  await sales.save();
+      }
 
         return res.status(200).json({
-          message: "Order cancelled and refund initiated successfully",
+          message: "Order cancelled and refunds processed successfully",
           refund,
         });
       } catch (razorpayError) {
@@ -396,6 +499,30 @@ const orderCancel = async (req, res) => {
           error: razorpayError.message,
         });
       }
+    } else if (order.payment === "Wallet") {
+      const wallet = await Wallet.findOne({ userId: order.userId });
+      const refundAmount = order.walletAmountUsed - order.shippingFee;
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+          type: "credit",
+          amount: refundAmount,
+          description: `Refund for cancelled order ${order._id}`,
+        });
+        await wallet.save();
+        order.walletAmountUsed = 0;
+      order.status = "Cancelled";
+      order.paymentStatus = "Refunded";
+      order.cancellationReason.push({ itemId, reason });
+      await order.save();
+      const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Cancelled";
+  await sales.save();
+      }
+      console.log("order",order)
+      return res.status(200).json({
+        message: "Order cancelled and wallet refund processed successfully",
+      });
     } else {
       return res.status(400).json({ message: "Invalid payment method" });
     }
@@ -406,6 +533,7 @@ const orderCancel = async (req, res) => {
       .json({ message: "An error occurred. Please try again." });
   }
 };
+
 const orderReturn = async (req, res) => {
   const { orderId, itemId, reason } = req.body;
   try {
@@ -444,9 +572,27 @@ const orderReturn = async (req, res) => {
 
 
     if (order.payment === "Cash on Delivery") {
+      if(order.walletAmountUsed > 0){
+        const wallet = await Wallet.findOne({ userId: order.userId });
+        const refundAmount = order.walletAmountUsed;
+
+          wallet.balance += refundAmount;
+          wallet.transactions.push({
+            type: "credit",
+            amount: refundAmount,
+            description: `Refund for returned order ${order._id}`,
+          });
+          await wallet.save();
+        order.walletAmountUsed = 0;
+      }
       order.returnReason.push({ itemId, reason });
       order.status = "Returned";
       await order.save();
+      const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Returned";
+  await sales.save();
+      }
       return res.status(200).json({ message: "Order returned successfully" });
     } else if (order.payment === "Online Payment") {
       if (!order.paymentId) {
@@ -454,16 +600,78 @@ const orderReturn = async (req, res) => {
       }
       console.log("oredered amount",order.newTotal)
       try {
+        const razorpayRefundAmount = (order.newTotal - order.shippingFee) * 100; 
+        console.log('razorpayRefundAmount',razorpayRefundAmount)
         const refund = await razorpay.payments.refund(order.paymentId, {
-          amount:item.price * item.quantity * 100,
+          amount:(order.newTotal-order.shippingFee) * 100,
           speed: "normal",
         });
+        if (order.walletAmountUsed >0) {
+          const wallet = await Wallet.findOne({ userId: order.userId });
+          const walletRefundAmount = order.walletAmountUsed;
+          const finalAmount = walletRefundAmount  + (razorpayRefundAmount/100)
+          if (!wallet) {
+            const newWallet = new Wallet({
+              userId: order.userId,
+              balance: finalAmount,
+              transactions: [
+                {
+                  type: "credit",
+                  amount: finalAmount,
+                  description: `Refund for returned order ${order._id}`,
+                },
+              ],
+            });
+            await newWallet.save();
+          } else {
+            wallet.balance += finalAmount;
+            wallet.transactions.push({
+              type: "credit",
+              amount: razorpayRefundAmount/100,
+              description: `Refund for returned order ${order._id}`,
+            });
+            await wallet.save();
+          }
 
+          order.walletAmountUsed = 0;
+        }else{
+          const wallet = await Wallet.findOne({ userId: order.userId });
+          const refundAmount = razorpayRefundAmount/100
+          if(!wallet){
+            const newWallet = new Wallet({
+              userId: order.userId,
+              balance: refundAmount,
+              transactions: [
+                {
+                  type: "credit",
+                  amount: refundAmount,
+                  description: `Refund for returned order ${order._id}`,
+                },
+              ],
+            });
+            await newWallet.save();
+          }else {
+            wallet.balance += razorpayRefundAmount/100;
+            wallet.transactions.push({
+              type: "credit",
+              amount: razorpayRefundAmount,
+              description: `Refund for returned order ${order._id}`,
+            });
+            await wallet.save();
+          }
+        }
+      
+        
         console.log("Refund initiated successfully:", refund);
         order.status = "Returned";
         order.paymentStatus = "Refunded";
         order.returnReason.push({ itemId, reason });
         await order.save();
+        const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Returned";
+  await sales.save();
+      }
 
         return res.status(200).json({
           message: "Order returned and refund initiated successfully",
@@ -489,6 +697,31 @@ const orderReturn = async (req, res) => {
           error: razorpayError.message,
         });
       }
+    }else if (order.payment === "Wallet") {
+      const wallet = await Wallet.findOne({ userId: order.userId });
+      const refundAmount = order.walletAmountUsed - order.shippingFee;
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+          type: "credit",
+          amount: refundAmount,
+          description: `Refund for cancelled order ${order._id}`,
+        });
+        await wallet.save();
+        order.walletAmountUsed = 0
+      order.status = "Returned";
+      order.paymentStatus = "Refunded";
+      order.returnReason.push({ itemId, reason });
+      await order.save();
+      const sales = await Sales.findOne({orderId :order._id})
+      if(sales){
+        sales.status = "Returned";
+  await sales.save();
+      }
+      console.log("order",order)
+
+      return res.status(200).json({
+        message: "Order cancelled and wallet refund processed successfully",
+      });
     } else {
       return res.status(400).json({ message: "Invalid payment method" });
     }

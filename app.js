@@ -6,7 +6,7 @@ const session = require('express-session');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const passport = require('./config/passport');
-
+const setupCronJobs = require("./controllers/cronJob-middleware");
 var hbs = require('express-handlebars')
 const handlebars = require('handlebars');
 var db = require('./config/connection');
@@ -17,6 +17,8 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');                                
+
+setupCronJobs();
 
 hbs.create({}).handlebars.registerHelper('ifEquals', function(value1, value2, options) {
   
@@ -82,16 +84,34 @@ handlebars.registerHelper('or', function () {
 handlebars.registerHelper('statusColor', function (status) {
   switch (status) {
     case 'Pending':
-      return 'warning'; // Yellow
+      return 'warning';
     case 'Shipped':
-      return 'primary'; // Blue
+      return 'primary'; 
     case 'Completed':
-      return 'success'; // Green
+      return 'success'; 
     case 'Cancelled':
-      return 'danger'; // Red
+      return 'danger'; 
     default:
-      return 'secondary'; // Gray (default)
+      return 'secondary'; 
   }
+});
+handlebars.registerHelper('add', function (a, b) {
+  return a + b;
+});
+handlebars.registerHelper("formatDiscount", function (discountType, discountValue) {
+  if (discountType === "percentage") {
+    return `${discountValue}%`; // Add % for percentage
+  } else if (discountType === "fixed") {
+    return `₹${discountValue}`; // Add ₹ for fixed amount
+  }
+  return discountValue; // Default fallback
+});
+handlebars.registerHelper("calculateDiscount", function (price, offerAmount) {
+  const discount = ((price - offerAmount) / price) * 100;
+  return Math.round(discount); // Round to the nearest integer
+});
+handlebars.registerHelper("calculateDeductedAmount", function (price, offerAmount) {
+  return price - offerAmount; // Amount deducted
 });
 app.use(logger('dev'));
 app.use(bodyParser.json());

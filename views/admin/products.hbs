@@ -59,7 +59,9 @@
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Product</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Product Name</th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Category</th>
-          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white">Price</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"> Actual Price</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"> Offer Price</th>
+          <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"> Offer</th>
           
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
           <th class="text-center" style="background-color: rgb(228, 178, 117); color:white"></th>
@@ -83,6 +85,26 @@
               <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.name}}</td>
               <td class="text-center" style="text-align: center; vertical-align: middle;">{{this.category}}</td>
               <td class="text-center" style="text-align: center; vertical-align: middle;">₹{{this.price}}</td>
+              <td class="text-center" style="text-align: center; vertical-align: middle;">
+  {{#if this.offerAmount}}
+    ₹{{this.offerAmount}}<br><span style="font-size: 12px; color:rgb(173, 169, 165)">Offer price</span> <!-- Show offerAmount if it exists and is greater than 0 -->
+  {{else}}
+    ₹{{this.price}}<br><span style="font-size: 12px; color:rgb(173, 169, 165)">No offer applied</span> <!-- Show real price if offerAmount is 0 or undefined -->
+  {{/if}}
+</td>
+               <td style="text-align: center; vertical-align: middle;">
+  {{#if this.offers.length}}
+    <form action="/admin/remove-offer" method="POST" onsubmit="return confirm('Are you sure you want to remove this offer?')">
+      <input type="hidden" name="productId" value="{{this._id}}">
+      <input type="hidden" name="offerId" value="{{this.offers.[0]}}">
+      <button type="submit" class="btn" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">Remove Offer</button>
+    </form>
+  {{else}}
+    <a href="/admin/show-offer/{{this._id}}" class="btn" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;" aria-label="Add offer">
+      Add Offer
+    </a>
+  {{/if}}
+</td>
               
               <td style="text-align: center; vertical-align: middle;">
                 <a href="/admin/edit-product/{{this._id}}" class="btn" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; padding: 5px 10px; text-decoration: none; border-radius: 5px;" aria-label="Edit product">

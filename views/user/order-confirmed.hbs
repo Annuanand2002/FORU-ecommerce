@@ -73,7 +73,7 @@
         <p>Thank you for shopping</p>
         <p>Order-id: {{order._id}}</p>
         <p>Payment Method: {{paymentMethod}}</p>
-        <p>Total Amount: ₹{{order.newTotal}}</p>
+        <p>Total Amount: ₹{{add order.newTotal order.walletAmountUsed}}</p>
         <a href="/collections" class="continue-shopping">Continue shopping</a>
     </div>
 </body>

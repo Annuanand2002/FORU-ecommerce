@@ -233,6 +233,9 @@ body {
                 <a href="/address">Addresses</a>
             </li>
             <li class="sidebar-menu-item">
+                <a href="/wallet">Wallet</a>
+            </li>
+            <li class="sidebar-menu-item">
                 <a href="/delete-account">Delete Account</a>
             </li>
         </ul>
@@ -252,7 +255,7 @@ body {
                         <div class="order-item {{../this.status}}">
                             <div class="order-item-product">
                                 <div class="order-item-image">
-                                    <img src="{{this.productId.images}}" alt="{{this.productId.name}}">
+                                    <img src="{{this.image}}" alt="{{this.produtName}}">
                                 </div>
                                 <div class="order-item-info">
     <span class="product-name">{{this.productId.name}}</span>
@@ -266,8 +269,11 @@ body {
                             </div>
                             <div class="order-item-meta">
                                 <div class="order-item-status">
-                                    <span style="font-size: 16px; color:#c28f63">Status: {{../this.status}}</span>
-                                </div>
+  <span style="font-size: 16px; 
+               color: {{#if (eq ../this.status 'Completed')}}green{{else if (eq ../this.status 'Cancelled')}}red{{else if (eq ../this.status 'Returned')}}red{{else}}#c28f63{{/if}};">
+    Status: {{../this.status}}
+  </span>
+</div>
                                 <div class="order-item-date">
                                     <span style="font-size: 14px;">Ordered Date: {{formatDate ../this.createdAt}}</span>
                                 </div>

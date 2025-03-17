@@ -124,7 +124,7 @@
           <td>{{formatDate this.createdAt}}</td>
           <td>{{this.userId.name}}</td>
           <td class="status">
-  <select class="status-dropdown" data-order-id="{{this._id}}" {{#if (or (eq this.status "Completed") (eq this.status "Cancelled"))}}disabled{{/if}}>
+  <select class="status-dropdown" data-order-id="{{this._id}}" {{#if (or (eq this.status "Completed") (eq this.status "Cancelled") (eq this.status "Returned"))}}disabled{{/if}}>
     <option value="Pending" {{#ifEquals this.status "Pending"}}selected{{/ifEquals}}>Pending</option>
     <option value="Shipped" {{#ifEquals this.status "Shipped"}}selected{{/ifEquals}}>Shipped</option>
     <option value="Completed" {{#ifEquals this.status "Completed"}}selected{{/ifEquals}}>Completed</option>

@@ -5,6 +5,7 @@ const productSchema =new mongoose.Schema({
   name: { type: String, required: true,index:true },
   category: { type: String, required: true },
   price: { type: Number, required: true,},
+  offerAmount :{type : Number,default:0},
   gender: { type: String, required: true },
   sizes: [
     {
@@ -23,6 +24,12 @@ const productSchema =new mongoose.Schema({
   images: [String],
   latestCollection: { type: Boolean, default: false },
   bestSeller: { type: Boolean, default: false },
+  offers : [
+    {
+      type : mongoose.Schema.Types.ObjectId,
+      ref: "Offer",
+    }
+  ]
 })
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ price: 1, category:1,gender:1 });

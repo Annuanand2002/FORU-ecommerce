@@ -58,10 +58,10 @@
                 {{#each order.items}}
                 <tr>
                     <td>
-                        <img src="{{this.productId.images.[0]}}" alt="{{this.productId.name}}" style="width: 100px; height: 100px; object-fit: cover;">
+                        <img src="{{this.image}}" alt="{{this.productName}}" style="width: 100px; height: 100px; object-fit: cover;">
                     </td>
                     <td>
-                        <strong>{{this.productId.name}}</strong><br>
+                        <strong>{{this.productName}}</strong><br>
                         Quantity: {{this.quantity}}<br>
                         Price: ₹{{this.price}}<br>
                         Size: {{this.size}}
