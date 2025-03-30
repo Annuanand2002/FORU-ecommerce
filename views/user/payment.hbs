@@ -384,6 +384,10 @@ document.querySelector('.place-order').addEventListener('click', async function 
             return;
         }
         paymentMethod = selectedPaymentMethod.value;
+        if(paymentMethod === "Cash on Delivery" && newTotalAmount < 1000){
+            showPopup("Cash on Delivery is only available for orders above ₹1000.")
+            return;
+        }
     }
 
     try {

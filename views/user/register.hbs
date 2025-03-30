@@ -40,30 +40,37 @@
                     <input  id="email" class="form-control form-control-lg" name="email" placeholder="Email address"/>
                     <span class="error-message" id="emailError" style="color: red;"></span>
                   </div>
-                  <div class="row">
-                   <div class="col-md-6">
-                    <div class="form-outline mb-4" style="position: relative;">
-                    <label class="form-label" for="password">Password*</label>
-                    <input
-                     type="password"
-                     id="password"
-                     class="form-control form-control-lg"name="password"
-                     placeholder="At least 6 characters"
-                     style="padding-right: 40px;"/>
-                     <i
-                     class="fa-solid fa-eye"
-                     id="togglePassword"
-                     style="
-                     position: absolute;
-                     right: 15px;
-                     top: 70%;
-                     transform: translateY(-50%);
-                     cursor: pointer;
-                     color:rgb(125, 122, 122)
-                     "></i>
-                     <span class="error-message" id="passwordError" style="color: red;"></span>
-                     </div>
-                   </div>
+
+                 <div class="row">
+  <div class="col-md-6">
+    <div class="form-outline mb-4" style="position: relative;">
+      <label class="form-label" for="password">Password*</label>
+      <div style="position: relative;">
+        <input
+          type="password"
+          id="password"
+          class="form-control form-control-lg"
+          name="password"
+          placeholder="At least 6 characters"
+          style="padding-right: 40px;"
+        />
+        <i
+          class="fa-solid fa-eye"
+          id="togglePassword"
+          style="
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgb(125, 122, 122);
+          "
+        ></i>
+      </div>
+      <span class="error-message" id="passwordError" style="color: red; display: block; margin-top: 5px;"></span>
+    </div>
+  </div>
+</div>
                   <!--<div class="col-md-6">
                     <div class="form-outline mb-4" style="position: relative;">
                     <label class="form-label" for="password">Re-enter the password*</label>

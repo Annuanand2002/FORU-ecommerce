@@ -71,6 +71,22 @@ handlebars.registerHelper('range', function (start, end) {
 handlebars.registerHelper('neq', function (a, b) {
   return a !== b;
 });
+handlebars.registerHelper('getStatusCounts', function(items) {
+  const counts = {};
+  items.forEach(item => {
+    counts[item.status] = (counts[item.status] || 0) + 1;
+  });
+  return counts;
+});
+handlebars.registerHelper('getMostCommonStatus', function(items) {
+  const statusCounts = {};
+  items.forEach(item => {
+    statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
+  });
+  return Object.keys(statusCounts).reduce((a, b) => 
+    statusCounts[a] > statusCounts[b] ? a : b
+  );
+});
 handlebars.registerHelper('json', function(context) {
   return JSON.stringify(context);
 });
@@ -94,6 +110,12 @@ handlebars.registerHelper('statusColor', function (status) {
     default:
       return 'secondary'; 
   }
+});
+handlebars.registerHelper('gte', function (a, b, options) {
+  if (a >= b) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
 });
 handlebars.registerHelper('add', function (a, b) {
   return a + b;

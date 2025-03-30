@@ -273,8 +273,8 @@
                 <div class="order-item-meta">
                    <div class="order-item-status">
   <span style="font-size: 16px; 
-               color: {{#if (eq order.status 'Completed')}}green{{else if (eq order.status 'Cancelled')}}red{{else if (eq order.status 'Returned')}}red{{else}}#d6a57a{{/if}};">
-    Status: {{order.status}}
+               color: {{#if (eq item.status 'Completed')}}green{{else if (eq item.status 'Cancelled')}}red{{else if (eq item.status 'Returned')}}red{{else}}#d6a57a{{/if}};">
+    Status: {{item.status}}
   </span>
 </div>
                     <div class="order-item-date" style="margin-left: 50px;">
@@ -321,8 +321,8 @@
         id="return-order-button" 
         class="get-invoice-button" 
         style="background-color: #d6a57a; color: white;"
-        data-order-status="{{order.status}}"
-        data-completion-date="{{order.completionDate}}">
+        data-order-status="{{item.status}}"
+        data-completion-date="{{item.completionDate}}">
         Return Order
     </button>
 
@@ -330,7 +330,7 @@
         id="cancel-order-button" 
         class="get-invoice-button" 
         style="background-color: #d6a57a; color: white;"
-        data-order-status="{{order.status}}">
+        data-order-status="{{item.status}}">
         Cancel Order
     </button>
 </div>
@@ -359,9 +359,9 @@
                 </div>
                 {{#each order.items}}
     {{#if (neq this._id ../item._id)}} 
-        <div class="other-item">
+        <div class="other-item"> 
             <div class="other-item-image">
-                <img src="{{this.productId.images}}" alt="{{this.productId.name}}">
+                <img src="{{this.productId.images.[0]}}" alt="{{this.productId.name}}">
             </div>
             <div class="other-item-info">
                 <div class="other-product-name"><span style="color: #4e4e4e; font-size:12px">{{this.productId.name}}</span></div>
@@ -369,7 +369,7 @@
                     <span style="color: #4e4e4e; font-size:12px">Size: {{this.size}} | Quantity: {{this.quantity}} | Price: ₹{{this.price}}</span>
                 </div>
                 <div class="arrow-icon" style="margin-left: 300px;">
-        <a href="/order-details/{{../this._id}}/{{this._id}}" style="color:#d6a57a;">&gt;</a>
+        <a href="/order-details/{{../order._id}}/{{this._id}}" style="color:#d6a57a;">&gt;</a>
     </div>
             </div>
         </div>
@@ -388,160 +388,186 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  // Cancel Order Functionality
   const cancelButton = document.getElementById("cancel-order-button");
-  const returnButton = document.getElementById("return-order-button");
-  const orderStatus = cancelButton.dataset.orderStatus;
-  const completionDate = new Date(returnButton.dataset.completionDate);
+  const cancelModal = document.getElementById("cancel-order-modal");
+  const overlay = document.getElementById("overlay");
+  const cancellationReason = document.getElementById("cancellation-reason");
+  const submitCancellation = document.getElementById("submit-cancellation");
+  const closeModal = document.getElementById("close-modal");
 
-  // Cancel Button Logic
-  if (orderStatus !== "Pending") {
-    cancelButton.disabled = true;
-    cancelButton.style.backgroundColor = "#ccc";
-    cancelButton.style.pointerEvents = "none";
-  } else {
-    // Add click event to show the modal
-    cancelButton.addEventListener("click", function () {
-      document.getElementById("cancel-order-modal").style.display = "block";
-      document.getElementById("overlay").style.display = "block";
+  // Initialize cancel button based on order status
+  if (cancelButton) {
+    const orderStatus = cancelButton.dataset.orderStatus;
+    
+    if (orderStatus !== "Pending") {
+      cancelButton.disabled = true;
+      cancelButton.style.backgroundColor = "#ccc";
+      cancelButton.style.cursor = "not-allowed";
+    } else {
+      cancelButton.addEventListener("click", function () {
+        cancelModal.style.display = "block";
+        overlay.style.display = "block";
+      });
+    }
+  }
+
+  // Close cancel modal
+  if (closeModal) {
+    closeModal.addEventListener("click", function () {
+      cancelModal.style.display = "none";
+      overlay.style.display = "none";
     });
   }
 
-  // Close Cancel Modal
-  document.getElementById("close-modal").addEventListener("click", function () {
-    document.getElementById("cancel-order-modal").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-  });
+  // Submit cancellation
+  if (submitCancellation) {
+    submitCancellation.addEventListener("click", async function () {
+      const reason = cancellationReason.value.trim();
 
-  // Submit Cancellation Reason
-  document.getElementById("submit-cancellation").addEventListener("click", async function () {
-    const reason = document.getElementById("cancellation-reason").value.trim();
-
-    if (!reason) {
-      alert("Please provide a reason for cancellation.");
-      return;
-    }
-
-    const data = {
-      orderId: "{{order._id}}",
-      itemId: "{{item._id}}",
-      reason: reason,
-    };
-
-    try {
-      // Send data to the server
-      const response = await fetch("/cancel-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        window.location.reload(); // Refresh the page to reflect changes
-      } else {
-        alert("Failed to cancel order. Please try again.");
+      if (!reason) {
+        alert("Please provide a reason for cancellation.");
+        return;
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
-    }
-  });
 
-  // Return Button Logic
-  if (orderStatus === "Completed") {
-    const currentDate = new Date();
-    const returnEndDate = new Date(completionDate);
-    returnEndDate.setDate(returnEndDate.getDate() + 7); // Add 7 days to the completion date
+      const data = {
+        orderId: "{{order._id}}",
+        itemId: "{{item._id}}",
+        reason: reason,
+      };
 
-    if (currentDate <= returnEndDate) {
-      // Enable the return button
-      returnButton.disabled = false;
-      returnButton.style.backgroundColor = "#d6a57a";
-      returnButton.style.pointerEvents = "auto";
+      try {
+        const response = await fetch("/cancel-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
 
-      // Add click event to show the return modal
-      returnButton.addEventListener("click", function () {
-        document.getElementById("return-order-modal").style.display = "block";
-        document.getElementById("overlay-return").style.display = "block";
-      });
-    } else {
-      // Disable the return button after 7 days
-      returnButton.disabled = true;
-      returnButton.style.backgroundColor = "#ccc";
-      returnButton.style.pointerEvents = "none";
-    }
-  } else {
-    // Disable the return button if the order is not completed
-    returnButton.disabled = true;
-    returnButton.style.backgroundColor = "#ccc";
-    returnButton.style.pointerEvents = "none";
+        const result = await response.json();
+
+        if (result.success) {
+          window.location.reload();
+        } else {
+          alert(result.message || "Failed to cancel order. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      } finally {
+        cancelModal.style.display = "none";
+        overlay.style.display = "none";
+      }
+    });
   }
 
-  // Close Return Modal
-  document.getElementById("close-return-modal").addEventListener("click", function () {
-    document.getElementById("return-order-modal").style.display = "none";
-    document.getElementById("overlay-return").style.display = "none";
-  });
+  // Return Order Functionality
+  const returnButton = document.getElementById("return-order-button");
+  const returnModal = document.getElementById("return-order-modal");
+  const overlayReturn = document.getElementById("overlay-return");
+  const returnReason = document.getElementById("return-reason");
+  const submitReturn = document.getElementById("submit-return");
+  const closeReturnModal = document.getElementById("close-return-modal");
+  const returnReasonError = document.getElementById("return-reason-error");
+  const successPopup = document.getElementById("success-popup");
+  const overlayPopup = document.getElementById("overlay-popup");
+  const closePopup = document.getElementById("close-popup");
 
-  // Submit Return Reason
-  document.getElementById("submit-return").addEventListener("click", async function () {
-    const reason = document.getElementById("return-reason").value.trim();
-    const errorMessage = document.getElementById("return-reason-error");
+  // Initialize return button based on order status and completion date
+  if (returnButton) {
+    const orderStatus = returnButton.dataset.orderStatus;
+    const completionDate = new Date(returnButton.dataset.completionDate);
 
-    // Clear any previous error message
-    errorMessage.style.display = "none";
+    if (orderStatus === "Completed") {
+      const currentDate = new Date();
+      const returnEndDate = new Date(completionDate);
+      returnEndDate.setDate(returnEndDate.getDate() + 7);
 
-    if (!reason) {
-      errorMessage.style.display = "block";
-      return;
-    }
-
-    const data = {
-      orderId: "{{order._id}}",
-      itemId: "{{item._id}}",
-      reason: reason,
-    };
-
-    try {
-      // Send data to the server
-      console.log("Data",data)
-      const response = await fetch("/return-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        // Show the custom success popup
-        const successPopup = document.getElementById("success-popup");
-        const overlayPopup = document.getElementById("overlay-popup");
-        successPopup.style.display = "block";
-        overlayPopup.style.display = "block";
-
-        // Automatically hide the popup after 3 seconds
-        setTimeout(() => {
-          successPopup.style.display = "none";
-          overlayPopup.style.display = "none";
-          window.location.reload(); // Refresh the page to reflect changes
-        }, 3000);
-
-        // Close the popup manually if the user clicks the "Close" button
-        document.getElementById("close-popup").addEventListener("click", function () {
-          successPopup.style.display = "none";
-          overlayPopup.style.display = "none";
-          window.location.reload(); // Refresh the page to reflect changes
+      if (currentDate <= returnEndDate) {
+        returnButton.addEventListener("click", function () {
+          returnModal.style.display = "block";
+          overlayReturn.style.display = "block";
         });
       } else {
-        const errorData = await response.json();
-        alert(errorData.message || "Failed to return order. Please try again.");
+        returnButton.disabled = true;
+        returnButton.style.backgroundColor = "#ccc";
+        returnButton.style.cursor = "not-allowed";
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+    } else {
+      returnButton.disabled = true;
+      returnButton.style.backgroundColor = "#ccc";
+      returnButton.style.cursor = "not-allowed";
     }
-  });
+  }
+
+  // Close return modal
+  if (closeReturnModal) {
+    closeReturnModal.addEventListener("click", function () {
+      returnModal.style.display = "none";
+      overlayReturn.style.display = "none";
+    });
+  }
+
+  // Submit return
+  if (submitReturn) {
+    submitReturn.addEventListener("click", async function () {
+      const reason = returnReason.value.trim();
+      returnReasonError.style.display = "none";
+
+      if (!reason) {
+        returnReasonError.style.display = "block";
+        return;
+      }
+
+      const data = {
+        orderId: "{{order._id}}",
+        itemId: "{{item._id}}",
+        reason: reason,
+      };
+
+      try {
+        const response = await fetch("/return-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          returnModal.style.display = "none";
+          overlayReturn.style.display = "none";
+          
+          // Show success popup
+          successPopup.style.display = "block";
+          overlayPopup.style.display = "block";
+          
+          // Auto close after 3 seconds
+          setTimeout(() => {
+            successPopup.style.display = "none";
+            overlayPopup.style.display = "none";
+            window.location.reload();
+          }, 3000);
+        } else {
+          alert(result.message || "Failed to return order. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
+      }
+    });
+  }
+
+  // Close success popup
+  if (closePopup) {
+    closePopup.addEventListener("click", function () {
+      successPopup.style.display = "none";
+      overlayPopup.style.display = "none";
+      window.location.reload();
+    });
+  }
 });
 </script>

@@ -130,6 +130,7 @@
 async function applyFilter() {
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
+  const today = new Date().toISOString().split('T')[0]; 
 
   // Reset error messages
   document.getElementById('startDateError').style.display = 'none';
@@ -141,11 +142,22 @@ async function applyFilter() {
   // Validate inputs
   if (!startDate) {
     document.getElementById('startDateError').style.display = 'block';
+    document.getElementById('startDateError').textContent = 'Please select a start date.';
     isValid = false;
+  }else if(startDate>today){
+    document.getElementById('startDateError').style.display = 'block';
+    document.getElementById('startDateError').textContent = 'Start date cannot be in the future.';
+    isValid = false;
+    startDateInput.value = '';
   }
 
   if (!endDate) {
     document.getElementById('endDateError').style.display = 'block';
+    document.getElementById('endDateError').textContent = 'Please select an end date.';
+    isValid = false;
+  }else if(endDate>today){
+    document.getElementById('endDateError').style.display = 'block';
+    document.getElementById('endDateError').textContent = 'End date cannot be in the future.';
     isValid = false;
   }
 

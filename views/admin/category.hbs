@@ -13,13 +13,24 @@
         {{#each categories}}
         <li class="list-group-item d-flex justify-content-between align-items-center">
           {{this.name}}
-          <div>
-            <!-- Add Coupon Button -->
-            {{!-- <button type="button" class="btn btn-sm btn-success add-coupon" data-id="{{this._id}}" data-bs-toggle="modal" data-bs-target="#addCouponModal">
-              Add Offer
-            </button> --}}
+          <div class="d-flex align-items-center">
+            <!-- Offer Button Container -->
+            <div class="me-2">
+              {{#if this.offers.length}}
+                <form action="/admin/remove-category-offer" method="POST" onsubmit="return confirm('Are you sure you want to remove this offer?')" class="m-0">
+                  <input type="hidden" name="categoryId" value="{{this._id}}">
+                  <input type="hidden" name="offerId" value="{{this.offers.[0]}}">
+                  <button type="submit" class="btn btn-sm" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">Remove Offer</button>
+                </form>
+              {{else}}
+                <a href="/admin/add-offer/{{this._id}}" class="btn btn-sm" style="background: linear-gradient(to top left, rgb(102, 204, 102), rgb(51, 153, 51)); color: white; text-decoration: none;" aria-label="Add offer">
+                  Add Offer
+                </a>
+              {{/if}}
+            </div>
+            
             <!-- Delete Button -->
-            <button type="button" class="btn btn-sm delete-category" data-id="{{this._id}}" style="border-radius: 50%;">
+            <button type="button" class="btn btn-sm delete-category" data-id="{{this._id}}" style="border-radius: 50%; padding: 0.25rem 0.5rem; line-height: 1;">
               &times;
             </button>
           </div>
@@ -30,32 +41,26 @@
   </div>
 
   <!-- Add Category Modal -->
-  <form id="addCategoryForm">
-    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="mb-3">
-                <label for="categoryName" class="form-label">Category Name</label>
-                <input type="text" class="form-control" id="categoryName" placeholder="Enter category name">
-                <div id="categoryError" class="text-danger mt-2"></div>
-              </div>
-              <button type="submit" class="btn btn-primary" id="saveCategoryBtn">Save</button>
-            </form>
-          </div>
+  <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addCategoryForm">
+            <div class="mb-3">
+              <label for="categoryName" class="form-label">Category Name</label>
+              <input type="text" class="form-control" id="categoryName" placeholder="Enter category name">
+              <div id="categoryError" class="text-danger mt-2"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="saveCategoryBtn">Save</button>
+          </form>
         </div>
       </div>
     </div>
-  </form>
+  </div>
 </div>
-
-
-
-
 
 

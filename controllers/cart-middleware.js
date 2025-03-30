@@ -76,13 +76,20 @@ const Wallet = require('../models/wallet-schema')
 
         await Cart.updateOne({userId},{$set:{totalPrice,shippingFee,newTotalAmount:newTotalPrice,discountAmount}})
 
-        
+        const coupons = await Coupon.find({
+              minPurchaseAmount: { $lte: newTotalPrice },
+              isActive: true,
+              expiryDate: { $gte: new Date() },
+            }).lean();
+
+          
 
         res.render('user/cart', {
             cart,
             user,
             totalPrice, 
             shippingFee,
+            coupons,
             newTotalPrice,
             discountAmount,
             isUser: true,
@@ -214,6 +221,80 @@ const cartQuantityCheck =  async (req, res) => {
   }
 };
 
+// const applyCoupon = async (req, res) => {
+//   try {
+//     const { couponId } = req.body;
+//     const userId = req.session.user._id;
+
+//     // 1. Validate coupon exists and is active
+//     const coupon = await Coupon.findOne({
+//       _id: couponId,
+//       isActive: true,
+//       expiryDate: { $gt: new Date() }
+//     });
+
+//     if (!coupon) {
+//       return res.status(404).json({ 
+//         success: false, 
+//         message: 'Coupon not found or expired.' 
+//       });
+//     }
+
+//     // 2. Get cart with populated products
+//     const cart = await Cart.findOne({ userId })
+//       .populate('items.productId')
+//       .populate('appliedCoupons'); // If you want to check existing coupons
+
+//     // 3. Calculate cart total (considering offers)
+//     const totalPrice = cart.items.reduce((total, item) => {
+//       const price = item.productId.offerAmount > 0 
+//         ? item.productId.offerAmount +cart.shippingFee
+//         : item.productId.price;
+//       return total + (price * item.quantity) + cart.shippingFee;
+//     }, 0);
+
+//     // 4. Validate minimum purchase amount
+//     if (coupon.minPurchaseAmount > totalPrice) {
+//       return res.status(400).json({ 
+//         success: false, 
+//         message: `Minimum purchase of ₹${coupon.minPurchaseAmount} required for this coupon.` 
+//       });
+//     }
+
+//     // 5. Check if coupon is already applied
+//     if (cart.appliedCoupons && cart.appliedCoupons._id.equals(coupon._id)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'This coupon is already applied.'
+//       });
+//     }
+
+//     // 6. Apply coupon and calculate discount
+//     cart.appliedCoupons = coupon._id;
+//     cart.discountAmount = Math.min(
+//       coupon.discountAmount, 
+//       coupon.maxDiscount || Infinity
+//     );
+    
+//     // 7. Save and respond
+//     await cart.save();
+    
+//     res.json({ 
+//       success: true, 
+//       message: 'Coupon applied successfully.',
+//       discountAmount: cart.discountAmount,
+//       newTotal: totalPrice - cart.discountAmount
+//     });
+
+//   } catch (error) {
+//     console.error('Error applying coupon:', error);
+//     res.status(500).json({ 
+//       success: false, 
+//       message: 'Internal server error' 
+//     });
+//   }
+// };
+
 const applyCoupon = async (req, res) => {
   try {
       const { couponId } = req.body; // Single coupon ID
@@ -250,7 +331,7 @@ const applyCoupon = async (req, res) => {
       console.error('Error applying coupon:', error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
-};
+}
 const getAddAddressCart = async (req,res)=>{
   res.render('user/addAddressCart',{isUser:true})
 }

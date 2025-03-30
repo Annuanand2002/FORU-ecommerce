@@ -1,80 +1,118 @@
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4" style="color: #d6a57a;;">Order Details</h2>
 
-    <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <h2 class="text-center mb-4" style="color: #d6a57a;;">Order Details</h2>
+        <table class="table table-bordered">
+            <tr>
+                <th>Order ID</th>
+                <td>{{order._id}}</td>
+            </tr>
+            <tr>
+                <th>Customer Name</th>
+                <td>{{order.userId.name}}</td>
+            </tr>
+            <tr>
+                <th>Total Price</th>
+                <td>₹{{order.totalPrice}}</td>
+            </tr>
+            <tr>
+                <th>Shipping Fee</th>
+                <td>₹{{order.shippingFee}}</td>
+            </tr>
+            <tr>
+                <th>Payment Method</th>
+                <td class="payment-method">
+                    {{order.payment}}<br>
+                    {{#if (eq order.payment "online payment")}}
+                    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
+                        {{order.paymentStatus}}
+                    </span>
+                    {{/if}}
+                </td>
+            </tr>
+            <tr>
+                <th>Order Date</th>
+                <td>{{formatDate order.createdAt}}</td>
+            </tr>
+            <tr>
+                <th>Delivery Address</th>
+                <td>
+                    <strong>{{order.deliveryAddress.name}}</strong><br>
+                    {{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},<br>
+                    {{order.deliveryAddress.state}} - {{order.deliveryAddress.postalCode}}
+                </td>
+            </tr>
+            <tr>
+                <th colspan="2" class="text-center">Ordered Items</th>
+            </tr>
+            <tr>
+                <th>Product</th>
+                <th>Details</th>
+            </tr>
+            {{#each order.items}}
+            <tr>
+                <td>
+                    <img src="{{this.image}}" alt="{{this.productName}}" style="width: 100px; height: 100px; object-fit: cover;">
+                </td>
+                <td>
+                    <strong>{{this.productName}}</strong><br>
+                    Quantity: {{this.quantity}}<br>
+                    Price: ₹{{this.price}}<br>
+                    Size: {{this.size}}<br>
+                    status:{{this.status}}<br>
+                    <select class="status-dropdown" data-order-id="{{../order._id}}" data-item-id="{{this._id}}" {{#if (or (eq this.status "Completed") (eq this.status "Cancelled") (eq this.status "Returned"))}}disabled{{/if}}>
+                        <option value="Pending" {{#ifEquals this.status "Pending"}}selected{{/ifEquals}}>Pending</option>
+                        <option value="Shipped" {{#ifEquals this.status "Shipped"}}selected{{/ifEquals}}>Shipped</option>
+                        <option value="Completed" {{#ifEquals this.status "Completed"}}selected{{/ifEquals}}>Completed</option>
+                        <option value="Cancelled" {{#ifEquals this.status "Cancelled"}}selected{{/ifEquals}}>Cancelled</option>
+                        <option value="Returned" {{#ifEquals this.status "Returned"}}selected{{/ifEquals}}>Returned</option>
+                    </select>
+                    <span class="status-{{this.status}}" style="padding-top:50px;color:rgb(90, 87, 87);font-size:12px;"><br>*{{this.status}}</span>
+                </td>
+            </tr>
+            {{/each}}
+        </table>
 
-            <table class="table table-bordered">
-                <tr>
-                    <th>Order ID</th>
-                    <td>{{order._id}}</td>
-                </tr>
-                <tr>
-                    <th>Customer Name</th>
-                    <td>{{order.userId.name}}</td>
-                </tr>
-                <tr>
-                    <th>Total Price</th>
-                    <td>₹{{order.totalPrice}}</td>
-                </tr>
-                <tr>
-                    <th>Shipping Fee</th>
-                    <td>₹{{order.shippingFee}}</td>
-                </tr>
-                <tr>
-                    <th>Payment Method</th>
-                    <td class="payment-method">
-  {{order.payment}}<br>
-  {{#if (eq order.payment "online payment")}}
-    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
-      {{order.paymentStatus}}
-    </span>
-  {{/if}}
-</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td><span class="badge bg-success">{{order.status}}
-  </span></td>
-                </tr>
-                <tr>
-                    <th>Order Date</th>
-                    <td>{{formatDate order.createdAt}}</td>
-                </tr>
-                <tr>
-                    <th>Delivery Address</th>
-                    <td>
-                        <strong>{{order.deliveryAddress.name}}</strong><br>
-                        {{order.deliveryAddress.house}}, {{order.deliveryAddress.city}},<br>
-                        {{order.deliveryAddress.state}} - {{order.deliveryAddress.postalCode}}
-                    </td>
-                </tr>
-                <tr>
-                    <th colspan="2" class="text-center">Ordered Items</th>
-                </tr>
-                <tr>
-                    <th>Product</th>
-                    <th>Details</th>
-                </tr>
-                {{#each order.items}}
-                <tr>
-                    <td>
-                        <img src="{{this.image}}" alt="{{this.productName}}" style="width: 100px; height: 100px; object-fit: cover;">
-                    </td>
-                    <td>
-                        <strong>{{this.productName}}</strong><br>
-                        Quantity: {{this.quantity}}<br>
-                        Price: ₹{{this.price}}<br>
-                        Size: {{this.size}}
-                    </td>
-                </tr>
-                {{/each}}
-            </table>
-
-            <div class="mt-4 text-center">
-                <a href="/admin/order" class="btn" style="background-color: #d6a57a; color:white;">Back to Orders</a>
-            </div>
+        <div class="mt-4 text-center">
+            <a href="/admin/order" class="btn" style="background-color: #d6a57a; color:white;">Back to Orders</a>
         </div>
     </div>
+</div>
 
-   
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const statusDropdowns = document.querySelectorAll('.status-dropdown');
+    statusDropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', function () {
+            const orderId = this.getAttribute('data-order-id');
+            const itemId = this.getAttribute('data-item-id');
+            const newStatus = this.value;
+            updateOrderStatus(orderId, itemId, newStatus);
+        });
+    });
+
+    async function updateOrderStatus(orderId, itemId, newStatus) {
+        try {
+            const response = await fetch(`/admin/update-order-status/${orderId}/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                const statusCell = document.querySelector(`.status-dropdown[data-item-id="${itemId}"]`).closest('td');
+                statusCell.querySelector('span').textContent = `*${newStatus}`;
+            } else {
+                alert(result.message || 'An error occurred while updating the order status.');
+            }
+        } catch (error) {
+            alert('An error occurred while updating the order status.');
+        }
+    }
+});
+</script>
 

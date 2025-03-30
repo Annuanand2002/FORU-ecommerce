@@ -1,0 +1,49 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header" style="background-color:rgb(222, 168, 101); color:white">
+          <h4 class="mb-0">Select Offer</h4>
+        </div>
+        <div class="card-body">
+          <form id="apply-offer-form" action="/admin/apply-category-offer" method="POST">
+            <input type="hidden" name="categoryId" value="{{categoryId}}">
+            {{#if offers.length}}
+            {{#each offers}}
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="offerId" id="offer-{{this._id}}" value="{{this._id}}">
+                <label class="form-check-label" for="offer-{{this._id}}">
+                  <strong>{{this.name}}</strong> - {{this.description}} ({{this.discountValue}}{{#ifEquals this.discountType "percentage"}}%{{else}}₹{{/ifEquals}})
+                </label>
+              </div>
+            {{/each}}
+            {{else}}
+            <p>No offer available</p>
+            {{/if}}
+            <!-- Error Message -->
+            <div id="error-message" class="text-danger mb-3" style="display: none;">
+              Please select an offer.
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary-custom" style="background-color:rgb(222, 168, 101);color:white">Apply Offer</button>
+              <a href="/admin/category" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById("apply-offer-form").addEventListener("submit", function (e) {
+  const selectedOffer = document.querySelector('input[name="offerId"]:checked');
+  const errorMessage = document.getElementById("error-message");
+
+  if (!selectedOffer) {
+    e.preventDefault(); // Prevent form submission
+    errorMessage.style.display = "block"; // Show error message
+  } else {
+    errorMessage.style.display = "none"; // Hide error message if an offer is selected
+  }
+});
+</script>

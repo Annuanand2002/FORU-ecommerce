@@ -126,26 +126,40 @@ const adminLogin =  async (req, res) => {
 
 const dashboard = async (req, res, next) => {
   try {
+    const salesData = {
+      daily: await getSalesData('day'),
+      weekly: await getSalesData('week'), 
+      monthly: await getSalesData('month')
+    };
     const totalSales = await Sales.aggregate([
-      { $match: { status: "Completed" } },
-      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+      { $unwind: "$items" },
+      { $match: { 'items.status': "Completed" } },
+      { 
+        $group: { 
+          _id: null, 
+          total: { $sum: { $multiply: ["$items.price", "$items.quantity"] } } 
+        } 
+      }
     ]);
 
     const totalOrders = await Order.countDocuments().lean();
 
     const totalProductSold = await Sales.aggregate([
-      { $match: { status: "Completed" } },
+     
       { $unwind: "$items" },
+      { $match: { 'items.status': "Completed" } },
+
       { $group: { _id: null, total: { $sum: "$items.quantity" } } }
     ]);
 
-    const pendingOrders = await Order.countDocuments({ status: "Pending" }).lean();
+    const pendingOrders = await Order.countDocuments({ 'items.status': "Pending" }).lean();
 
     const orders = await Order.find().sort({ createdAt: -1 }).limit(5).populate("userId", "name").lean();
 
     const topSellingProducts = await Sales.aggregate([
-      { $match: { status: "Completed" } },
+      
       { $unwind: "$items" },
+      { $match: { 'items.status': "Completed" } },
       {
         $group: {
           _id: "$items.productId",
@@ -163,12 +177,13 @@ const dashboard = async (req, res, next) => {
       },
       { $unwind: "$productDetails" },
       { $sort: { revenue: -1 } },
-      { $limit: 5 }
+      { $limit: 10 }
     ]);
 
    
 
     res.render("admin/dashboard", {
+      salesData: JSON.stringify(salesData),
       admin: true,
       isAdminLogin: false,
       totalSales: totalSales[0]?.total || 0,
@@ -186,6 +201,46 @@ const dashboard = async (req, res, next) => {
   }
 };
 
+async function getSalesData(interval) {
+  const groupBy = {
+    day: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+    week: { $dateToString: { format: "%Y-%U", date: "$createdAt" } },
+    month: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }
+  };
+
+  return await Order.aggregate([
+    // 1. Unwind items to process individually
+    { $unwind: "$items" },
+
+    // 2. Filter only completed items
+    { $match: { "items.status": "Completed" } },
+
+    // 3. Group by order to calculate revenue per order
+    {
+      $group: {
+        _id: "$_id", // Group by order ID
+        createdAt: { $first: "$createdAt" }, // Keep order date
+        orderTotal: { $first: "$newTotal" }, // Use 'newTotal' (includes discounts/shipping)
+        completedItemsRevenue: { 
+          $sum: { $multiply: ["$items.price", "$items.quantity"] } 
+        },
+      }
+    },
+
+    // 4. Group by time interval (day/week/month)
+    {
+      $group: {
+        _id: groupBy[interval],
+        totalRevenue: { $sum: "$orderTotal" }, // Sum of all order totals
+        completedItemsRevenue: { $sum: "$completedItemsRevenue" }, // Revenue from items only
+        orderCount: { $sum: 1 }, // Count of orders
+      }
+    },
+
+    // 5. Sort chronologically
+    { $sort: { _id: 1 } }
+  ]);
+}
 const logoutAdmin = (req, res, next) => {
   req.session.destroy((err) => {
     if (err) {

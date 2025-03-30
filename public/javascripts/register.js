@@ -67,6 +67,28 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (password.length < 6) {
       passwordError.textContent = 'Password must be at least 6 characters long';
       isValid = false;
+    }else{
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (!hasUpperCase) {
+        passwordError.textContent = 'Password must contain at least one uppercase letter';
+        isValid = false;
+      }
+      else if (!hasLowerCase) {
+        passwordError.textContent = 'Password must contain at least one lowercase letter';
+        isValid = false;
+      }
+      else if (!hasNumber) {
+        passwordError.textContent = 'Password must contain at least one number';
+        isValid = false;
+      }
+      else if (!hasSpecialChar) {
+        passwordError.textContent = 'Password must contain at least one special character';
+        isValid = false;
+      }
     }
 
     if (!phone) {
@@ -124,6 +146,29 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.classList.add('error');
       }
       
+    }
+  });
+  passwordInput.addEventListener('input', () => {
+    const password = passwordInput.value;
+    passwordError.textContent = '';
+    
+    if (password.length > 0 && password.length < 8) {
+      passwordError.textContent = 'Password must be at least 8 characters long';
+      return;
+    }
+    
+    // Show strength requirements as user types
+    const requirements = [];
+    if (!/[A-Z]/.test(password)) requirements.push('one uppercase letter');
+    if (!/[a-z]/.test(password)) requirements.push('one lowercase letter');
+    if (!/[0-9]/.test(password)) requirements.push('one number');
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) requirements.push('one special character');
+    
+    if (requirements.length > 0) {
+      passwordError.textContent = `Missing: ${requirements.join(', ')}`;
+    } else {
+      passwordError.textContent = 'Strong password!';
+      passwordError.style.color = 'green';
     }
   });
 })

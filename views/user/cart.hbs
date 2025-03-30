@@ -412,6 +412,7 @@ button {
                 {{else}}
                 <div class="price-summary">
                     <span>Apply coupon</span>
+                    {{!-- <p>₹0</p> --}}
                     <a href="/apply-coupon?totalPrice={{totalPrice}}">Apply coupon</a>
                 </div>
                 {{/if}}
@@ -420,9 +421,84 @@ button {
                     <span>₹{{newTotalPrice}}</span>
                 </div>
             </div>
+            
 
             <a href="/address-cart" style="text-decoration: none;"><button class="place-order" id="place-order-btn">PLACE ORDER</button></a>
-
+  <!-- Right Column - Coupon Section -->
+{{!-- <div class="coupon-section" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+    <h5 style="margin-bottom: 15px; color: #333;">Available Coupons</h5>
+    
+    {{#if coupons.length}}
+        <div class="coupon-list" style="max-height: 300px; overflow-y: auto;">
+            {{#each coupons}}
+            <div class="coupon-item" 
+                 style="margin-bottom: 10px; 
+                        padding: 12px; 
+                        background: #f8f9fa; 
+                        border-radius: 8px;
+                        border: 1px solid #e0e0e0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center;">
+                            <input 
+                                class="form-check-input coupon-radio" 
+                                type="radio" 
+                                name="couponId" 
+                                value="{{this._id}}" 
+                                id="coupon-{{this._id}}"
+                                style="margin-right: 10px;"
+                                {{#if (eq this._id ../appliedCoupon._id)}}checked{{/if}}
+                            >
+                            <div>
+                                <strong style="color: #d6a57a;">{{this.couponName}}</strong>
+                                <div style="font-size: 12px; color: #666; margin-top: 3px;">
+                                    <span>₹{{this.discountAmount}} off</span> | 
+                                    <span>Min. ₹{{this.minPurchaseAmount}}</span> | 
+                                    <span>Exp: {{formatDate this.expiryDate 'DD MMM'}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #555; margin-top: 5px;">
+                            {{this.description}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        
+    <div class="mt-3" style="display: flex; flex-direction: column; gap: 10px;">
+    <!-- Error message container (initially hidden) -->
+    <div id="coupon-error" class="text-danger" style="display: none; margin-bottom: 5px;">
+        Please select a coupon to apply
+    </div>
+    
+    <div style="display: flex; gap: 10px;">
+        <button 
+            type="button" 
+            id="apply-coupon-btn" 
+            class="btn" 
+            style="background-color: #d6a57a; color: white; flex: 1;"
+            {{#if cart.discountAmount}}disabled{{/if}}
+        >
+            {{#if cart.discountAmount}}Applied{{else}}Apply Coupon{{/if}}
+        </button>
+        <a 
+            href="/cart/remove-coupon" 
+            class="btn btn-outline-secondary" 
+            style="flex: 1;"
+            {{#unless cart.discountAmount}}disabled{{/unless}}
+        >
+            Remove
+        </a>
+    </div>
+</div>
+    {{else}}
+        <div class="text-center py-3" style="color: #666;">
+            No coupons available for this order
+        </div>
+    {{/if}}
+</div> --}}
         </div>
         <div id="popup-message" class="popup">
   <span id="popup-text"></span>
@@ -638,6 +714,71 @@ button {
         });
     }
 });
+document.addEventListener("DOMContentLoaded", function() {
+    const applyBtn = document.getElementById('apply-coupon-btn');
+    const errorMsg = document.getElementById('coupon-error');
+    
+    if (applyBtn && !applyBtn.disabled) {
+        applyBtn.addEventListener('click', async function() {
+            const selectedCoupon = document.querySelector('input[name="couponId"]:checked');
+            
+            if (!selectedCoupon) {
+                // Show error message instead of alert
+                errorMsg.style.display = 'block';
+                
+                // Hide error after 3 seconds
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+                return;
+            }
 
+            try {
+                errorMsg.style.display = 'none'; // Hide error if showing
+                const response = await fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponId: selectedCoupon.value })
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const result = await response.json();
+                    errorMsg.textContent = result.message || 'Failed to apply coupon';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.textContent = 'An error occurred while applying coupon';
+                errorMsg.style.display = 'block';
+            }
+        });
+    }
+
+    // Remove button handler remains the same
+    const removeBtn = document.querySelector('a[href="/cart/remove-coupon"]');
+    if (removeBtn && !removeBtn.disabled) {
+        removeBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/cart/remove-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const result = await response.json();
+                    alert(result.message || 'Failed to remove coupon');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while removing coupon');
+            }
+        });
+    }
+});
     </script>
 </body>

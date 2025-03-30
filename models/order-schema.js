@@ -36,6 +36,33 @@ items: [{
   size: {
      type: String,
      required: true },
+  status: {
+      type: String,
+      default: 'Pending',
+      required : true
+    },
+    completionDate: { type: Date },
+  cancellationReason: [
+      {
+        reason: {
+          type: String,
+        },
+        cancelledAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    returnReason: [{
+      itemId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+      },
+      reason: {
+        type: String,
+        required: true
+      }
+    }],
 }],
 totalPrice: {
   type: Number,
@@ -69,10 +96,7 @@ deliveryAddress: {
   type: mongoose.Schema.Types.Mixed, 
   required: true
 },
-status: {
-  type: String,
-  default: 'Pending'
-},
+
 payment: {
   type : String,
   required :true
@@ -93,27 +117,8 @@ createdAt: {
   type: Date,
   default: Date.now
 },
-cancellationReason: [{
-  itemId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  reason: {
-    type: String,
-    required: true
-  }
-}],
-completionDate: { type: Date },
-returnReason: [{
-  itemId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  reason: {
-    type: String,
-    required: true
-  }
-}]
+
+
 })
 
 module.exports = mongoose.model('Order', orderSchema);

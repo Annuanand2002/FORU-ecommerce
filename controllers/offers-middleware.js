@@ -1,5 +1,6 @@
 const Offer = require('../models/offer-schema')
 const Product = require('../models/product-schema')
+const Category = require('../models/cateogory-schema')
 const getOfferPage = async (req,res)=>{
   try{
     const offers = await Offer.find({}).lean();
@@ -15,7 +16,7 @@ const updateOfferStatus = async (req,res,next)=>{
     const offers = await Offer.find({})
   const currentDate = new Date();
   for(let offer of offers){
-    if(new Date(offer.endDate)< currentDate && isActive){
+    if(new Date(offer.endDate)< currentDate && offers.isActive){
       offer.isActive = false;
       await offer.save();
     }
@@ -125,6 +126,7 @@ const deletOffer = async(req,res)=>{
   }
 }
 
+/**show product offer listed page */
 const showOfferPage = async(req,res)=>{
   try{
    const productId = req.params.id;
@@ -137,7 +139,20 @@ catch(error){
   res.status(500).json({ message: "An error occurred while fetching offers." });
 }
 }
+/**show category offer listed page */
+const showCategoryOfferPage = async (req,res)=>{
+  try{
+    const categoryId = req.params.id;
+  const offers = await Offer.find({ applicableTo: "category" ,isActive: true}).lean();
+  res.render('admin/showcategoryOffer',{isAdminLogin: false,
+    admin: true,categoryId,offers})
+  }catch(error){
+    console.error("Error fetching offers:", error);
+  res.status(500).json({ message: "An error occurred while fetching offers." });
+  }
+  }
 
+  /**apply the offer in product */
 const applyOffer = async (req, res) => {
   try {
     const { productId, offerId } = req.body;
@@ -196,6 +211,7 @@ const applyOffer = async (req, res) => {
   }
 };
 
+/**remove the offer from product */
 const removeOffer = async (req,res)=>{
   try{
     const {productId,offerId} = req.body;
@@ -217,4 +233,93 @@ const removeOffer = async (req,res)=>{
     res.status(500).json({ message: "An error occurred while removing the offer." });
   }
 }
-module.exports = {getOfferPage,getAddOfferPage,addOffer,updateOfferStatus,getEditOfferPage,editOffer,deletOffer,showOfferPage,applyOffer,removeOffer}
+
+/**apply the offer in category */
+const applyCategoryOffer = async (req,res)=>{
+  try{
+    const {categoryId,offerId} = req.body;
+    console.log('req.body',req.body)
+  const category = await Category.findById(categoryId)
+  console.log("category",category)
+  const offer = await Offer.findById(offerId)
+  console.log("offer",offer)
+  if(!category ||! offer){
+    return res.status(404).json({success: false,
+      error: 'Category or offer not found'})
+  }
+  const products = await Product.find({category:category.name})
+  console.log("products",products)
+  for(const product of products){
+    let shouldApplyCategoryOffer = true
+    let bestOffer = offer 
+    let bestDiscountValue = calculateDiscountValue(offer,product.price)
+
+    if(product.offers && product.offers.length > 0){
+      const productOffers = await Offer.find({_id: { $in: product.offers },isActive: true,endDate: { $gte: new Date() }})
+      for (const productOffer of productOffers) {
+        const currentValue = calculateDiscountValue(productOffer, product.price);
+        if (currentValue > bestDiscountValue) {
+          bestDiscountValue = currentValue;
+          bestOffer = productOffer;
+          shouldApplyCategoryOffer = false;
+        }
+      }
+    }if(shouldApplyCategoryOffer){
+      product.offers = [offer._id];
+    }else{
+      product.offers = [bestOffer._id];
+    }
+    product.offerAmount = bestDiscountValue;
+    await product.save();
+
+  }
+  category.offers = [offer._id];
+  await category.save();
+  res.redirect("/admin/category");
+  }catch(error){
+    console.error('Error applying category offer:', error);
+    return res.status(500).json({success:false,error:error.message})
+  }
+  
+}
+/**to caluclate the offer discount */
+function calculateDiscountValue (offer,price){
+  if (!offer || !offer.isActive) return 0;
+  if(offer.discountType === "percentage"){
+    return price * (offer.discountValue / 100);
+  }
+  return Math.min(offer.discountValue, price);
+}
+
+/**remove offer from catgeory */
+const removeCategoryOffer = async(req,res)=>{
+ try{
+  const {categoryId,offerId} = req.body;
+  const category = await Category.findById(categoryId)
+  const offer = await Offer.findById(offerId)
+
+  if(!category || !offer){
+    return res.status(404).json({success:false,error:"category or offer not found"})
+  }
+  const offerIndex = category.offers.indexOf(offerId)
+  if(offerIndex === -1){
+    return res.status(404).json({success:false,error:"this offer is not applied to the catgeory"})
+  }
+
+  const products = await Product.find({category:category.name,offers:offerId})
+  for(const product of products){
+    product.offers = product.offers.filter(id=>id.toString()!==offerId.toString())
+    product.offerAmount = 0;
+    await product.save()
+  }
+  category.offers = category.offers.filter(id=>id.toString() !== offerId.toString())
+  await category.save()
+  res.redirect('/admin/category')
+ }catch(error){
+  console.error('Error removing category offer:', error);
+  res.status(500).json({success:false,error:error.message})
+ }
+}
+
+module.exports = {getOfferPage,getAddOfferPage,addOffer,updateOfferStatus,getEditOfferPage,editOffer,deletOffer,showOfferPage,
+  applyOffer,removeOffer,showCategoryOfferPage,applyCategoryOffer,removeCategoryOffer}

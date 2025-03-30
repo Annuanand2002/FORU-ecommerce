@@ -104,34 +104,31 @@
   opacity: 0.7;
 }
 </style>
-<div class="container">
+
+  <div class="container" style="padding-left:200px !important">
   <h4 style="margin-top: 30px;color:rgb(158, 147, 147)">Order details</h4>
+  
   <table class="table order-table" style="margin-top: 50px;margin-left:10px;">
     <thead>
       <tr>
         <th>Order</th>
         <th>Date</th>
         <th>Customer</th>
-        <th>Shipping Status</th>
-        <th>Payment</th>
+        <th>No.of items</th>
         <th>Action</th>
       </tr>
     </thead>
     <tbody>
       {{#each orders}}
+      
         <tr>
           <td>#{{this._id}}</td>
           <td>{{formatDate this.createdAt}}</td>
           <td>{{this.userId.name}}</td>
-          <td class="status">
-  <select class="status-dropdown" data-order-id="{{this._id}}" {{#if (or (eq this.status "Completed") (eq this.status "Cancelled") (eq this.status "Returned"))}}disabled{{/if}}>
-    <option value="Pending" {{#ifEquals this.status "Pending"}}selected{{/ifEquals}}>Pending</option>
-    <option value="Shipped" {{#ifEquals this.status "Shipped"}}selected{{/ifEquals}}>Shipped</option>
-    <option value="Completed" {{#ifEquals this.status "Completed"}}selected{{/ifEquals}}>Completed</option>
-    <option value="Cancelled" {{#ifEquals this.status "Cancelled"}}selected{{/ifEquals}}>Cancelled</option>
-    <option value="Returned" {{#ifEquals this.status "Returned"}}selected{{/ifEquals}}>Returned</option>
-  </select>
-  <span class="status-{{this.status}}" style="padding-top:50px;color:rgb(90, 87, 87);font-size:12px;"><br>*{{this.status}}</span>
+          <td style="text-align: center; vertical-align: middle;">
+  <span style="font-family: 'Times New Roman', Times, serif; font-size:14px;color:rgb(72, 67, 67)">
+      {{this.items.length}}
+  </span>
 </td>
           <td class="payment-method">
   {{this.payment}}<br>
@@ -148,38 +145,3 @@
   </table>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const statusDropdowns = document.querySelectorAll('.status-dropdown');
-    statusDropdowns.forEach(dropdown => {
-        dropdown.addEventListener('change', function () {
-            const orderId = this.getAttribute('data-order-id');
-            const newStatus = this.value;
-            updateOrderStatus(orderId, newStatus);
-        });
-    });
-
-    async function updateOrderStatus(orderId, newStatus) {
-        try {
-            const response = await fetch(`/admin/update-order-status/${orderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                const statusCell = document.querySelector(`.status-dropdown[data-order-id="${orderId}"]`).closest('.status');
-                statusCell.querySelector('span').textContent = `*${newStatus}`;
-            } else {
-                alert(result.message || 'An error occurred while updating the order status.');
-            }
-        } catch (error) {
-            alert('An error occurred while updating the order status.');
-        }
-    }
-});
-</script>

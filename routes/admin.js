@@ -9,7 +9,7 @@ const Admin = require('../models/admin-schema');
 const categoryHelper = require('../controllers/cateogory-controller');
 const bcrypt = require('bcrypt');
 const {adminAuth} = require('../controllers/auth-middleware')
-const {orderAdmin,updateOrderAdmin,orderPageUpdate,orderDetails} = require('../controllers/order-controller')
+const {orderAdmin,updateOrderAdmin,orderPageUpdate,orderDetails, invoiceDownload} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 const offerHelper = require('../controllers/offers-middleware')
 const salesHelper = require('../controllers/sales-middleware')
@@ -255,7 +255,7 @@ router.post("/user/unblock/:id", async (req, res) => {
   }
 });
 router.get('/order',adminAuth,orderAdmin)
-router.post('/update-order-status/:id',adminAuth,orderPageUpdate);
+router.post('/update-order-status/:orderId/:itemId',orderPageUpdate);
 router.get('/order-details/:id',orderDetails)
 
 /**coupon */
@@ -276,12 +276,15 @@ router.post('/delete-offer/:id',offerHelper.deletOffer)
 router.get('/show-offer/:id',adminAuth,offerHelper.showOfferPage)
 router.post("/apply-offer", offerHelper.applyOffer);
 router.post("/remove-offer", offerHelper.removeOffer);
-
+router.get('/add-offer/:id',adminAuth,offerHelper.showCategoryOfferPage)
+router.post("/apply-category-offer",offerHelper.applyCategoryOffer)
+router.post('/remove-category-offer',offerHelper.removeCategoryOffer)
 /***sales-report */
 router.get('/sales-report',adminAuth,salesHelper.getSalesReportPage)
 router.post('/filter-sales',salesHelper.filterSalesData)
 
 router.get('/logout',adminHelper.logoutAdmin)
+
 
 
 module.exports = router;

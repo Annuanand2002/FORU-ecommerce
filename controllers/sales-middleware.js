@@ -4,14 +4,13 @@ const Order = require("../models/order-schema");
 const getSalesReportPage = async (req, res) => {
   try {
     const completedOrders = await Order.aggregate([
-
-      {
-        $match: {
-          status: 'Completed'
-        }
-      },
       {
         $unwind: '$items'
+      },
+      {
+        $match: {
+          'items.status': 'Completed'
+        }
       },
       {
         $lookup: {
@@ -78,17 +77,17 @@ const filterSalesData = async (req, res) => {
   }
 
   try {
-    const filterQuery = {
-      status: 'Completed',
-      createdAt: {
-        $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)), // Start of the day
-        $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999)) // End of the day
-      }
-    };
+    const start = new Date(new Date(startDate).setHours(0, 0, 0, 0)); 
+    const end = new Date(new Date(endDate).setHours(23, 59, 59, 999)); 
 
     const filteredOrders = await Order.aggregate([
-      { $match: filterQuery },
       { $unwind: '$items' },
+      { $match :
+        {
+          'items.status' : "Completed",
+          createdAt: { $gte: start, $lte: end }
+        }
+      },
       {
         $lookup: {
           from: 'users',

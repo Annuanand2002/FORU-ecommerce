@@ -1,208 +1,353 @@
-<style>
-  body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
 
-  .container {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    align-items: center;
-  }
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    
+    .container-fluid {
+      padding: 20px;
+    }
+    
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    
+    .card {
+      flex: 1;
+      min-width: 200px;
+      max-width: 250px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .tables-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 30px;
+    }
+    
+     .table-wrapper:first-child {
+        flex: 2; /* Takes twice as much space as the second table */
+        min-width: 400px; /* Increased minimum width */
+    }
 
-  .stats-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 20px;
-  }
+    /* Top-Selling Products Table - Narrower */
+    .table-wrapper:last-child {
+        flex: 1;
+        min-width: 300px;
+    }
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: relative;
+      height: 400px;
+    }
+    
+    .chart-controls {
+      margin: 15px 0;
+      text-align: center;
+    }
+    
+    .active-period {
+      background-color: rgb(228, 178, 117) !important;
+      color: white !important;
+      border-color: rgb(228, 178, 117) !important;
+    }
+    
+    .badge {
+      font-size: 0.75em;
+      padding: 0.5em 0.75em;
+      border-radius: 0.25em;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+    
+    .brand-color {
+      background-color: rgb(228, 178, 117);
+      color: white;
+    }
+    
+    .period-selector {
+      transition: all 0.3s ease;
+      min-width: 80px;
+    }
+    .table-responsive {
+        overflow: visible !important; /* This removes the scrollbar */
+    }
 
-  .card {
-    flex: 1;
-    max-width: 250px;
-    min-width: 200px;
-  }
+    /* Make sure the table takes full width */
+    .table-responsive table {
+        width: 100%;
+    }
 
-  .tables-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    width: 100%;
-    margin-top: 20px;
-  }
-
-  .table-wrapper {
-    flex: 1;
-    min-width: 300px;
-  }
-
-  .filter-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-  }
-
-  .filter-container select {
-    width: 150px;
-    margin-left: 10px;
-  }
-</style>
+  </style>
 
 <body>
-  <div class="container-fluid p-4 position-relative">
-    <button type="button" class="btn mt-4" style="background-color: rgb(228, 178, 117); color: white;" 
-            data-bs-toggle="modal" data-bs-target="#addAdminModal">Add Admin</button>
+  <div class="container-fluid">
+    <button type="button" class="btn brand-color mt-4" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+      Add Admin
+    </button>
 
     <div class="container mt-4">
-      <h3 class="text-center" style="color:rgb(228, 178, 117);" >📊 Dashboard</h3>
-
-      <!-- Filter for Stats
-      <div class="filter-container" style="margin-left:800px;">
-        <label for="statsFilter" style="color:rgb(228, 178, 117);">Filter Stats:</label>
-        <select id="statsFilter" class="form-control">
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
-      </div> -->
+      <h3 class="text-center mb-4" style="color:rgb(228, 178, 117);">📊 Dashboard</h3>
 
       <!-- Stats Cards -->
-      <div class="stats-container mt-4">
-        <div class="card text-white" style="background-color:rgb(228, 178, 117);">
-          <div class="card-body">
-            <h4>Total Sales</h4>
-            <h2 id="totalSales">₹{{totalSales}}</h2>
+      <div class="stats-container">
+        <div class="card text-white brand-color">
+          <div class="card-body text-center">
+            <h5 class="card-title">Total Sales</h5>
+            <h2 class="card-text">₹{{totalSales}}</h2>
           </div>
         </div>
+        
         <div class="card text-white" style="background-color:rgb(207, 175, 136);">
-          <div class="card-body">
-            <h4>Total Orders</h4>
-            <h2 id="totalOrders">{{totalOrders}}</h2>
+          <div class="card-body text-center">
+            <h5 class="card-title">Total Orders</h5>
+            <h2 class="card-text">{{totalOrders}}</h2>
           </div>
         </div>
-        <div class="card  text-dark" style="background-color:rgb(186, 204, 167);">
-          <div class="card-body">
-            <h4>Products Sold</h4>
-            <h2 id="totalProductsSold">{{totalProductSold}}</h2>
+        
+        <div class="card text-dark" style="background-color:rgb(186, 204, 167);">
+          <div class="card-body text-center">
+            <h5 class="card-title">Products Sold</h5>
+            <h2 class="card-text">{{totalProductSold}}</h2>
           </div>
         </div>
+        
         <div class="card text-white" style="background-color:rgb(207, 167, 167);">
-          <div class="card-body">
-            <h4>Pending Orders</h4>
-            <h2 id="pendingOrders">{{pendingOrders}}</h2>
+          <div class="card-body text-center">
+            <h5 class="card-title">Pending Orders</h5>
+            <h2 class="card-text">{{pendingOrders}}</h2>
           </div>
         </div>
       </div>
 
-      <!-- Charts -->
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <canvas id="salesChart"></canvas>
+      {{!-- <!-- Sales Chart -->
+      <div class="chart-container">
+        <div class="chart-controls">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary period-selector active-period" data-period="daily">Daily</button>
+            <button type="button" class="btn btn-outline-secondary period-selector" data-period="weekly">Weekly</button>
+            <button type="button" class="btn btn-outline-secondary period-selector" data-period="monthly">Monthly</button>
+          </div>
         </div>
-      </div>
+        <canvas id="salesChart"></canvas>
+      </div> --}}
 
-      <!-- Tables (Recent Orders and Top-Selling Products) -->
-      <div class="tables-container mt-4">
+      <!-- Tables Section -->
+      <div class="tables-container">
         <div class="table-wrapper">
-          <h4>📦 Recent Orders</h4>
-          <table class="table table-bordered">
-            <thead class="thead-dark">
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Payment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each orders}}
-              <tr>
-                <td>{{this._id}}</td>
-                <td>{{this.userId.name}}</td>
-                <td>₹{{this.totalPrice}}</td>
-                <td><span class="badge bg-{{statusColor this.status}}">{{this.status}}</span></td>
-                <td>{{this.payment}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
+          <h4 class="mb-3">📦 Recent Orders</h4>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each orders}}
+                <tr>
+                  <td>{{this._id}}</td>
+                  <td>{{this.userId.name}}</td>
+                  <td>₹{{this.totalPrice}}</td>
+                  <td>
+                    {{#each (getStatusCounts this.items)}}
+                    <span class="badge bg-{{statusColor @key}}">
+                      {{@key}}: {{this}}
+                    </span>
+                    {{/each}}
+                  </td>
+                  <td>{{this.payment}}</td>
+                </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="table-wrapper">
-          <h4>🌟 Top-Selling Products</h4>
-          <table class="table table-bordered">
-            <thead class="thead-dark">
-              <tr>
-                <th>Product Name</th>
-                <th>Units Sold</th>
-                <th>Total Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each topSellingProducts}}
-              <tr>
-                <td>{{this.productDetails.name}}</td>
-                <td>{{this.unitsSold}}</td>
-                <td>₹{{this.revenue}}</td>
-              </tr>
-              {{/each}}
-            </tbody>
-          </table>
+          <h4 class="mb-3">🌟 Top-Selling Products</h4>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Product Name</th>
+                  <th>Units Sold</th>
+                  <th>Total Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each topSellingProducts}}
+                <tr>
+                  <td>{{this.productDetails.name}}</td>
+                  <td>{{this.unitsSold}}</td>
+                  <td>₹{{this.revenue}}</td>
+                </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  let salesData = {{{salesData}}}; // Ensure JSON is passed properly
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {{!-- <script>
+    // Initialize chart with default period
+    let currentPeriod = 'weekly';
+    let salesChart;
+    const salesData = {{{salesData}}};
 
-  function formatSalesData(data) {
-    return {
-      labels: data.map(entry => entry._id),
-      amounts: data.map(entry => entry.total)
-    };
-  }
-
-  let dailySales = formatSalesData(salesData.daily);
-
-  let salesChart = new Chart(document.getElementById('salesChart'), {
-    type: 'line',
-    data: {
-      labels: dailySales.labels,
-      datasets: [{
-        label: 'Sales Revenue',
-        data: dailySales.amounts,
-        borderColor: 'blue',
-        borderWidth: 2,
-        backgroundColor: 'rgba(0, 123, 255, 0.2)',
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
+    // Format date labels based on period
+    function formatDateLabel(dateString, period) {
+      if (period === 'daily') {
+        return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      }
+      if (period === 'weekly') {
+        const [year, week] = dateString.split('-');
+        return `Week ${week}, ${year}`;
+      }
+      return new Date(`${dateString}-01`).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
     }
-  });
 
-  function updateSalesChart(period) {
-    let data = formatSalesData(salesData[period]);
-    salesChart.data.labels = data.labels;
-    salesChart.data.datasets[0].data = data.amounts;
-    salesChart.update();
-  }
+    // Initialize or update chart
+    function renderChart() {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      const periodData = salesData[currentPeriod] || [];
+      
+      const chartData = {
+        labels: periodData.map(entry => formatDateLabel(entry._id, currentPeriod)),
+        revenueData: periodData.map(entry => entry.total),
+        orderCountData: periodData.map(entry => entry.count)
+      };
 
-  document.getElementById('statsFilter').addEventListener('change', function() {
-    updateSalesChart(this.value);
-  });
-</script>
+      if (salesChart) {
+        salesChart.destroy();
+      }
 
+      salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: 'Sales Revenue (₹)',
+              data: chartData.revenueData,
+              backgroundColor: 'rgba(228, 178, 117, 0.7)',
+              borderColor: 'rgba(228, 178, 117, 1)',
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Number of Orders',
+              data: chartData.orderCountData,
+              type: 'line',
+              borderColor: 'rgba(100, 149, 237, 1)',
+              backgroundColor: 'rgba(100, 149, 237, 0.1)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: 'rgba(100, 149, 237, 1)',
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 20
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label.includes('Revenue')) {
+                    return `${label}: ₹${context.raw.toLocaleString('en-IN')}`;
+                  }
+                  return `${label}: ${context.raw}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              type: 'linear',
+              display: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Revenue (₹)'
+              },
+              grid: {
+                drawOnChartArea: true
+              }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              title: {
+                display: true,
+                text: 'Order Count'
+              },
+              grid: {
+                drawOnChartArea: false
+              },
+              min: 0
+            }
+          }
+        }
+      });
+    }
+
+    // Period selector functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      renderChart();
+      
+      document.querySelectorAll('.period-selector').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentPeriod = this.dataset.period;
+          renderChart();
+          document.querySelector('.active-period').classList.remove('active-period');
+          this.classList.add('active-period');
+        });
+      });
+    });
+  </script> --}}
 </body>

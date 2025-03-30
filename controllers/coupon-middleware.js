@@ -141,7 +141,7 @@ const deleteCoupon = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
+/**user-side */
 const getApplyCouponPage = async (req, res) => {
   try {
     const totalPrice = parseFloat(req.query.totalPrice);

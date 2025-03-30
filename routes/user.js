@@ -14,7 +14,7 @@ const {updateProfile,deleteAccount}= require('../controllers/userAccount-middlew
 const {wishlistMangement, getWishlistData, fetchProductWishlist,getWishlist}= require('../controllers/wishlist-middleware')
 const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress} = require('../controllers/address-middleware')
 const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon} = require('../controllers/cart-middleware')
-const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses} = require('../controllers/order-controller')
+const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses,invoiceDownload} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 const walletHelper = require('../controllers/wallet-middleware')
 
@@ -253,5 +253,8 @@ router.post('/wallet/reduce',walletHelper.addFromWallet)
 
 /**wallet mangement */
 router.get("/wallet",checkAuthentication,walletHelper.getWallet)
+
+/**invoice */
+router.get('/orders/:orderId/invoice',invoiceDownload)
 
 module.exports = router;
