@@ -118,7 +118,8 @@ createdAt: {
   default: Date.now
 },
 
-
+paymentAttempts: { type: Number, default: 0 },
+lastPaymentAttempt: { type: Date },
 })
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -1,5 +1,7 @@
-const Coupon = require("../models/coupon-schema");
+const Coupon = require("../models/coupon-schema")
 
+
+/**render the coupon page */
 const showCouponPage = async (req, res) => {
   try {
     let page = parseInt(req.query.page) || 1;
@@ -39,10 +41,13 @@ const showCouponPage = async (req, res) => {
   }
 };
 
+/**get add coupon page */
 const getaddCoupon = async (req, res) => {
   res.render("admin/add-coupon", { admin: true, isAdminLogin: false });
 };
 
+
+/*logic to add coupn*/
 const addCoupon = async (req, res) => {
   try {
     const {
@@ -78,6 +83,8 @@ const addCoupon = async (req, res) => {
   }
 };
 
+
+/**render edit coupon page */
 const getEditPage = async (req, res) => {
   try {
     const couponId = req.params.id;
@@ -100,6 +107,8 @@ const getEditPage = async (req, res) => {
   }
 };
 
+
+/**logic for edit coupon */
 const editCoupon = async (req, res) => {
   try {
     const couponId = req.params.id;
@@ -131,6 +140,7 @@ const editCoupon = async (req, res) => {
   }
 };
 
+/*logic for delete coupon*/
 const deleteCoupon = async (req, res) => {
   try {
     const couponId = req.params.id;
@@ -156,6 +166,9 @@ const getApplyCouponPage = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
 module.exports = {
   showCouponPage,
   getaddCoupon,

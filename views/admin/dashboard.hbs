@@ -1,5 +1,4 @@
-
-  <style>
+<style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f8f9fa;
@@ -40,16 +39,16 @@
       margin-top: 30px;
     }
     
-     .table-wrapper:first-child {
-        flex: 2; /* Takes twice as much space as the second table */
-        min-width: 400px; /* Increased minimum width */
+    .table-wrapper:first-child {
+      flex: 2;
+      min-width: 400px;
     }
-
-    /* Top-Selling Products Table - Narrower */
+    
     .table-wrapper:last-child {
-        flex: 1;
-        min-width: 300px;
+      flex: 1;
+      min-width: 300px;
     }
+    
     .chart-container {
       background: white;
       padding: 20px;
@@ -88,17 +87,37 @@
     .period-selector {
       transition: all 0.3s ease;
       min-width: 80px;
+      margin: 0 5px;
+      border: 1px solid #ddd;
+      background: white;
     }
+    
     .table-responsive {
-        overflow: visible !important; /* This removes the scrollbar */
+      overflow: visible !important;
     }
-
-    /* Make sure the table takes full width */
+    
     .table-responsive table {
-        width: 100%;
+      width: 100%;
     }
-
-  </style>
+    
+    /* Status badge colors */
+    .bg-Pending {
+      background-color: #ffc107;
+      color: #000;
+    }
+    .bg-Completed {
+      background-color: #28a745;
+      color: white;
+    }
+    .bg-Processing {
+      background-color: #17a2b8;
+      color: white;
+    }
+    .bg-Cancelled {
+      background-color: #dc3545;
+      color: white;
+    }
+</style>
 
 <body>
   <div class="container-fluid">
@@ -140,18 +159,29 @@
         </div>
       </div>
 
-      {{!-- <!-- Sales Chart -->
-      <div class="chart-container">
-        <div class="chart-controls">
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary period-selector active-period" data-period="daily">Daily</button>
-            <button type="button" class="btn btn-outline-secondary period-selector" data-period="weekly">Weekly</button>
-            <button type="button" class="btn btn-outline-secondary period-selector" data-period="monthly">Monthly</button>
+      <!-- Charts Section -->
+      <div class="row mt-4">
+        <div class="col-md-8">
+          <div class="chart-container">
+            <h4 style="color: rgb(228, 178, 117);">📈 Sales Trend</h4>
+            <div class="chart-controls">
+              <button class="btn btn-sm period-selector active-period" data-period="daily">Daily</button>
+              <button class="btn btn-sm period-selector" data-period="weekly">Weekly</button>
+              <button class="btn btn-sm period-selector" data-period="monthly">Monthly</button>
+            </div>
+            <canvas id="salesChart"></canvas>
           </div>
         </div>
-        <canvas id="salesChart"></canvas>
-      </div> --}}
-
+        <div class="col-md-4">
+          <div class="chart-container">
+            <h4 style="color: rgb(228, 178, 117);">🛍️ Sales by Category</h4>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+<br>
+<br>
+<br>
       <!-- Tables Section -->
       <div class="tables-container">
         <div class="table-wrapper">
@@ -175,7 +205,7 @@
                   <td>₹{{this.totalPrice}}</td>
                   <td>
                     {{#each (getStatusCounts this.items)}}
-                    <span class="badge bg-{{statusColor @key}}">
+                    <span class="badge bg-{{@key}}">
                       {{@key}}: {{this}}
                     </span>
                     {{/each}}
@@ -218,136 +248,135 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  {{!-- <script>
-    // Initialize chart with default period
-    let currentPeriod = 'weekly';
-    let salesChart;
-    const salesData = {{{salesData}}};
 
-    // Format date labels based on period
-    function formatDateLabel(dateString, period) {
-      if (period === 'daily') {
-        return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-      }
-      if (period === 'weekly') {
-        const [year, week] = dateString.split('-');
-        return `Week ${week}, ${year}`;
-      }
-      return new Date(`${dateString}-01`).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-    }
-
-    // Initialize or update chart
-    function renderChart() {
-      const ctx = document.getElementById('salesChart').getContext('2d');
-      const periodData = salesData[currentPeriod] || [];
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Parse the server-side data
+      const salesData = JSON.parse('{{{salesData}}}');
+      const categoryData = JSON.parse('{{{categorySales}}}');
       
-      const chartData = {
-        labels: periodData.map(entry => formatDateLabel(entry._id, currentPeriod)),
-        revenueData: periodData.map(entry => entry.total),
-        orderCountData: periodData.map(entry => entry.count)
-      };
-
-      if (salesChart) {
-        salesChart.destroy();
-      }
-
-      salesChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: chartData.labels,
-          datasets: [
-            {
-              label: 'Sales Revenue (₹)',
-              data: chartData.revenueData,
-              backgroundColor: 'rgba(228, 178, 117, 0.7)',
-              borderColor: 'rgba(228, 178, 117, 1)',
-              borderWidth: 1,
-              yAxisID: 'y'
-            },
-            {
-              label: 'Number of Orders',
-              data: chartData.orderCountData,
-              type: 'line',
-              borderColor: 'rgba(100, 149, 237, 1)',
-              backgroundColor: 'rgba(100, 149, 237, 0.1)',
+      // Log data for debugging
+      console.log('Sales Data:', salesData);
+      console.log('Category Data:', categoryData);
+      
+      // Initialize sales chart
+      const salesCtx = document.getElementById('salesChart').getContext('2d');
+      let salesChart = createSalesChart(salesCtx, salesData.daily);
+      
+      // Initialize category chart
+      const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+      createCategoryChart(categoryCtx, categoryData);
+      
+      // Period selector functionality
+      document.querySelectorAll('.period-selector').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.period-selector').forEach(b => b.classList.remove('active-period'));
+          this.classList.add('active-period');
+          
+          const period = this.dataset.period;
+          updateSalesChart(salesChart, salesData[period]);
+        });
+      });
+      
+      // Chart creation functions
+      function createSalesChart(ctx, periodData) {
+        return new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: periodData.labels,
+            datasets: [{
+              label: 'Sales (₹)',
+              data: periodData.data,
+              backgroundColor: 'rgba(228, 178, 117, 0.2)',
+              borderColor: 'rgb(228, 178, 117)',
               borderWidth: 2,
-              pointRadius: 4,
-              pointBackgroundColor: 'rgba(100, 149, 237, 1)',
-              yAxisID: 'y1'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: {
-                usePointStyle: true,
-                padding: 20
+              tension: 0.3,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return ' ₹' + context.raw.toLocaleString();
+                  }
+                }
               }
             },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  let label = context.dataset.label || '';
-                  if (label.includes('Revenue')) {
-                    return `${label}: ₹${context.raw.toLocaleString('en-IN')}`;
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return '₹' + value.toLocaleString();
                   }
-                  return `${label}: ${context.raw}`;
                 }
               }
             }
+          }
+        });
+      }
+      
+      function updateSalesChart(chart, periodData) {
+        chart.data.labels = periodData.labels;
+        chart.data.datasets[0].data = periodData.data;
+        chart.update();
+      }
+      
+      function createCategoryChart(ctx, data) {
+        const labels = data.map(item => item._id || 'Uncategorized');
+        const values = data.map(item => item.totalSales);
+        const backgroundColors = generateColors(labels.length);
+        
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: backgroundColors,
+              borderWidth: 1
+            }]
           },
-          scales: {
-            x: {
-              grid: {
-                display: false
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  padding: 20
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return ' ₹' + context.raw.toLocaleString();
+                  }
+                }
               }
-            },
-            y: {
-              type: 'linear',
-              display: true,
-              position: 'left',
-              title: {
-                display: true,
-                text: 'Revenue (₹)'
-              },
-              grid: {
-                drawOnChartArea: true
-              }
-            },
-            y1: {
-              type: 'linear',
-              display: true,
-              position: 'right',
-              title: {
-                display: true,
-                text: 'Order Count'
-              },
-              grid: {
-                drawOnChartArea: false
-              },
-              min: 0
             }
           }
-        }
-      });
-    }
-
-    // Period selector functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      renderChart();
-      
-      document.querySelectorAll('.period-selector').forEach(btn => {
-        btn.addEventListener('click', function() {
-          currentPeriod = this.dataset.period;
-          renderChart();
-          document.querySelector('.active-period').classList.remove('active-period');
-          this.classList.add('active-period');
         });
-      });
+      }
+      
+      function generateColors(count) {
+        const baseColor = [228, 178, 117];
+        const colors = [];
+        
+        for (let i = 0; i < count; i++) {
+          // Create variations of your brand color
+          const hue = (baseColor[0] + (i * 30)) % 360;
+          colors.push(`hsla(${hue}, 70%, 65%, 0.7)`);
+        }
+        
+        return colors;
+      }
     });
-  </script> --}}
+  </script>
 </body>

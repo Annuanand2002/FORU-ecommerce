@@ -1,5 +1,6 @@
 const User = require('../models/user-schema');
 
+/**add address in profile page */
 async function addAddress(req,res){
   const {name,phone,house,city,state,postalCode} = req.body;
   if (!name || !phone || !house || !city || !state || !postalCode) {
@@ -33,7 +34,7 @@ res.redirect('/address')
       res.status(500).send('Server error');
   }
 }
-
+/**get the profile-side address page */
 async function getAddresses(req, res) {
     try {
       const userId = req.session.user._id;
@@ -50,6 +51,7 @@ async function getAddresses(req, res) {
     }
 }
 
+/**remove the address from profile side */
 async function removeAddress(req, res) {
   try {
       const userId = req.session.user._id;
@@ -70,6 +72,8 @@ async function removeAddress(req, res) {
       res.status(500).send('Server error');
   }
 }
+
+/**get edit address page of profile side. */
 async function getEditAddresses(req, res) {
   try {
     const userId = req.session.user._id;
@@ -85,6 +89,8 @@ async function getEditAddresses(req, res) {
       res.status(500).send('Server error');
   }
 }
+
+/**edit address logic in profile-side */
 async function editAddress(req, res) {
   const { name, phone, house, city, state, postalCode, addressId } = req.body; // Include addressId
   if (!name || !phone || !house || !city || !state || !postalCode || !addressId) {
@@ -118,6 +124,8 @@ async function editAddress(req, res) {
     res.status(500).send('Server error');
   }
 }
+
+/**logic to set a address as default address */
 async function setDefaultAddress(req, res) {
   const userId = req.session.user._id;
   const addressId = req.params.id;

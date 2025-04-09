@@ -219,13 +219,26 @@ const handlePaymentResponse = async (req, res) => {
         { $set: { paymentStatus: "Completed" } }
       );
     } else if (status === "failed") {
+      const failedPaymentId = paymentId || `failed_${Date.now()}`;
+      orders.paymentId = failedPaymentId
       orders.paymentStatus = "Failed";
+      orders.paymentAttempts = (orders.paymentAttempts || 0) +1;
+      orders.lastPaymentAttempt = new Date()
       await orders.save();
       await Sales.updateOne(
         { userId: userId },
         { $set: { paymentStatus: "Failed" } }
       );
+
+      return res.json({ 
+        success: false,
+        orderId: orders._id,
+        paymentFailed: true,
+        razorpayOrderId: orders.razorpayOrderId,
+        redirectUrl: `/payment-failed/${orders._id}`
+      });
     }
+    
     res.status(200).json({ message: `Payment ${status}.` });
   } catch (error) {
     console.error("Error:", error);
@@ -260,7 +273,7 @@ const orderConfirmed = async (req, res) => {
 /**render order-page in admin */
 const orderAdmin = async (req, res) => {
   try {
-    const orders = await Order.find().populate("userId", "name").lean();
+    const orders = await Order.find().populate("userId", "name").sort({ createdAt: -1 }).lean();
 
     res.render("admin/order", {
       isAdminLogin: false,
@@ -343,6 +356,7 @@ const getOrderPage = async (req, res) => {
 
     const orders = await Order.find({ userId })
       .populate("items.productId")
+      .sort({ createdAt: -1 }) 
       .skip(startIndex)
       .limit(limit)
       .lean();
@@ -421,28 +435,36 @@ const orderCancel = async (req, res) => {
       }
     }
 
-    const itemTotal = item.price * item.quantity;
+    const calculateRefundAmount = ()=>{
+      const orderTotalBeforeDiscount = order.items.reduce((sum,item)=>sum + (item.price * item.quantity),0)
+      const discountRatio = order.discountCouponFee/orderTotalBeforeDiscount;
+      const itemSubTotal = item.price * item.quantity
+      const itemDiscount = Math.round(itemSubTotal * discountRatio)
+      return itemSubTotal - itemDiscount;
+    }
 
-    if (order.payment === "Cash on Delivery" || order.payment === "Wallet") {
+    const refundAmount = calculateRefundAmount();
+
+     if ( order.payment === "Wallet") {
       const wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {
         const newWallet = new Wallet({
           userId: order.userId,
-          balance: itemTotal,
+          balance: refundAmount,
           transactions: [
             {
               type: "credit",
-              amount: itemTotal,
+              amount:  refundAmount,
               description: `Refund for cancelled item ${item.productName} in order ${order._id}`,
             },
           ],
         });
         await newWallet.save();
       } else {
-        wallet.balance += itemTotal;
+        wallet.balance += refundAmount;
         wallet.transactions.push({
           type: "credit",
-          amount: refund/100,
+          amount:  refundAmount/100,
           description: `Refund for cancelled item ${item.productName} in order ${order._id}`,
         });
         await wallet.save();
@@ -453,8 +475,8 @@ const orderCancel = async (req, res) => {
       }
 
       try {
-        const razorpayRefundAmount = itemTotal * 100;
-
+        const razorpayRefundAmount =  refundAmount * 100;
+        console.log("razorpayRefundAmount",razorpayRefundAmount)
         const refund = await razorpay.payments.refund(order.paymentId, {
           amount: razorpayRefundAmount,
           speed: "normal",
@@ -464,11 +486,11 @@ const orderCancel = async (req, res) => {
         if (!wallet) {
           const newWallet = new Wallet({
             userId: order.userId,
-            balance: itemTotal,
+            balance:  refundAmount,
             transactions: [
               {
                 type: "credit",
-                amount: itemTotal,
+                amount:  refundAmount,
                 description: `Refund for cancelled item ${item.productName} in order ${order._id}`,
               },
             ],
@@ -476,10 +498,10 @@ const orderCancel = async (req, res) => {
           await newWallet.save();
         } else {
 
-          wallet.balance += itemTotal;
+          wallet.balance +=  refundAmount;
           wallet.transactions.push({
             type: "credit",
-            amount: itemTotal,
+            amount:  refundAmount,
             description: `Refund for cancelled item ${item.productName} in order ${order._id}`,
           });
           await wallet.save();
@@ -575,7 +597,15 @@ const orderReturn = async (req, res) => {
       }
     }
 
-    const itemTotal = item.price * item.quantity;
+    const calculateRefundAmount = ()=>{
+      const orderTotalBeforeDiscount = order.items.reduce((sum,item)=>sum + (item.price * item.quantity),0)
+      const discountRatio = order.discountCouponFee/orderTotalBeforeDiscount;
+      const itemSubTotal = item.price * item.quantity
+      const itemDiscount = Math.round(itemSubTotal * discountRatio)
+      return itemSubTotal - itemDiscount;
+    }
+
+    const refundAmount = calculateRefundAmount();
 
     
     if (order.payment === "Cash on Delivery" || order.payment === "Wallet") {
@@ -585,11 +615,11 @@ const orderReturn = async (req, res) => {
 
         const newWallet = new Wallet({
           userId: order.userId,
-          balance: itemTotal,
+          balance: refundAmount,
           transactions: [
             {
               type: "credit",
-              amount: itemTotal,
+              amount: refundAmount,
               description: `Refund for returned item ${item.productName} in order ${order._id}`,
             },
           ],
@@ -600,7 +630,7 @@ const orderReturn = async (req, res) => {
         wallet.balance += itemTotal;
         wallet.transactions.push({
           type: "credit",
-          amount: itemTotal,
+          amount: refundAmount,
           description: `Refund for returned item ${item.productName} in order ${order._id}`,
         });
         await wallet.save();
@@ -612,7 +642,7 @@ const orderReturn = async (req, res) => {
 
       try {
 
-        const razorpayRefundAmount = itemTotal * 100;
+        const razorpayRefundAmount = refundAmount * 100;
 
 
         const refund = await razorpay.payments.refund(order.paymentId, {
@@ -638,10 +668,10 @@ const orderReturn = async (req, res) => {
           await newWallet.save();
         } else {
 
-          wallet.balance += itemTotal;
+          wallet.balance += refundAmount;
           wallet.transactions.push({
             type: "credit",
-            amount: itemTotal,
+            amount: refundAmount,
             description: `Refund for returned item ${item.productName} in order ${order._id}`,
           });
           await wallet.save();
@@ -879,6 +909,62 @@ const invoiceDownload = async (req, res) => {
   }
 };
 
+const paymentFailPage = async (req,res)=>{
+  console.log("req.params.orderId",req.params.orderId)
+  const order = await Order.findById(req.params.orderId)
+  .populate("userId")
+  .populate("items.productId")
+  .lean();
+  console.log("order",order)
+  res.render("user/payment-fail", { order,paymentMethod: order.payment,
+    deliveryAddress: order.deliveryAddress,
+    isAdminLogin: true,});
+}
+/**retry payment */
+const retryPayment = async (req,res)=>{
+  try{
+    const {orderId} = req.body
+    console.log("req.body of retry",req.body)
+    const userId = req.session.user._id
+    const order = await Order.findOne({_id : orderId,userId})
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+    if (order.paymentStatus === "Completed") {
+      return res.status(400).json({ message: "Payment already completed." });
+    }
+    if (order.paymentAttempts >= 3) {
+      return res.status(400).json({ 
+        message: "Maximum payment attempts reached. Please contact support." 
+      });
+    }
+    // Create new Razorpay order
+    console.log("heyyyy")
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.newTotal * 100,
+      currency: "INR",
+      receipt: `order_${order._id}_retry_${order.paymentAttempts + 1}`,
+    });
+console.log("razorpayOrder",razorpayOrder)
+    // Update order with new attempt
+    order.razorpayOrderId = razorpayOrder.id;
+    order.paymentAttempts += 1;
+    order.lastPaymentAttempt = new Date();
+    await order.save();
+console.log("sucesss")
+    return res.status(200).json({
+      success: true,
+      orderId: order._id,
+      razorpayOrderId: razorpayOrder.id,
+      amount: razorpayOrder.amount
+    });
+  }catch(error){
+    console.log(error)
+    res.status(500).json({  success: false,message: "Retry failed" });
+  }
+}
+
 module.exports = {
   invoiceDownload,
   placeOrder,
@@ -892,5 +978,7 @@ module.exports = {
   orderCancel,
   handlePaymentResponse,
   addAddressses,
-  orderReturn
+  orderReturn,
+  paymentFailPage,
+  retryPayment
 };

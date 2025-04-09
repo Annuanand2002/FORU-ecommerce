@@ -330,7 +330,9 @@
         id="cancel-order-button" 
         class="get-invoice-button" 
         style="background-color: #d6a57a; color: white;"
-        data-order-status="{{item.status}}">
+        data-order-status="{{item.status}}"
+        data-payment-status = "{{order.paymentStatus}}"
+        data-payment-method="{{order.payment}}">
         Cancel Order
     </button>
 </div>
@@ -399,8 +401,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize cancel button based on order status
   if (cancelButton) {
     const orderStatus = cancelButton.dataset.orderStatus;
+    const paymentStatus = cancelButton.dataset.paymentStatus;
+    const paymentMethod = cancelButton.dataset.paymentMethod; 
+
+     const shouldDisable = 
+      orderStatus !== "Pending" || 
+      (paymentMethod === "Online Payment" && paymentStatus !== "Completed");
     
-    if (orderStatus !== "Pending") {
+    if (shouldDisable ) {
       cancelButton.disabled = true;
       cancelButton.style.backgroundColor = "#ccc";
       cancelButton.style.cursor = "not-allowed";

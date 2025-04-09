@@ -361,8 +361,8 @@ margin-right: 5px;
 <script>
 document.querySelector('.place-order').addEventListener('click', async function () {
     const addressId = '{{addressObj._id}}';
-    const walletAmountUsed = parseFloat('{{cart.walletAmountUsed}}'); // Get the wallet amount used
-    const newTotalAmount = parseFloat('{{cart.newTotalAmount}}'); // Get the new total amount
+    const walletAmountUsed = parseFloat('{{cart.walletAmountUsed}}');
+    const newTotalAmount = parseFloat('{{cart.newTotalAmount}}'); 
 
     if (!addressId) {
         showPopup('Please select a delivery address.');
@@ -407,67 +407,73 @@ document.querySelector('.place-order').addEventListener('click', async function 
         if (response.ok) {
             if (paymentMethod === 'Online Payment') {
                 const options = {
-                    key: 'rzp_test_buXTHPZB2Eujic',
-                    amount: data.amount,
-                    currency: 'INR',
-                    name: 'FORU',
-                    description: 'Payment for your order',
-                    order_id: data.razorpayOrderId,
-                    handler: async function (response) {
-                        console.log('Razorpay Response:', response);
-                        const paymentResponse = await fetch('/handle-payment-response', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                orderId: response.razorpay_order_id,
-                                paymentId: response.razorpay_payment_id,
-                                signature: response.razorpay_signature,
-                                status: 'success',
-                                order: data.orderId,
-                            }),
-                        });
-                        if (paymentResponse.ok) {
-                            window.location.href = `/order-confirmation/${data.orderId}`;
-                        } else {
-                            showPopup('Payment verification failed.');
-                        }
-                    },
-                    prefill: {
-                        name: '{{user.name}}',
-                        email: '{{user.email}}',
-                        contact: '{{user.phone}}',
-                    },
-                    theme: {
-                        color: '#d6a57a',
-                    },
-                };
-                const rzp = new Razorpay(options);
-                rzp.on('payment failed', async function (response) {
-                    console.log("haai");
-                    const paymentResponse = await fetch('/handle-payment-response', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            orderId: order.id,
-                            status: 'failed',
-                        }),
-                    });
-                    if (paymentMethod.ok) {
-                        showPopup('Payment failed. Please try again.');
-                    } else {
-                        showPopup('Failed to process payment.');
-                    }
+    key: 'rzp_test_buXTHPZB2Eujic',
+    amount: data.amount,
+    currency: 'INR',
+    name: 'FORU',
+    description: 'Payment for your order',
+    order_id: data.razorpayOrderId,
+    handler: async function (response) {
+        console.log('Razorpay Response:', response);
+        const paymentResponse = await fetch('/handle-payment-response', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                status: 'success',
+                order: data.orderId,
+            }),
+        });
+        if (paymentResponse.ok) {
+            window.location.href = `/order-confirmation/${data.orderId}`;
+        } else {
+            showPopup('Payment verification failed.');
+        }
+    },
+    modal: {
+        ondismiss: async function() {
+            try {
+                const paymentResponse = await fetch('/handle-payment-response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: data.razorpayOrderId, 
+                        status: 'failed',
+                        order: data.orderId   
+                    })
                 });
-                rzp.open();
+                const result = await paymentResponse.json();
+                if (result.paymentFailed) {
+                    window.location.href = `/payment-failed/${data.orderId}`;
+                }
+            } catch (error) {
+                console.error('Error handling modal dismissal:', error);
+                showPopup('Failed to process payment status');
+            }
+        }
+    },
+    prefill: {
+        name: '{{user.name}}',
+        email: '{{user.email}}',
+        contact: '{{user.phone}}',
+    },
+    theme: {
+        color: '#d6a57a',
+    },
+};
+
+const rzp = new Razorpay(options);
+rzp.open();
+
             } else if (paymentMethod === 'Wallet') {
-                // Redirect to order confirmation page for full wallet payment
+                
                 window.location.href = `/order-confirmation/${data.orderId}`;
             } else {
-                // For Cash on Delivery, redirect to order confirmation
+                
                 window.location.href = `/order-confirmation/${data.orderId}`;
             }
         } else {

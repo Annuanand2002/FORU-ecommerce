@@ -1,6 +1,8 @@
 const Sales = require('../models/sales-schema')
 const Order = require("../models/order-schema");
 
+
+/**render sales report page */
 const getSalesReportPage = async (req, res) => {
   try {
     const completedOrders = await Order.aggregate([
@@ -62,7 +64,7 @@ console.log("getSalesReportPage",getSalesReportPage)
   }
 };
 
-
+/**logic to filter sales data in sales report page */
 const filterSalesData = async (req, res) => {
   const { startDate, endDate } = req.body;
 

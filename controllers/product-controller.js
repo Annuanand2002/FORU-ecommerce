@@ -62,48 +62,123 @@ async function getEditProduct(productId) {
   }
 }
 
+// const updateProduct = async (productId, productData, files) => {
+//   try {
+//     const { name, price, category, bestSeller, latestCollection,sizeName,sizeQuantity,description,removedImages } = productData;
+//     let sizes = [];
+//     if (Array.isArray(sizeName) && Array.isArray(sizeQuantity) && sizeName.length === sizeQuantity.length) {
+//       sizes = sizeName.map((size, index) => ({
+//         size,
+//         quantity: parseInt(sizeQuantity[index], 10), 
+//       }));
+//     }
+    
+//     const existingProduct = await Product.findById(productId);
+//     if (!existingProduct) {
+//       return { success: false, error: 'Product not found' };
+//     }
+
+//     let updatedImages = existingProduct.images || [];
+//     if (files && files.length > 0) {
+//       const newImages = files.map(file => '/uploads/' + file.filename);
+//       updatedImages = updatedImages.concat(newImages); 
+//     }
+
+//     const updatedData = {
+//       name,
+//       price,
+//       category,
+//       images: updatedImages, 
+//       bestSeller: bestSeller === 'on',
+//       latestCollection: latestCollection === 'on',
+//       sizes,
+//       description
+//     };
+    
+//     const updatedProduct = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
+//     return { success: true, product: updatedProduct };
+//   } catch (err) {
+//     console.error('Error updating product:', err);
+//     return { success: false, error: err };
+//   }
+// };
+
+
 const updateProduct = async (productId, productData, files) => {
   try {
-    const { name, price, category, bestSeller, latestCollection,sizeName,sizeQuantity,description } = productData;
-    let sizes = [];
-    if (Array.isArray(sizeName) && Array.isArray(sizeQuantity) && sizeName.length === sizeQuantity.length) {
-      sizes = sizeName.map((size, index) => ({
-        size,
-        quantity: parseInt(sizeQuantity[index], 10), 
-      }));
-    }
-    
-    const existingProduct = await Product.findById(productId);
-    if (!existingProduct) {
-      return { success: false, error: 'Product not found' };
-    }
+      const { 
+          name, 
+          price, 
+          category, 
+          description,
+          bestSeller, 
+          latestCollection,
+          sizeName,
+          sizeQuantity,
+          removedImages
+      } = productData;
 
-    let updatedImages = existingProduct.images || [];
-    if (files && files.length > 0) {
-      const newImages = files.map(file => '/uploads/' + file.filename);
-      updatedImages = updatedImages.concat(newImages); 
-    }
+      // Process sizes
+      const sizes = [];
+      if (Array.isArray(sizeName) && Array.isArray(sizeQuantity)) {
+          sizeName.forEach((size, index) => {
+              sizes.push({
+                  size,
+                  quantity: parseInt(sizeQuantity[index]) || 0
+              });
+          });
+      }
 
-    const updatedData = {
-      name,
-      price,
-      category,
-      images: updatedImages, 
-      bestSeller: bestSeller === 'on',
-      latestCollection: latestCollection === 'on',
-      sizes,
-      description
-    };
-    
-    const updatedProduct = await Product.findByIdAndUpdate(productId, updatedData, { new: true });
-    return { success: true, product: updatedProduct };
-  } catch (err) {
-    console.error('Error updating product:', err);
-    return { success: false, error: err };
+      // Find existing product
+      const product = await Product.findById(productId);
+      if (!product) {
+          return { success: false, error: 'Product not found' };
+      }
+
+      // Process removed images
+      let updatedImages = [...product.images];
+      if (removedImages) {
+          const removed = JSON.parse(removedImages);
+          updatedImages = updatedImages.filter(img => !removed.includes(img));
+          
+          // Delete files from server
+          removed.forEach(imgPath => {
+              const filename = path.basename(imgPath);
+              const filePath = path.join(__dirname, '../public/uploads', filename);
+              if (fs.existsSync(filePath)) {
+                  fs.unlinkSync(filePath);
+              }
+          });
+      }
+
+      // Process new images
+      if (files && files.length > 0) {
+          const newImages = files.map(file => '/uploads/' + file.filename);
+          updatedImages = [...updatedImages, ...newImages]
+      }
+
+      // Update product
+      const updatedProduct = await Product.findByIdAndUpdate(
+          productId,
+          {
+              name,
+              price,
+              category,
+              description,
+              images: updatedImages,
+              sizes,
+              bestSeller: bestSeller === 'on',
+              latestCollection: latestCollection === 'on'
+          },
+          { new: true }
+      );
+
+      return { success: true, product: updatedProduct };
+  } catch (error) {
+      console.error('Error updating product:', error);
+      return { success: false, error: error.message };
   }
 };
-
-
 
 const deleteProduct = async (productId)=>{
   try{

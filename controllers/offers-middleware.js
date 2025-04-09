@@ -1,6 +1,8 @@
 const Offer = require('../models/offer-schema')
 const Product = require('../models/product-schema')
 const Category = require('../models/cateogory-schema')
+
+/**render offer listing page */
 const getOfferPage = async (req,res)=>{
   try{
     const offers = await Offer.find({}).lean();
@@ -29,6 +31,7 @@ const updateOfferStatus = async (req,res,next)=>{
   }
 }
 
+/*render add offer page*/
 const getAddOfferPage = async (req,res)=>{
   res.render('admin/addOffer',{isAdminLogin: false,
     admin: true
@@ -74,6 +77,8 @@ const addOffer = async (req, res) => {
       res.status(500).json({ message: "An error occurred while creating the offer." });
   }
 };
+
+/**render edit offer page */
 const getEditOfferPage = async (req,res)=>{
   try{
     const offerId = req.params.id;
@@ -89,6 +94,7 @@ const getEditOfferPage = async (req,res)=>{
   }
 }
 
+/**logic to edit offer */
 const editOffer = async(req,res)=>{
   try{
     const offerId = req.params.id;
@@ -112,6 +118,7 @@ const editOffer = async(req,res)=>{
 }
 }
 
+/**logic to delete offer */
 const deletOffer = async(req,res)=>{
   try{
     const offerId = req.params.id

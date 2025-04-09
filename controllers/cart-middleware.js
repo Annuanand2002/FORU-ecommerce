@@ -383,6 +383,30 @@ const addAddressCart = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+/**remove coupon from cart */
 
+const removeCoupon = async (req,res)=>{
+  try{
+    const userId = req.session.user._id;
+    console.log("userId ",userId )
+    const cart = await Cart.findOneAndUpdate({userId},{
+      $set : {
+        discountAmount : 0,
+        appliedCoupons : null,
+        newTotalAmount : 0
+      }
+    },{ new: true }
+  ).populate('items.productId')
+  if(cart){
+    cart.newTotalAmount = cart.totalPrice + cart.shippingFee
+    await cart.save();
+  }
+  res.json({ success: true, message: 'Coupon removed successfully' });
 
-module.exports = {addToCart,getCart,removeCart,updateCartQunatity,addressCart,getAddressCart,removeCartAddress,cartQuantityCheck,applyCoupon,getAddAddressCart,addAddressCart}
+  }catch(error){
+    console.error(error);
+        res.status(500).json({ success: false, message: 'Failed to remove coupon' });
+  }
+}
+
+module.exports = {addToCart,getCart,removeCoupon,removeCart,updateCartQunatity,addressCart,getAddressCart,removeCartAddress,cartQuantityCheck,applyCoupon,getAddAddressCart,addAddressCart}

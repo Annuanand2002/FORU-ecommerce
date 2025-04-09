@@ -91,40 +91,123 @@
     const table = document.querySelector('#salesTable');
     const headers = [];
     const rows = [];
+    let totalQuantity = 0;
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let totalNetRevenue = 0;
 
     // Extract headers
     table.querySelectorAll('thead th').forEach(th => {
       headers.push(th.innerText);
     });
 
-    // Extract rows
+    // Extract rows and calculate totals
     table.querySelectorAll('tbody tr').forEach(tr => {
       const row = [];
-      tr.querySelectorAll('td').forEach(td => {
+      const cells = tr.querySelectorAll('td');
+      cells.forEach((td, index) => {
         row.push(td.innerText);
+        
+        // Calculate totals
+        if (index === 3) totalQuantity += parseInt(td.innerText) || 0; // Quantity
+        if (index === 4) totalRevenue += parseFloat(td.innerText) || 0; // Total Price
+        if (index === 5) totalDiscount += parseFloat(td.innerText) || 0; // Discount Amount
+        if (index === 6) totalNetRevenue += parseFloat(td.innerText) || 0; // New Total
       });
       rows.push(row);
     });
 
+    // Add title and date range
+    const startDate = document.getElementById('startDate').value || 'All Time';
+    const endDate = document.getElementById('endDate').value || 'All Time';
+    
+    doc.setFontSize(16);
+    doc.text('Sales Report', 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Date Range: ${startDate} to ${endDate}`, 14, 22);
+
+    // Add summary section
+    doc.setFontSize(12);
+    doc.text('Summary', 14, 32);
+    
+    const summaryData = [
+      ['Total Items Sold:', totalQuantity],
+      ['Total Revenue:', totalRevenue.toFixed(2)],
+      ['Total Discount:', totalDiscount.toFixed(2)],
+      ['Net Revenue:', totalNetRevenue.toFixed(2)]
+    ];
+    
+    doc.autoTable({
+      startY: 37,
+      head: [['Metric', 'Value']],
+      body: summaryData,
+      theme: 'plain',
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [228, 178, 117] }
+    });
+
     // Add table to PDF
     doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 10,
       head: [headers],
       body: rows,
-      theme: 'grid', 
+      theme: 'grid',
+      headStyles: { fillColor: [228, 178, 117] }
     });
 
     // Save the PDF
-    doc.save('sales-report.pdf');
+    doc.save(`sales-report-${startDate}-to-${endDate}.pdf`);
   }
 
-  // Export to Excel
   function exportToExcel() {
     // Get table data
     const table = document.querySelector('#salesTable');
     const workbook = XLSX.utils.table_to_book(table);
+    
+    // Calculate totals
+    let totalQuantity = 0;
+    let totalRevenue = 0;
+    let totalDiscount = 0;
+    let totalNetRevenue = 0;
+    
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      const cells = tr.querySelectorAll('td');
+      totalQuantity += parseInt(cells[3].innerText) || 0;
+      totalRevenue += parseFloat(cells[4].innerText) || 0;
+      totalDiscount += parseFloat(cells[5].innerText) || 0;
+      totalNetRevenue += parseFloat(cells[6].innerText) || 0;
+    });
 
+    // Add summary worksheet
+    const startDate = document.getElementById('startDate').value || 'All Time';
+    const endDate = document.getElementById('endDate').value || 'All Time';
+    
+    const summaryData = [
+      ['Sales Report Summary'],
+      [''],
+      ['Date Range:', `${startDate} to ${endDate}`],
+      [''],
+      ['Metric', 'Value'],
+      ['Total Items Sold:', totalQuantity],
+      ['Total Revenue:', totalRevenue.toFixed(2)],
+      ['Total Discount:', totalDiscount.toFixed(2)],
+      ['Net Revenue:', totalNetRevenue.toFixed(2)]
+    ];
+    
+    const summaryWS = XLSX.utils.aoa_to_sheet(summaryData);
+    
+    // Format summary sheet
+    summaryWS['!cols'] = [
+      { width: 20 },
+      { width: 15 }
+    ];
+    
+    // Add both sheets to workbook
+    workbook.SheetNames.unshift('Summary');
+    workbook.Sheets['Summary'] = summaryWS;
+    
     // Export to Excel file
-    XLSX.writeFile(workbook, 'sales-report.xlsx');
+    XLSX.writeFile(workbook, `sales-report-${startDate}-to-${endDate}.xlsx`);
   }
 
 async function applyFilter() {

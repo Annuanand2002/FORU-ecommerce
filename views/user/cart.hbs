@@ -302,6 +302,17 @@ button {
     font-weight: bold;
 }
 
+
+#coupon-applied-section {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+#remove-coupon-btn:hover {
+    color: #dc3545; /* Red color on hover */
+}
     </style>
 
 <body>
@@ -332,7 +343,7 @@ button {
                 </div>
                 {{else}}
         <p>No saved address found.</p>
-    {{/if}}
+    {{/if}} 
             </div>
             {{#if cart.items.length}}
             {{#each cart.items}}
@@ -403,19 +414,37 @@ button {
                     <span>FREE</span>
                 </div>
                 {{/if}}
-                {{#if discountAmount}}
-                <div class="price-summary">
-                    <span>Coupon discount</span>
-                    <span>-₹{{discountAmount}}</span>
-                </div>
-                
-                {{else}}
-                <div class="price-summary">
-                    <span>Apply coupon</span>
-                    {{!-- <p>₹0</p> --}}
-                    <a href="/apply-coupon?totalPrice={{totalPrice}}">Apply coupon</a>
-                </div>
-                {{/if}}
+                <!-- In your right-column section where coupon discount is shown -->
+{{#if discountAmount}}
+<div class="price-summary">
+        <span>Coupon discount</span>
+        <span>
+            -₹{{discountAmount}}
+            <button id="remove-coupon-btn" 
+                    style="background: none; 
+                           border: none; 
+                           cursor: pointer; 
+                           color: #999;
+                           transition: color 0.2s;
+                           padding: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+        </span>
+    {{#if appliedCoupon}}
+    <small style="color: green; display: block; font-size: 12px; text-align: right;">
+        {{appliedCoupon.couponName}}
+    </small>
+    {{/if}}
+</div>
+{{else}}
+<div class="price-summary">
+    <span>Apply coupon</span>
+    <a href="/apply-coupon?totalPrice={{totalPrice}}">Apply coupon</a>
+</div>
+{{/if}}
+             
                 <div class="price-summary total-amount">
                     <span>Total Amount</span>
                     <span>₹{{newTotalPrice}}</span>
@@ -507,6 +536,48 @@ button {
 
     <script>
        document.addEventListener("DOMContentLoaded", function () {
+
+        const removeCouponBtn = document.getElementById('remove-coupon-btn');
+    if (removeCouponBtn) {
+        removeCouponBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch('/remove-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest' // Helps identify AJAX requests
+                    },
+                    credentials: 'same-origin' // Ensures cookies are sent
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showPopup('Coupon removed successfully', 'success');
+                    // Update UI without full page reload (optional)
+                    setTimeout(() => {
+                        window.location.reload(); // Reload to reflect changes
+                    }, 1000);
+                } else {
+                    showPopup(result.message || 'Failed to remove coupon', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showPopup('An error occurred while removing coupon', 'error');
+            }
+        });
+        
+        // Add hover effect
+        removeCouponBtn.addEventListener('mouseover', function() {
+            this.style.color = '#dc3545'; // Red color on hover
+        });
+        
+        removeCouponBtn.addEventListener('mouseout', function() {
+            this.style.color = '#999'; // Gray color normally
+        });
+    }
     // Function to show the popup message
     function showPopup(message, type = 'success') {
         const popup = document.getElementById('popup-message');
@@ -523,7 +594,6 @@ button {
             }, 500);
         }, 3000);
     }
-
 
     async function fetchAvailableQuantity(productId, size) {
         try {
@@ -780,5 +850,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+
     </script>
 </body>

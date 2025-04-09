@@ -13,8 +13,8 @@ const {getSingleProduct}= require('../controllers/product-controller');
 const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
 const {wishlistMangement, getWishlistData, fetchProductWishlist,getWishlist}= require('../controllers/wishlist-middleware')
 const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress} = require('../controllers/address-middleware')
-const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon} = require('../controllers/cart-middleware')
-const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses,invoiceDownload} = require('../controllers/order-controller')
+const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon,removeCoupon} = require('../controllers/cart-middleware')
+const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,retryPayment,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses,invoiceDownload,paymentFailPage} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 const walletHelper = require('../controllers/wallet-middleware')
 
@@ -226,6 +226,8 @@ router.post('/place-order',placeOrder)
 router.post('/handle-payment-response',handlePaymentResponse)
 router.get('/order-confirmation/:orderId',checkAuthentication,orderConfirmed)
 router.post('/add-addresses',checkAuthentication,addAddressses)
+router.get('/payment-failed/:orderId',checkAuthentication,paymentFailPage)
+router.post('/retry-payment',retryPayment)
 /**logout */
 router.get('/logout', logoutUser);
 
@@ -250,6 +252,7 @@ router.get('/product/:productId/size/:size/quantity',cartQuantityCheck)
 router.get('/apply-coupon',couponHelper.getApplyCouponPage)
 router.post('/apply-coupon',applyCoupon)
 router.post('/wallet/reduce',walletHelper.addFromWallet)
+router.post('/remove-coupon',checkAuthentication,removeCoupon)
 
 /**wallet mangement */
 router.get("/wallet",checkAuthentication,walletHelper.getWallet)

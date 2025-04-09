@@ -1,20 +1,48 @@
+<style>
+    .card-header {
+        background-color: rgb(228, 178, 117);
+        color: white;
+    }
 
-    <style>
-        .card-header {
-            background-color: rgb(228, 178, 117);
-            color: white;
-        }
+    .btn-primary-custom {
+        background-color: rgb(228, 178, 117);
+        color: white;
+    }
 
-        .btn-primary-custom {
-            background-color: rgb(228, 178, 117);
-            color: white;
-        }
+    .error-message {
+        color: red;
+        font-size: small;
+    }
+     .image-preview {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 5px;
+        display: inline-block;
+    }
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
 
-        .error-message {
-            color: red;
-            font-size: small;
-        }
-    </style>
+    .edit-image {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: rgb(228, 178, 117);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 2px 5px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+
+</style>
 
 <body>
 
@@ -49,22 +77,20 @@
                             <label class="form-label">Available Sizes and Quantities</label>
 
                             <div id="sizes-container">
-                              <div class="row mb-2 size-group">
-                                <div class="col-md-5">
-                                  <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name">
+                                <div class="row mb-2 size-group">
+                                    <div class="col-md-5">
+                                        <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger remove-size">Remove</button>
+                                    </div>
                                 </div>
-                                <div class="col-md-5">
-                                  <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0">
-                                </div>
-                                <div class="col-md-2">
-                                  <button type="button" class="btn btn-danger remove-size">Remove</button>
-                                </div>
-                              </div>
                             </div>
-                            <button type="button" id="add-size" class="btn" style="background-color:  rgb(228, 178, 117);color:white;">Add Size</button>
+                            <button type="button" id="add-size" class="btn" style="background-color: rgb(228, 178, 117);color:white;">Add Size</button>
                         </div>
-
-
 
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -87,26 +113,27 @@
 
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description" class="form-control" rows="3"
-                                      placeholder="Enter product description"></textarea>
+                            <textarea name="description" id="description" class="form-control" rows="3" placeholder="Enter product description"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="image" class="form-label">Images</label>
-                            <input type="file" name="images" id="image" class="form-control">
-                        </div>
+    <label for="images" class="form-label">Images (Max 5)</label>
+    <input type="file" name="images" id="images" class="form-control" accept="image/*" multiple>
+    <div id="image-error" class="error-message"></div>
+    <div id="image-previews" class="d-flex flex-wrap gap-2 mt-2"></div>
+</div>
+
+
 
                         <div class="mb-3">
                             <label class="form-label">Additional Categories</label>
                             <div class="d-flex">
                                 <div class="form-check me-3">
-                                    <input class="form-check-input" type="checkbox" name="latestCollection"
-                                           value="true" id="latestCollection">
+                                    <input class="form-check-input" type="checkbox" name="latestCollection" value="true" id="latestCollection">
                                     <label class="form-check-label" for="latestCollection">Latest Collection</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="bestSeller" value="true"
-                                           id="bestSeller">
+                                    <input class="form-check-input" type="checkbox" name="bestSeller" value="true" id="bestSeller">
                                     <label class="form-check-label" for="bestSeller">Best Seller</label>
                                 </div>
                             </div>
@@ -122,38 +149,203 @@
         </div>
     </div>
 </div>
-
-
+<!-- Cropping Modal -->
+<div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="img-container">
+                    <img id="cropper-image" src="" alt="Preview" style="max-width: 100%;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" style="background-color:rgb(228, 178, 117);color:white;" id="save-crop">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const addSizeButton = document.getElementById('add-size');
-        const sizesContainer = document.getElementById('sizes-container');
+document.addEventListener('DOMContentLoaded', function () {
+    const MAX_IMAGES = 5;
+    const imageInput = document.getElementById('images');
+    const previewContainer = document.getElementById('image-previews');
+    const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+    const cropperImage = document.getElementById('cropper-image');
+    const saveCropBtn = document.getElementById('save-crop');
+    
+    let cropper;
+    let currentEditingIndex = null;
+    let newImages = [];
+    let currentFileIndex = 0;
+    let filesToProcess = [];
 
-        addSizeButton.addEventListener('click', function () {
-            const newSizeGroup = document.createElement('div');
-            newSizeGroup.classList.add('row', 'mb-2', 'size-group');
+    // Size management code
+    const addSizeButton = document.getElementById('add-size');
+    const sizesContainer = document.getElementById('sizes-container');
 
-            newSizeGroup.innerHTML = `
-                <div class="col-md-5">
-                    <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name" required>
-                </div>
-                <div class="col-md-5">
-                    <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-size">Remove</button>
-                </div>
-            `;
+    addSizeButton.addEventListener('click', function () {
+        const newSizeGroup = document.createElement('div');
+        newSizeGroup.classList.add('row', 'mb-2', 'size-group');
 
-            sizesContainer.appendChild(newSizeGroup);
-        });
+        newSizeGroup.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" name="sizeName[]" class="form-control" placeholder="Size Name" required>
+            </div>
+            <div class="col-md-5">
+                <input type="number" name="sizeQuantity[]" class="form-control" placeholder="Quantity" min="0" required>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger remove-size">Remove</button>
+            </div>
+        `;
 
-        sizesContainer.addEventListener('click', function (event) {
-            if (event.target.classList.contains('remove-size')) {
-                event.target.parentElement.parentElement.remove();
-            }
+        sizesContainer.appendChild(newSizeGroup);
+    });
+
+    sizesContainer.addEventListener('click', function (event) {
+        if (event.target.classList.contains('remove-size')) {
+            event.target.parentElement.parentElement.remove();
+        }
+    });
+
+    // Handle new image selection
+    imageInput.addEventListener('change', function(e) {
+        if (!e.target.files.length) return;
+        
+        const files = Array.from(e.target.files);
+        if (files.length > MAX_IMAGES) {
+            alert(`You can upload a maximum of ${MAX_IMAGES} images`);
+            return;
+        }
+
+        filesToProcess = files;
+        currentFileIndex = 0;
+        newImages = [];
+        previewContainer.innerHTML = '';
+        
+        if (filesToProcess.length) {
+            processNextImage();
+        }
+    });
+
+    function processNextImage() {
+        if (currentFileIndex >= filesToProcess.length) {
+            // All images processed
+            updateFileInput();
+            return;
+        }
+
+        const file = filesToProcess[currentFileIndex];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            cropperImage.src = e.target.result;
+            
+            // Initialize cropper when modal is shown
+            cropModal.show();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Initialize cropper when modal is shown
+    cropModal._element.addEventListener('shown.bs.modal', function() {
+        if (cropper) {
+            cropper.destroy();
+        }
+        
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 0.8,
+            responsive: true
         });
     });
-</script>
 
-</body>
+    // Clean up cropper when modal is hidden
+    cropModal._element.addEventListener('hidden.bs.modal', function() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    });
+
+    // Save cropped image
+    saveCropBtn.addEventListener('click', function() {
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 800,
+                fillColor: '#fff',
+                imageSmoothingQuality: 'high'
+            });
+            
+            canvas.toBlob(function(blob) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Add to previews
+                    addImagePreview(e.target.result, currentFileIndex);
+                    
+                    // Store cropped image
+                    newImages.push({
+                        src: e.target.result,
+                        file: new File([blob], `cropped_${Date.now()}.jpg`, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        })
+                    });
+                    
+                    // Process next image
+                    currentFileIndex++;
+                    cropModal.hide();
+                    
+                    if (currentFileIndex < filesToProcess.length) {
+                        processNextImage();
+                    } else {
+                        updateFileInput();
+                    }
+                };
+                reader.readAsDataURL(blob);
+            }, 'image/jpeg', 0.9);
+        }
+    });
+
+    function addImagePreview(url, index) {
+        const preview = document.createElement('div');
+        preview.className = 'image-preview';
+        preview.innerHTML = `
+            <img src="${url}" alt="Preview Image">
+            <button type="button" class="edit-image" data-index="${index}">Edit</button>
+        `;
+        previewContainer.appendChild(preview);
+        
+        // Add edit functionality
+        preview.querySelector('.edit-image').addEventListener('click', function() {
+            currentEditingIndex = parseInt(this.getAttribute('data-index'));
+            cropperImage.src = newImages[currentEditingIndex].src;
+            cropModal.show();
+        });
+    }
+
+    function updateFileInput() {
+        // Create a new DataTransfer object for the files
+        const dataTransfer = new DataTransfer();
+        
+        // Add all new images (cropped or original)
+        newImages.forEach(img => {
+            dataTransfer.items.add(img.file);
+        });
+        
+        // Update the file input with the new files
+        imageInput.files = dataTransfer.files;
+    }
+
+    
+});
+</script>

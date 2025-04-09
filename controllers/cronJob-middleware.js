@@ -17,6 +17,7 @@ const setupCronJobs = ()=>{
           );
           await product.save();
         }
+        offer.isActive = false;
         offer.products = [];
         await offer.save();
         console.log(`Removed expired offer ${offer._id} from products.`);

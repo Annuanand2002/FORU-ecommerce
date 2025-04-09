@@ -1,5 +1,7 @@
 const User = require('../models/user-schema');
 
+
+/**user */
 function checkAuthentication(req,res,next){
   if(req.session.user){
     next()
@@ -32,6 +34,7 @@ function checkUserBlocked(req,res,next){
   }
 }
 
+/**admin */
 const adminAuth = (req,res,next)=>{
   if(!req.session.admin){
     return res.redirect('/admin/login')

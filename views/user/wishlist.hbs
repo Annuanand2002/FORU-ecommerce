@@ -198,6 +198,25 @@
   width: 100%;
   transition: background-color 0.3s ease;
 }
+.empty-wishlist-image {
+  width: 100%;
+  max-width: 400px; /* Adjust this value as needed */
+  height: auto;
+  border-radius: 8px;
+  margin: 0 auto;
+  display: block;
+}
+
+.empty-wishlist-container {
+  padding: 20px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .empty-wishlist-image {
+    max-width: 300px;
+  }
+}
 
 .add-to-cart-btn:hover {
   background-color: #333;
@@ -205,10 +224,11 @@
 </style>
 
 <section class="wishlist-section">
-  <h3 class="wishlist-title">My Wishlist</h3>
+  
   <div class="wishlist-products">
     {{#if products.length}}
       <div class="product-grid">
+        <h3 class="wishlist-title">My Wishlist</h3>
         {{#each products}}
           <div class="wishlist-product-card">
             <div class="card-header">
@@ -248,7 +268,15 @@
         {{/each}}
       </div>
     {{else}}
-      <p>Your wishlist is empty.</p>
+   <div class="empty-wishlist-container" style="text-align: center; margin: 40px 0;">
+    <img 
+      src="images/Gemini_Generated_Image_d2wyznd2wyznd2wy.jpg" 
+      class="empty-wishlist-image"
+      alt="Empty wishlist"
+    >
+    <p style="color: #777; margin-top: 10px;">Start adding products to your wishlist</p>
+    <a href="/collections" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: rgb(238, 236, 230);; color: black; text-decoration: none; border-radius: 4px;">Browse Products</a>
+  </div>
     {{/if}}
   </div>
 

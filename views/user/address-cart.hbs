@@ -440,7 +440,9 @@ margin-right: 5px;
             <span>₹{{cart.newTotalAmount}}</span>
         </div>
     </div>
-
+    <div id="address-error" style="color: red; margin-top: 10px; display: none;">
+    Please choose a delivery address
+</div>
     <button class="place-order">PLACE ORDER</button>
 </div>
 <div id="popup-message" class="popup">
@@ -506,10 +508,14 @@ function showPopup(message) {
 document.querySelector('.place-order').addEventListener('click', function () {
 
     const selectedAddressId = localStorage.getItem('selectedAddressId');
+    const addressError = document.getElementById('address-error')
 
     if (!selectedAddressId) {
+        addressError.style.display = 'block';
         showPopup('Please select a delivery address.');
         return; 
+    }else{
+        addressError.style.display = 'none';
     }
 
     window.location.href = `/payment?addressId=${selectedAddressId}`;
@@ -518,6 +524,7 @@ document.querySelector('.place-order').addEventListener('click', function () {
 document.querySelectorAll('input[name="addressID"]').forEach((radio) => {
     radio.addEventListener('change', function () {
         localStorage.setItem('selectedAddressId', this.value);
+        document.getElementById('address-error').style.display = 'none';
     });
 });
 // Get the modal and buttons

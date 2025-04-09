@@ -2,6 +2,8 @@ const Wallet = require('../models/wallet-schema')
 const Cart = require('../models/cart-schema')
 const Order = require('../models/order-schema')
 
+
+/*8do payment from wallet*/
 const addFromWallet = async (req,res)=>{
   const userId = req.user.id; 
   const {amount} = req.body
@@ -36,6 +38,7 @@ const addFromWallet = async (req,res)=>{
   }
 };
 
+/**render wallet page */
 const getWallet = async (req, res) => {
   const userId = req.session.user._id;
   const page = parseInt(req.query.page) || 1;
