@@ -1,147 +1,260 @@
-<style>
-    /* Custom CSS for styling the table */
-    .order-table {
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <style>
+        /* Custom CSS for styling the table */
+        .order-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin-top: 30px;
+        }
 
-    .order-table th,
-    .order-table td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #dee2e6;
-        vertical-align: middle;
+        .order-table th,
+        .order-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
 
-    }
+        .order-table th {
+            background-color: rgb(228, 178, 117);
+            font-weight: bold;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
 
-    .order-table th {
-        background-color: rgb(228, 178, 117);
-        font-weight: bold;
-        color: white;
-    }
+        .order-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
 
-    .order-table tbody tr:hover {
-        background-color: #f5f5f5;
-    }
+        .container {
+            padding: 15px;
+            overflow-x: hidden;
+        }
 
-    .order-table .status {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+        .btn-view-details {
+            background-color: rgb(228, 178, 117);
+            border: none;
+            color: white;
+            border-radius: 2px;
+            padding: 8px 15px;
+            text-decoration: none;
+            display: inline-block;
+        }
 
-    .order-table .status-completed {
-        color: #28a745;
-    }
+        .btn-view-details:hover {
+            background-color: rgb(210, 160, 100);
+        }
 
-    .order-table .status-pending {
-        color: #ffc107;
-    }
+        /* Pagination styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
 
-    .order-table .status-shipping {
-        color: #007bff;
-    }
+        .page-item {
+            margin: 5px;
+        }
 
-    .order-table .status-cancelled {
-        color: #dc3545;
-    }
+        .page-link {
+            color: rgb(228, 178, 117);
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
 
-    .order-table .payment-method {
-        display: flex;
-        align-items: center;
-    }
+        .page-link:hover {
+            background-color: rgb(228, 178, 117);
+            color: white;
+        }
 
-    .order-table .view-details {
-        color: #007bff;
-        text-decoration: none;
-    }
+        .page-item.active .page-link {
+            background-color: rgb(228, 178, 117);
+            color: white;
+            border-color: rgb(228, 178, 117);
+        }
 
-    .order-table .view-details:hover {
-        text-decoration: underline;
-    }
+        .page-item.disabled .page-link {
+            color: #ccc;
+            cursor: not-allowed;
+        }
 
- .container {
- padding: 20px;
-}
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .order-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .order-table thead {
+                display: none;
+            }
+            
+            .order-table tbody {
+                display: block;
+            }
+            
+            .order-table tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            
+            .order-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right !important;
+                padding: 8px 10px;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .order-table td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: rgb(228, 178, 117);
+                margin-right: auto;
+                padding-right: 10px;
+                text-align: left;
+            }
+            
+            .order-table td:last-child {
+                border-bottom: none;
+            }
+            
+            .btn-view-details {
+                width: 100%;
+                text-align: center;
+            }
+        }
 
-.page-item {
-  margin: 0 5px;
-}
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .order-table td {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left !important;
+            }
+            
+            .order-table td::before {
+                margin-bottom: 5px;
+            }
+            
+            h4 {
+                font-size: 1.3rem;
+                margin-top: 15px;
+            }
+            
+            .btn-view-details {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h4 style="color: rgb(158, 147, 147);">Orders</h4>
+        
+        <div class="table-responsive">
+            <table class="table order-table">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each orders}}
+                    <tr>
+                        <td data-label="Order">#{{this._id}}</td>
+                        <td data-label="Date">{{formatDate this.createdAt}}</td>
+                        <td data-label="Customer">{{this.userId.name}}</td>
+                        <td data-label="Items">
+                            <span style="font-family: 'Times New Roman', Times, serif; font-size:14px;color:rgb(72, 67, 67)">
+                                {{this.items.length}}
+                            </span>
+                        </td>
+                        <td data-label="Payment">
+                            {{this.payment}}<br>
+                            {{#if (eq this.payment "Online Payment")}}
+                                <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
+                                    {{this.paymentStatus}}
+                                </span>
+                            {{/if}}
+                        </td>
+                        <td data-label="Action">
+                            <a href="/admin/order-details/{{this._id}}" class="btn-view-details">
+                                View details
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
 
-.page-link {
-  color: rgb(228, 178, 117);
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {{#if pagination.previous}}
+                <li class="page-item">
+                    <a class="page-link" href="/admin/orders?page={{pagination.previous}}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {{/if}}
 
-.page-link:hover {
-  background-color: rgb(228, 178, 117);
-  color: white;
-}
+                {{#each pagination.pages}}
+                <li class="page-item {{#ifEquals ../pagination.currentPage this}}active{{/ifEquals}}">
+                    <a class="page-link" href="/admin/orders?page={{this}}">{{this}}</a>
+                </li>
+                {{/each}}
 
-.page-item.active .page-link {
-  background-color: rgb(228, 178, 117);
-  color: white;
-  border-color: rgb(228, 178, 117);
-}
+                {{#if pagination.next}}
+                <li class="page-item">
+                    <a class="page-link" href="/admin/orders?page={{pagination.next}}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {{/if}}
+            </ul>
+        </nav>
+    </div>
 
-.page-item.disabled .page-link {
-  color: #ccc;
-  cursor: not-allowed;
-}
-.status-dropdown:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-</style>
-
-  <div class="container">
-  <h4 style="margin-top: 30px;color:rgb(158, 147, 147)">Orders</h4>
-  
-  <table class="table order-table" style="margin-top: 50px;margin-left:10px;">
-    <thead>
-      <tr>
-        <th>Order</th>
-        <th>Date</th>
-        <th>Customer</th>
-        <th>No.of items</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#each orders}}
-      
-        <tr>
-          <td>#{{this._id}}</td>
-          <td>{{formatDate this.createdAt}}</td>
-          <td>{{this.userId.name}}</td>
-          <td style="text-align: center; vertical-align: middle;">
-  <span style="font-family: 'Times New Roman', Times, serif; font-size:14px;color:rgb(72, 67, 67)">
-      {{this.items.length}}
-  </span>
-</td>
-          <td class="payment-method">
-  {{this.payment}}<br>
-  {{#if (eq this.payment "Online Payment")}}
-    <span style="font-family: 'Times New Roman', Times, serif; font-size:12px;color:rgb(72, 67, 67)">
-      {{this.paymentStatus}}
-    </span>
-  {{/if}}
-</td>
-          <td class="payment-method"><a href="/admin/order-details/{{this._id}}"><button style="background-color: rgb(228, 178, 117);border:none;color:white;border-radius:2px;">View details</button></a></td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
-</div>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // This ensures the data labels work even if the template engine doesn't add them
+            const headers = ["Order", "Date", "Customer", "Items", "Payment", "Action"];
+            const cells = document.querySelectorAll('.order-table td');
+            
+            cells.forEach((td, index) => {
+                const headerIndex = index % headers.length;
+                if (!td.hasAttribute('data-label')) {
+                    td.setAttribute('data-label', headers[headerIndex]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

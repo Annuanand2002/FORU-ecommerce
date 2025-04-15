@@ -1,3 +1,47 @@
+<style>
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .category-name {
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .list-group-item {
+      padding: 0.75rem 0.5rem !important;
+    }
+    
+    .btn-sm {
+      padding: 0.2rem 0.4rem !important;
+      font-size: 0.8rem !important;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .category-name {
+      max-width: 100px;
+    }
+    
+    .list-group-item > div {
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .list-group-item > div > .me-2 {
+      margin-right: 0 !important;
+      margin-bottom: 0.5rem;
+    }
+    
+    .btn {
+      padding: 0.375rem 0.5rem !important;
+      font-size: 0.9rem !important;
+    }
+  }
+</style>
+
+
+
 <div class="container mt-4">
   <div class="row">
     <div class="col-md-6">
@@ -62,5 +106,41 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Optional: Add JavaScript for better mobile experience
+  document.addEventListener('DOMContentLoaded', function() {
+    // Make delete buttons more touch-friendly on mobile
+    if (window.innerWidth < 768) {
+      document.querySelectorAll('.delete-category').forEach(btn => {
+        btn.style.padding = '0.4rem 0.6rem';
+        btn.style.fontSize = '1rem';
+      });
+    }
+    
+    // Form validation for add category
+    const addCategoryForm = document.getElementById('addCategoryForm');
+    if (addCategoryForm) {
+      addCategoryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const errorElement = document.getElementById('categoryError');
+        
+        if (!categoryName) {
+          errorElement.textContent = 'Please enter a category name';
+          return;
+        }
+        
+        if (categoryName.length < 2) {
+          errorElement.textContent = 'Category name must be at least 2 characters';
+          return;
+        }
+        
+        // Submit form if validation passes
+        this.submit();
+      });
+    }
+  });
+</script>
 
 

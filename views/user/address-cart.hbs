@@ -357,6 +357,7 @@ margin-right: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
         }
+        
 </style>
 
 <body>
@@ -445,6 +446,7 @@ margin-right: 5px;
 </div>
     <button class="place-order">PLACE ORDER</button>
 </div>
+</div>
 <div id="popup-message" class="popup">
 <span id="popup-text"></span>
 </div> 
@@ -460,27 +462,34 @@ margin-right: 5px;
         <form id="add-address-form">
             <div>
                 <label for="name">Full Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name">
+                <span id="nameError" style="color: red; display: none;"></span>
             </div>
             <div>
                 <label for="phone">Phone Number:</label>
-                <input type="tel" id="phone" name="phone" required>
+                <input type="tel" id="phone" name="phone">
+                <span id="phoneError" style="color: red; display: none;"></span>
             </div>
             <div>
                 <label for="house">House/Flat No.:</label>
-                <input type="text" id="house" name="house" required>
+                <input type="text" id="house" name="house">
+                <span id="houseError" style="color: red; display: none;"></span>
             </div>
             <div>
                 <label for="city">City:</label>
-                <input type="text" id="city" name="city" required>
+                <input type="text" id="city" name="city">
+                <span id="cityError" style="color: red; display: none;"></span>
+                
             </div>
             <div>
                 <label for="state">State:</label>
-                <input type="text" id="state" name="state" required>
+                <input type="text" id="state" name="state">
+                 <span id="stateError" style="color: red; display: none;"></span>
             </div>
             <div>
                 <label for="postalCode">Postal Code:</label>
-                <input type="text" id="postalCode" name="postalCode" required>
+                <input type="text" id="postalCode" name="postalCode" >
+                <span id="postalError" style="color: red; display: none;"></span>
             </div>
             <div>
                 <label for="isDefault">Set as Default Address:</label>
@@ -509,6 +518,7 @@ document.querySelector('.place-order').addEventListener('click', function () {
 
     const selectedAddressId = localStorage.getItem('selectedAddressId');
     const addressError = document.getElementById('address-error')
+    
 
     if (!selectedAddressId) {
         addressError.style.display = 'block';
@@ -552,18 +562,66 @@ window.addEventListener('click', (event) => {
 
 // Handle form submission
 addAddressForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // Prevent the default form submission
+    event.preventDefault(); 
+    document.querySelectorAll('[id$="Error"]').forEach(el => {
+        el.style.display = 'none';
+        el.textContent = '';
+    });
 
-    // Get form data
+  
     const formData = {
-        name: document.getElementById('name').value,
-        house: document.getElementById('house').value,
-        phone: document.getElementById('phone').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        postalCode: document.getElementById('postalCode').value,
+        name: document.getElementById('name').value.trim(),
+        house: document.getElementById('house').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
+        postalCode: document.getElementById('postalCode').value.trim(),
         isDefault: document.getElementById('isDefault').checked,
     };
+
+    let isValid = true
+
+    if (formData.name.length < 3) {
+        document.getElementById('nameError').textContent = 'Name must be at least 3 characters';
+        document.getElementById('nameError').style.display = 'block';
+        isValid = false;
+    }
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+        document.getElementById('phoneError').textContent = 'Please enter a valid 10-digit phone number';
+        document.getElementById('phoneError').style.display = 'block';
+        isValid = false;
+    }
+
+     if (formData.house.length < 3) {
+        document.getElementById('houseError').textContent = 'Please enter a valid house/flat number';
+        document.getElementById('houseError').style.display = 'block';
+        isValid = false;
+    }
+
+    if (formData.city.length < 2) {
+        document.getElementById('cityError').textContent = 'Please enter a valid city';
+        document.getElementById('cityError').style.display = 'block';
+        isValid = false;
+    }
+
+     if (formData.state.length < 2) {
+        document.getElementById('stateError').textContent = 'Please enter a valid state';
+        document.getElementById('stateError').style.display = 'block';
+        isValid = false;
+    }
+
+    const postalRegex = /^\d{6}$/;
+    if (!postalRegex.test(formData.postalCode)) {
+        document.getElementById('postalError').textContent = 'Please enter a valid 6-digit postal code';
+        document.getElementById('postalError').style.display = 'block';
+        isValid = false;
+    }
+
+    if (!isValid) {
+         event.preventDefault();
+    }
 
     try {
         // Send the data to the server using fetch
@@ -581,9 +639,7 @@ addAddressForm.addEventListener('submit', async (event) => {
             // Close the modal and refresh the page to show the new address
             addAddressModal.style.display = 'none';
             window.location.reload(); // Refresh the page to show the new address
-        } else {
-            showPopup(data.message || 'Failed to add address.');
-        }
+        } 
     } catch (error) {
         console.error('Error:', error);
         showPopup('An error occurred while adding the address.');

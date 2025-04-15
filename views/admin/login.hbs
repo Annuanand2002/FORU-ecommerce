@@ -1,37 +1,100 @@
+<style>
+  /* Custom styles for better responsiveness */
+  @media (max-width: 768px) {
+    section.vh-100 {
+      height: auto !important;
+      min-height: 100vh;
+    }
+    .card {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    .card-body {
+      padding: 2rem !important;
+    }
+    /* Smaller text for "Hi Admin" on mobile */
+    .login-title {
+      font-size: 1rem !important;
+      letter-spacing: 0.5px !important;
+    }
+    /* Adjust form elements for mobile */
+    .form-control-lg {
+      font-size: 1rem !important;
+      padding: 0.5rem 1rem !important;
+    }
+    .form-label {
+      font-size: 0.9rem !important;
+    }
+    /* Adjust eye icon position for mobile */
+    #togglePassword {
+      right: 18px !important;
+      top: 72% !important;
+    }
+  }
+  
+  /* Password field container */
+  .form-outline {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Eye icon positioning */
+  #togglePassword {
+    position: absolute;
+    right: 40px;
+    top: 70%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: rgb(125, 122, 122);
+    z-index: 2;
+  }
+  
+  /* Input field with icon */
+  .password-input {
+    padding-right: 40px !important;
+  }
+</style>
+
 <section class="vh-100" style="background-color: #c9c9c9;">
-  <div class="container py-5 h-100">
+  <div class="container py-3 py-lg-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col col-xl-10">
         <div class="card" style="border-radius: 1rem;">
           <div class="row g-0">
+            <!-- Image Column -->
             <div class="col-md-6 col-lg-5 d-none d-md-block">
               <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img1.webp"
-                alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+                alt="login form" class="img-fluid h-100" style="border-radius: 1rem 0 0 1rem; object-fit: cover;" />
             </div>
+            
+            <!-- Form Column -->
             <div class="col-md-6 col-lg-7 d-flex align-items-center">
               <div class="card-body p-4 p-lg-5 text-black">
                 <form id="adminLoginForm" method="POST" action="/admin/login">
                   <div class="d-flex align-items-center mb-3 pb-1">
-                    <span class="h1 fw-bold mb-0" style="font-family: 'Piedra', cursive; color: #854C4C !important; ">FORU</span>
+                    <span class="h1 fw-bold mb-0" style="font-family: 'Piedra', cursive; color: #854C4C !important;">FORU</span>
                   </div>
-                  <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Hi Admin! Login into your account</h5>
+                  <h5 class="fw-normal mb-3 pb-3 login-title" style="letter-spacing: 1px;">Hi Admin! Login into your account</h5>
 
-                  <div data-mdb-input-init class="form-outline mb-4">
+                  <!-- Username Field -->
+                  <div class="form-outline mb-4">
+                    <label class="form-label" for="username">Username</label>
                     <input type="text" id="username" name="username" class="form-control form-control-lg" />
-                    <label class="form-label" for="form2Example17">Username</label>
-                  <span class="error-message" id="usernameError" style="color: red;"></span>
+                    <span class="error-message" id="usernameError" style="color: red;"></span>
                   </div>
 
-                  <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="password" id="password" name="password" class="form-control form-control-lg" />
-                    <label class="form-label" for="form2Example27">Password</label>
-                    <i class="fa-solid fa-eye" id="togglePassword" style="cursor: pointer;"></i>
+                  <!-- Password Field with Correctly Positioned Eye Icon -->
+                  <div class="form-outline mb-4">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control form-control-lg password-input" />
+                    <i class="fa-solid fa-eye" id="togglePassword"></i>
                     <span class="error-message" id="passwordError" style="color: red;"></span>
-                 
                   </div>
-                   <p id="errorMessage" style="color: red;"></p>
+                  
+                  <p id="errorMessage" class="mb-3" style="color: red;"></p>
+                  
                   <div class="pt-1 mb-4">
-                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="submit">Login</button>
+                    <button class="btn btn-dark btn-lg btn-block w-100" type="submit">Login</button>
                   </div>
 
                   <a class="small text-muted" href="/admin/forgot-password">Forgot password?</a>
@@ -44,5 +107,8 @@
     </div>
   </div>
 </section>
+
+<script src="/javascripts/login-admin.js"></script>
+
 
 

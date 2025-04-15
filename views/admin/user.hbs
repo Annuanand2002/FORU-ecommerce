@@ -1,3 +1,108 @@
+<style>
+  /* Responsive adjustments for users table */
+@media (max-width: 1200px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .page-item {
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 992px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  
+  .table thead {
+    display: none;
+  }
+  
+  .table tbody {
+    display: block;
+    width: 100%;
+  }
+  
+  .table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+  }
+  
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    text-align: right !important;
+    border-bottom: 1px solid #dee2e6;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    padding-right: 1rem;
+    text-align: left;
+    color: rgb(228, 178, 117);
+  }
+  
+  .table td:last-child {
+    border-bottom: 0;
+  }
+  
+  /* Button adjustments */
+  .table td .btn {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .d-flex.justify-content-between.align-items-center.mb-4.pt-5 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  h4.my-3 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .pagination {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .table td {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left !important;
+  }
+  
+  .table td::before {
+    margin-bottom: 0.5rem;
+  }
+  
+  .table td .btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+</style>
+
 <div class="container">
   <div class="d-flex justify-content-between align-items-center mb-4 pt-5">
     
@@ -78,3 +183,16 @@
     </table>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add data-label attributes for responsive table
+  const headers = ["Name", "Email", "Mobile No", "Verified", "Status", "Action"];
+  const cells = document.querySelectorAll('.table-responsive td');
+  
+  cells.forEach((td, index) => {
+    const headerIndex = index % headers.length;
+    td.setAttribute('data-label', headers[headerIndex]);
+  });
+});
+</script>

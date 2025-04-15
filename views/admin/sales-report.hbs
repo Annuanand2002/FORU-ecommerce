@@ -1,3 +1,94 @@
+<style>
+  /* Responsive adjustments */
+  @media (max-width: 767.98px) {
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+      width: 100%;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    
+    thead {
+      display: none;
+    }
+    
+    tbody {
+      display: block;
+      width: 100%;
+    }
+    
+    tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      position: relative;
+    }
+    
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      text-align: right !important;
+      border-bottom: 1px solid #eee;
+    }
+    
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      padding-right: 1rem;
+      text-align: left;
+      color: rgb(228, 178, 117);
+    }
+    
+    td:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  @media (min-width: 768px) {
+    /* Show standard table layout on desktop */
+    td::before {
+      display: none;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .col-md-10 {
+      padding: 1rem !important;
+    }
+    
+    td {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left !important;
+      padding: 0.5rem 0.75rem;
+    }
+    
+    td::before {
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+
+  /* Always show table headers on larger screens */
+  @media (min-width: 768px) {
+    thead {
+      display: table-header-group;
+    }
+  }
+</style>
+
 <div class="col-md-10 p-4">
   <h4 class="my-3" style="color: rgb(228, 178, 117);">Sales Report</h4>
   <div class="d-flex justify-content-between align-items-center mb-4 pt-5">

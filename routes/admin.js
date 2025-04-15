@@ -64,7 +64,7 @@ router.post('/add-admin', async (req, res) => {
 
   try {
     const message = await adminHelper.addAdmin(username, password);
-    res.status(201).json({ message: message });  
+    res.status(201).json({ message: message ,success:true});  
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: error.message });  
