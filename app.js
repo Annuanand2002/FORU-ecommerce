@@ -135,6 +135,9 @@ handlebars.registerHelper("calculateDiscount", function (price, offerAmount) {
 handlebars.registerHelper("calculateDeductedAmount", function (price, offerAmount) {
   return price - offerAmount; // Amount deducted
 });
+handlebars.registerHelper("formatCurrency", function (value) {
+  return "₹" + parseFloat(value).toFixed(2);
+});
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

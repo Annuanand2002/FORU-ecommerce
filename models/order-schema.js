@@ -63,6 +63,13 @@ items: [{
         required: true
       }
     }],
+    returnRequest: {
+      requested: { type: Boolean, default: false },
+      reason: String,
+      requestedAt: Date,
+      approved: { type: Boolean, default: false },
+      approvedAt: Date
+    }
 }],
 totalPrice: {
   type: Number,

@@ -206,5 +206,46 @@ const getSingleProduct = async(req,res)=>{
     res.status(500).send("server error")
   }
 }
+const search = async (req, res) => {
+  try {
+    const searchQuery = req.query.q;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9; // Match your pagination limit
+    const skip = (page - 1) * limit;
 
-module.exports = { getAllProduct,getEditProduct,addProduct,updateProduct,deleteProduct,getSingleProduct};
+    if (!searchQuery || searchQuery.trim() === '') {
+      return res.redirect('/collections');
+    }
+
+    // Search query with text index
+    const searchResults = await Product.find(
+      { $text: { $search: searchQuery } },
+      { score: { $meta: "textScore" } }
+    )
+    .sort({ score: { $meta: "textScore" } })
+    .skip(skip)
+    .limit(limit);
+
+    const count = await Product.countDocuments({ 
+      $text: { $search: searchQuery } 
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('collections', {
+      products: searchResults,
+      searchQuery,
+      currentPage: page,
+      totalPages,
+      pages: Array.from({ length: totalPages }, (_, i) => i + 1),
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      title: `Search Results for "${searchQuery}"`
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).render('error', { message: 'Search failed' });
+  }
+};
+module.exports = { search,getAllProduct,getEditProduct,addProduct,updateProduct,deleteProduct,getSingleProduct};

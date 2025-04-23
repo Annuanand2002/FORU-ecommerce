@@ -5,7 +5,7 @@ const Order = require("../models/order-schema");
 /**render sales report page */
 const getSalesReportPage = async (req, res) => {
   try {
-    const completedOrders = await Order.aggregate([
+    const salesData = await Order.aggregate([
       {
         $unwind: '$items'
       },
@@ -16,7 +16,7 @@ const getSalesReportPage = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'users', 
+          from: 'users',
           localField: 'userId',
           foreignField: '_id',
           as: 'user'
@@ -25,41 +25,95 @@ const getSalesReportPage = async (req, res) => {
       {
         $unwind: '$user'
       },
-
       {
         $lookup: {
-          from: 'products', 
+          from: 'products',
           localField: 'items.productId',
           foreignField: '_id',
           as: 'product'
         }
       },
-      // Stage 6: Unwind the product array (since $lookup returns an array)
       {
         $unwind: '$product'
       },
-      // Stage 7: Project the required fields
+      // Calculate item-level values
+      {
+        $addFields: {
+          'itemTotal': {
+            $multiply: ['$items.price', '$items.quantity']
+          },
+          // Calculate the proportion of this item to the order total
+          'itemProportion': {
+            $cond: [
+              { $gt: ['$totalPrice', 0] },
+              { $divide: [
+                  { $multiply: ['$items.price', '$items.quantity'] },
+                  '$totalPrice'
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      // Calculate item's share of discount and final price
+      {
+        $addFields: {
+          'itemDiscount': {
+            $multiply: ['$discountCouponFee', '$itemProportion']
+          },
+          'itemFinalPrice': {
+            $subtract: [
+              { $multiply: ['$items.price', '$items.quantity'] },
+              { $multiply: ['$discountCouponFee', '$itemProportion'] }
+            ]
+          }
+        }
+      },
+      // Project final output
       {
         $project: {
-          orderId: '$_id', 
-          username: '$user.name', 
-          productname: '$product.name', 
-          quantity: '$items.quantity', // Include the quantity from the items array
-          totalPrice: 1, // Include the total price
-          discountAmount: '$discountCouponFee', // Include the discount amount
-          newTotal: 1 // Include the new total
+          orderId: '$_id',
+          username: '$user.name',
+          productname: '$product.name',
+          quantity: '$items.quantity',
+          unitPrice: '$items.price',
+          itemTotal: 1,
+          itemDiscount: 1,
+          itemFinalPrice: 1,
+          orderTotal: '$totalPrice',       // For reference
+          orderDiscount: '$discountCouponFee', // For reference
+          orderNewTotal: '$newTotal'       // For reference
         }
       }
     ]);
-console.log("getSalesReportPage",getSalesReportPage)
-    // Render the sales-report view with the fetched data
+
+    // Calculate grand totals
+    const grandTotals = salesData.reduce((acc, item) => ({
+      totalQuantity: acc.totalQuantity + item.quantity,
+      grossSales: acc.grossSales + item.itemTotal,
+      totalDiscount: acc.totalDiscount + item.itemDiscount,
+      netSales: acc.netSales + item.itemFinalPrice
+    }), {
+      totalQuantity: 0,
+      grossSales: 0,
+      totalDiscount: 0,
+      netSales: 0
+    });
+
     res.render('admin/sales-report', {
       isAdminLogin: false,
       admin: true,
-      sales: completedOrders // Pass the completed orders to the view
+      sales: salesData,
+      grandTotals,
+      helpers: {
+        formatCurrency: function(amount) {
+          return '₹' + amount.toFixed(2);
+        }
+      }
     });
   } catch (error) {
-    console.log("Error occurred:", error);
+    console.error("Error in sales report:", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -109,14 +163,52 @@ const filterSalesData = async (req, res) => {
       },
       { $unwind: '$product' },
       {
+        $addFields: {
+          'itemTotal': {
+            $multiply: ['$items.price', '$items.quantity']
+          },
+          // Calculate the proportion of this item to the order total
+          'itemProportion': {
+            $cond: [
+              { $gt: ['$totalPrice', 0] },
+              { $divide: [
+                  { $multiply: ['$items.price', '$items.quantity'] },
+                  '$totalPrice'
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      // Calculate item's share of discount and final price
+      {
+        $addFields: {
+          'itemDiscount': {
+            $multiply: ['$discountCouponFee', '$itemProportion']
+          },
+          'itemFinalPrice': {
+            $subtract: [
+              { $multiply: ['$items.price', '$items.quantity'] },
+              { $multiply: ['$discountCouponFee', '$itemProportion'] }
+            ]
+          }
+        }
+      },
+      // Project final output
+      {
         $project: {
           orderId: '$_id',
           username: '$user.name',
           productname: '$product.name',
           quantity: '$items.quantity',
-          totalPrice: 1,
-          discountAmount: '$discountCouponFee',
-          newTotal: 1
+          unitPrice: '$items.price',
+          itemTotal: 1,
+          itemDiscount: 1,
+          itemFinalPrice: 1,
+          orderTotal: '$totalPrice',       // For reference
+          orderDiscount: '$discountCouponFee', // For reference
+          orderNewTotal: '$newTotal'       // For reference
         }
       }
     ]);

@@ -198,9 +198,10 @@
               </td>
               <td style="text-align: center; vertical-align: middle;">
                 
-  <form action="/admin/delete-offer/{{this._id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this offer?')">
-    <button type="submit" class="btn" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">Delete</button>
-  </form>
+
+<button type="button" onclick="deleteOffer('{{this._id}}')" class="btn" style="background: linear-gradient(to top left, rgb(255, 99, 99), rgb(255, 204, 204)); color: white;">
+  Delete
+</button>
               </td>
             </tr>
             {{/each}}
@@ -209,3 +210,49 @@
   </div>
 </div>
 
+
+<script>
+  async function deleteOffer(offerId) {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch('/admin/offers', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: offerId })
+      });
+
+      const data = await response.json(); // Always parse JSON first
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete offer');
+      }
+
+      await Swal.fire(
+        'Deleted!',
+        data.message || 'Your offer has been deleted.',
+        'success'
+      );
+      window.location.reload();
+      
+    } catch (error) {
+      Swal.fire(
+        'Error!',
+        error.message || 'Something went wrong',
+        'error'
+      );
+    }
+  }
+}
+</script>

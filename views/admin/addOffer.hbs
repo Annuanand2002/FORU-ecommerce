@@ -130,81 +130,128 @@
         <p id="offerExistsMessage"></p>
     </div>
 </div>
+    
+
     <script>
         document.getElementById("add-offer-form").addEventListener("submit", async function (e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            // Clear previous error messages
-            document.querySelectorAll(".error-message").forEach((el) => (el.textContent = ""));
+    // Clear previous error messages
+    document.querySelectorAll(".error-message").forEach((el) => (el.textContent = ""));
+    
+    // Get submit button and save original text
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton.innerHTML;
 
-            // Gather form data
-            const formData = {
-                name: document.getElementById("name").value,
-                description: document.getElementById("description").value,
-                discountType: document.getElementById("discountType").value,
-                discountValue: parseFloat(document.getElementById("discountValue").value),
-                startDate: document.getElementById("startDate").value,
-                endDate: document.getElementById("endDate").value,
-                applicableTo : document.getElementById("applicableTo").value,
-            };
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Processing...
+    `;
 
-            // Validate form data
-            let isValid = true;
+    // Gather form data
+    const formData = {
+        name: document.getElementById("name").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        discountType: document.getElementById("discountType").value,
+        discountValue: parseFloat(document.getElementById("discountValue").value),
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        applicableTo: document.getElementById("applicableTo").value,
+    };
 
-            if (!formData.name) {
-                document.getElementById("name-error").textContent = "Offer name is required.";
-                isValid = false;
-            }
+    // Validate form data
+    let isValid = true;
 
-            if (!formData.discountType) {
-                document.getElementById("discountType-error").textContent = "Discount type is required.";
-                isValid = false;
-            }
+    if (!formData.name) {
+        document.getElementById("name-error").textContent = "Offer name is required.";
+        isValid = false;
+    }
 
-            if (!formData.discountValue || formData.discountValue <= 0) {
-                document.getElementById("discountValue-error").textContent = "Discount value must be greater than 0.";
-                isValid = false;
-            }
-            if (!formData.applicableTo) {
-    document.getElementById("applicableTo-error").textContent = "Please select if the offer applies to a product or category.";
-    isValid = false;
-}
+    if (!formData.discountType) {
+        document.getElementById("discountType-error").textContent = "Discount type is required.";
+        isValid = false;
+    }
 
-            if (!formData.startDate) {
-                document.getElementById("startDate-error").textContent = "Start date is required.";
-                isValid = false;
-            }
+    if (!formData.discountValue || formData.discountValue <= 0) {
+        document.getElementById("discountValue-error").textContent = "Discount value must be greater than 0.";
+        isValid = false;
+    }
 
-            if (!formData.endDate) {
-                document.getElementById("endDate-error").textContent = "End date is required.";
-                isValid = false;
-            } else if (new Date(formData.endDate) <= new Date(formData.startDate)) {
-                document.getElementById("endDate-error").textContent = "End date must be greater than start date.";
-                isValid = false;
-            }
+    if (!formData.applicableTo) {
+        document.getElementById("applicableTo-error").textContent = "Please select if the offer applies to a product or category.";
+        isValid = false;
+    }
 
-            if (!isValid) return;
+    if (!formData.startDate) {
+        document.getElementById("startDate-error").textContent = "Start date is required.";
+        isValid = false;
+    }
 
-            // Submit form data
-            try {
-                const response = await fetch("/admin/add-offers", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                });
+    if (!formData.endDate) {
+        document.getElementById("endDate-error").textContent = "End date is required.";
+        isValid = false;
+    } else if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+        document.getElementById("endDate-error").textContent = "End date must be greater than start date.";
+        isValid = false;
+    }
 
-                if (response.ok) {
-                    console.log("successssswssss")
-                    window.location.href = "/admin/offers"; 
-                } else {
-                    showOfferExistsPopup(result.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("An error occurred. Please try again.");
-            }
+    if (!isValid) {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+        return;
+    }
+
+    // Submit form data
+    try {
+        const response = await fetch("/admin/offers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
         });
-        function showOfferExistsPopup(message) {
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Show success message
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Offer added successfully',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Redirect to offers page
+            window.location.href = "/admin/offers";
+        } else {
+            // Show error message from server
+            if (result.message && result.message.includes("already exists")) {
+                showOfferExistsPopup(result.message);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Failed to add offer'
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again.'
+        });
+    } finally {
+        // Reset button state
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+    }
+});
+
+function showOfferExistsPopup(message) {
     const modal = document.getElementById("offerExistsModal");
     const messageElement = document.getElementById("offerExistsMessage");
     

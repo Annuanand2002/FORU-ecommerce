@@ -16,7 +16,6 @@
     border-radius: 3px;
   }
 
-  /* Responsive Styles */
   @media (max-width: 991.98px) {
     .navbar-collapse {
       text-align: center;
@@ -31,7 +30,7 @@
     }
 
     .d-flex.me-2 {
-      flex-direction: column; /* Stack input and button */
+      flex-direction: column;
       width: 100%;
       margin-bottom: 15px !important;
     }
@@ -43,8 +42,8 @@
     }
 
     .d-flex.align-items-center {
-      flex-direction: column; /* Stack icons and login/register */
-      width: 100%; /* Take full width inside the collapsed area */
+      flex-direction: column;
+      width: 100%;
     }
 
     .btn.me-2 {
@@ -62,22 +61,21 @@
       margin-bottom: 10px;
     }
   }
+
+  /* Fix dropdown menu positioning */
+  .dropdown-menu {
+    position: absolute;
+  }
 </style>
+
 <div class="user-layout">
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">FORU</a>
+        <a class="navbar-brand" href="/">FORU</a>
 
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -98,13 +96,7 @@
           </ul>
 
           <form class="d-flex me-2 mb-2 mb-lg-0" role="search" method="GET" action="/collections">
-            <input
-              class="form-control me-2 search-bar"
-              type="search"
-              name="gender"
-              placeholder="Search for products"
-              aria-label="Search"
-            />
+            <input class="form-control me-2 search-bar" type="search" name="gender" placeholder="Search for products" aria-label="Search" />
             <button class="btn btn-outline-success w-100 mt-2" type="submit" style="color: white">
               Search
             </button>
@@ -120,20 +112,10 @@
             </a>
 
             {{#if user}}
-              <div class="d-flex align-items-center dropdown">
-                <span class="text-light me-2">Hi, {{user.name}}</span>
-                <a
-                  href="#"
-                  class="btn dropdown-toggle p-0"
-                  id="userDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <i
-                    class="fa-regular fa-user-circle"
-                    style="color: black; font-size: 2.5rem;"
-                  ></i>
+              <div class="dropdown">
+                {{!-- <span class="text-light me-2">Hi, {{user.name}}</span> --}}
+                <a class="btn dropdown-toggle p-0" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fa-regular fa-user-circle" style="color: white; font-size: 2.5rem;"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                   <li><a class="dropdown-item" href="/account">Profile</a></li>
@@ -150,8 +132,11 @@
     </nav>
   </header>
 </div>
+
+<!-- User header specific JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Highlight active nav link
   const currentPath = window.location.pathname.split('/')[1] || 'home';
   const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
 
@@ -165,6 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       link.classList.remove('active');
     }
+  });
+
+  // Initialize dropdowns
+  const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+  const dropdownList = [...dropdownElementList].map(dropdownToggleEl => {
+    return new bootstrap.Dropdown(dropdownToggleEl);
   });
 });
 </script>

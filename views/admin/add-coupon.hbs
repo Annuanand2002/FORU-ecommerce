@@ -27,12 +27,12 @@
                     <h4 class="mb-0">Add Coupon</h4>
                 </div>
                 <div class="card-body">
-                    <form action="/admin/add-coupon" method="post" id="add-coupon-form">
+                    <form action="/admin/coupon" method="post" id="add-coupon-form">
                     <div class="row mb-3">
     <div class="col-md-6">
         <label for="couponName" class="form-label">Coupon Name</label>
         <input type="text" name="couponName" id="name" class="form-control" placeholder="Coupon Name">
-        <div class="error-message" id="name-error"></div> <!-- Add id here -->
+        <div class="error-message" id="name-error"></div> 
     </div>
 </div>
 
@@ -40,7 +40,7 @@
     <div class="col-md-6">
         <label for="discountAmount" class="form-label">Amount</label>
         <input type="number" name="discountAmount" id="amount" class="form-control" placeholder="Discount amount" min="1">
-        <div class="error-message" id="amount-error"></div> <!-- Add id here -->
+        <div class="error-message" id="amount-error"></div>
     </div>
 </div>
 
@@ -48,20 +48,20 @@
     <div class="col-md-6">
         <label for="minPurchaseAmount" class="form-label">Minimum Amount</label>
         <input type="number" name="minPurchaseAmount" id="minAmount" class="form-control" placeholder="Minimum purchase amount" min="200">
-        <div class="error-message" id="minAmount-error"></div> <!-- Add id here -->
+        <div class="error-message" id="minAmount-error"></div> 
     </div>
 </div>
 
 <div class="form-group">
     <label for="expiryDate">Expiry</label>
     <input type="date" id="expiryDate" name="expiryDate"/>
-    <div class="error-message" id="expiryDate-error"></div> <!-- Add id here -->
+    <div class="error-message" id="expiryDate-error"></div> 
 </div>
 
 <div class="mb-3">
     <label for="description" class="form-label">Description</label>
     <textarea name="description" id="description" class="form-control" rows="3" placeholder="Enter coupon description"></textarea>
-    <div class="error-message" id="description-error"></div> <!-- Add id here -->
+    <div class="error-message" id="description-error"></div> 
 </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary-custom">Submit</button>

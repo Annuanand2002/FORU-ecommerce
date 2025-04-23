@@ -49,28 +49,51 @@
                 <th>Product</th>
                 <th>Details</th>
             </tr>
-            {{#each order.items}}
-            <tr>
-                <td>
-                    <img src="{{this.image}}" alt="{{this.productName}}" style="width: 100px; height: 100px; object-fit: cover;">
-                </td>
-                <td>
-                    <strong>{{this.productName}}</strong><br>
-                    Quantity: {{this.quantity}}<br>
-                    Price: ₹{{this.price}}<br>
-                    Size: {{this.size}}<br>
-                    status:{{this.status}}<br>
-                    <select class="status-dropdown" data-order-id="{{../order._id}}" data-item-id="{{this._id}}" {{#if (or (eq this.status "Completed") (eq this.status "Cancelled") (eq this.status "Returned"))}}disabled{{/if}}>
-                        <option value="Pending" {{#ifEquals this.status "Pending"}}selected{{/ifEquals}}>Pending</option>
-                        <option value="Shipped" {{#ifEquals this.status "Shipped"}}selected{{/ifEquals}}>Shipped</option>
-                        <option value="Completed" {{#ifEquals this.status "Completed"}}selected{{/ifEquals}}>Completed</option>
-                        <option value="Cancelled" {{#ifEquals this.status "Cancelled"}}selected{{/ifEquals}}>Cancelled</option>
-                        <option value="Returned" {{#ifEquals this.status "Returned"}}selected{{/ifEquals}}>Returned</option>
-                    </select>
-                    <span class="status-{{this.status}}" style="padding-top:50px;color:rgb(90, 87, 87);font-size:12px;"><br>*{{this.status}}</span>
-                </td>
-            </tr>
-            {{/each}}
+           {{#each order.items}}
+<tr>
+  <td>
+    <img src="{{this.image}}" alt="{{this.productName}}" style="width: 100px; height: 100px; object-fit: cover;">
+  </td>
+  <td>
+    <strong>{{this.productName}}</strong><br>
+    Quantity: {{this.quantity}}<br>
+    Price: ₹{{this.price}}<br>
+    Size: {{this.size}}<br>
+    Status: {{this.status}}<br>
+    
+    {{#if (eq this.status "Return Processing")}}
+      <div class="return-request" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+        <p><strong>Return Reason:</strong> {{this.returnRequest.reason}}</p>
+        <p><strong>Requested At:</strong> {{formatDate this.returnRequest.requestedAt}}</p>
+        <div style="margin-top: 10px;">
+          <button class="btn btn-sm btn-success approve-return" 
+                  data-order-id="{{../order._id}}" 
+                  data-item-id="{{this._id}}"
+                  style="margin-right: 5px;">
+            Approve Return
+          </button>
+          <button class="btn btn-sm btn-danger reject-return" 
+                  data-order-id="{{../order._id}}" 
+                  data-item-id="{{this._id}}">
+            Reject Return
+          </button>
+        </div>
+      </div>
+    {{else}}
+      <select class="form-control status-dropdown" 
+              data-order-id="{{../order._id}}" 
+              data-item-id="{{this._id}}" 
+              style="margin-top: 5px;"
+              {{#if (or (eq this.status "Completed") (eq this.status "Cancelled") (eq this.status "Returned"))}}disabled{{/if}}>
+        <option value="Pending" {{#ifEquals this.status "Pending"}}selected{{/ifEquals}}>Pending</option>
+        <option value="Shipped" {{#ifEquals this.status "Shipped"}}selected{{/ifEquals}}>Shipped</option>
+        <option value="Completed" {{#ifEquals this.status "Completed"}}selected{{/ifEquals}}>Completed</option>
+        <option value="Cancelled" {{#ifEquals this.status "Cancelled"}}selected{{/ifEquals}}>Cancelled</option>
+      </select>
+    {{/if}}
+  </td>
+</tr>
+{{/each}}
         </table>
 
         <div class="mt-4 text-center">
@@ -80,18 +103,30 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
+    // Status dropdown change handler
     const statusDropdowns = document.querySelectorAll('.status-dropdown');
     statusDropdowns.forEach(dropdown => {
         dropdown.addEventListener('change', function () {
             const orderId = this.getAttribute('data-order-id');
             const itemId = this.getAttribute('data-item-id');
             const newStatus = this.value;
-            updateOrderStatus(orderId, itemId, newStatus);
+            
+            // Show loading state
+            const originalValue = this.value;
+            this.disabled = true;
+            this.innerHTML = `
+                <option value="${newStatus}" selected>
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    Updating...
+                </option>
+            `;
+            
+            updateOrderStatus(orderId, itemId, newStatus, this);
         });
     });
 
-    async function updateOrderStatus(orderId, itemId, newStatus) {
+    async function updateOrderStatus(orderId, itemId, newStatus, dropdownElement) {
         try {
             const response = await fetch(`/admin/update-order-status/${orderId}/${itemId}`, {
                 method: 'POST',
@@ -104,15 +139,124 @@ document.addEventListener('DOMContentLoaded', function () {
             const result = await response.json();
 
             if (response.ok) {
-                const statusCell = document.querySelector(`.status-dropdown[data-item-id="${itemId}"]`).closest('td');
-                statusCell.querySelector('span').textContent = `*${newStatus}`;
+                // Success - just reload the page to reflect all changes
+                window.location.reload();
             } else {
+                // Error case
+                dropdownElement.disabled = false;
+                dropdownElement.innerHTML = `
+                    <option value="Pending">Pending</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                `;
+                dropdownElement.value = dropdownElement.getAttribute('data-current-value');
                 alert(result.message || 'An error occurred while updating the order status.');
             }
         } catch (error) {
+            // Network error case
+            dropdownElement.disabled = false;
+            dropdownElement.innerHTML = `
+                <option value="Pending">Pending</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            `;
+            dropdownElement.value = dropdownElement.getAttribute('data-current-value');
             alert('An error occurred while updating the order status.');
         }
     }
+
+    // Handle return approvals
+    document.querySelectorAll('.approve-return').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to approve this return?')) return;
+            
+            const orderId = this.getAttribute('data-order-id');
+            const itemId = this.getAttribute('data-item-id');
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Processing...
+            `;
+            
+            try {
+                const response = await fetch('/admin/process-return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId,
+                        itemId,
+                        action: 'approve'
+                    }),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Return approved successfully');
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Failed to approve return');
+                    this.disabled = false;
+                    this.textContent = 'Approve Return';
+                }
+            } catch (error) {
+                alert('Error processing return approval');
+                this.disabled = false;
+                this.textContent = 'Approve Return';
+            }
+        });
+    });
+
+    // Handle return rejections
+    document.querySelectorAll('.reject-return').forEach(button => {
+        button.addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to reject this return?')) return;
+            
+            const orderId = this.getAttribute('data-order-id');
+            const itemId = this.getAttribute('data-item-id');
+            
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Processing...
+            `;
+            
+            try {
+                const response = await fetch('/admin/process-return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId,
+                        itemId,
+                        action: 'reject'
+                    }),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Return rejected successfully');
+                    window.location.reload();
+                } else {
+                    alert(result.message || 'Failed to reject return');
+                    this.disabled = false;
+                    this.textContent = 'Reject Return';
+                }
+            } catch (error) {
+                alert('Error processing return rejection');
+                this.disabled = false;
+                this.textContent = 'Reject Return';
+            }
+        });
+    });
 });
 </script>
-

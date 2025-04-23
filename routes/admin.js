@@ -9,7 +9,7 @@ const Admin = require('../models/admin-schema');
 const categoryHelper = require('../controllers/cateogory-controller');
 const bcrypt = require('bcrypt');
 const {adminAuth} = require('../controllers/auth-middleware')
-const {orderAdmin,updateOrderAdmin,orderPageUpdate,orderDetails, invoiceDownload} = require('../controllers/order-controller')
+const {orderAdmin,updateOrderAdmin,processReturnRequest,orderPageUpdate,orderDetails, invoiceDownload} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 const offerHelper = require('../controllers/offers-middleware')
 const salesHelper = require('../controllers/sales-middleware')
@@ -170,44 +170,6 @@ router.post('/delete-product/:id', async (req, res) => {
   }
 })
 
-/*category-mangement*/
-router.get('/category',adminAuth,async (req,res)=>{
-  try{
-    const categories = await categoryHelper.getAllcategories();
-    res.render('admin/category',{categories,admin:true,isAdminLogin:false})
-  }
-  catch{
-    res.status(500).send('Internal server error')
-  }
-})
-/*add-category*/
-router.post('/add-category', async (req, res) => {
-  try {
-    const { name } = req.body;
-    const existing = await categoryHelper.checkCategoryExists(name);
-    if (existing) {
-      return res.status(400).json({ error: 'Category already exists' });
-    }
-
-    await categoryHelper.addCategory({ name });
-    res.status(200).json({ message: 'Category added successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
-  }
-});
-
-/*delete-category*/
-router.delete('/delete-category/:id', async (req, res) => {
-  try {
-    const categoryId = req.params.id;
-    await categoryHelper.deleteCategory(categoryId);
-    res.status(200).json({ message: 'Category deleted successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Internal server error');
-  }
-});
 
 /*user-management */
 
@@ -254,25 +216,34 @@ router.post("/user/unblock/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+/*category-mangement*/
+router.get('/category', adminAuth, categoryHelper.getAllCategories);
+router.post('/category',categoryHelper.createCategory)
+router.delete('/category/:id',adminAuth,categoryHelper.deleteCategory)
+
+/**order mangement */
 router.get('/order',adminAuth,orderAdmin)
 router.post('/update-order-status/:orderId/:itemId',orderPageUpdate);
 router.get('/order-details/:id',orderDetails)
+router.post('/process-return', processReturnRequest);
 
 /**coupon */
 router.get('/coupon',adminAuth,couponHelper.showCouponPage)
+router.post('/coupon',couponHelper.addCoupon)
+router.put('/coupon',couponHelper.editCoupon)
+router.delete('/coupon',couponHelper.deleteCoupon)
 router.get('/add-coupon',adminAuth,couponHelper.getaddCoupon)
-router.post('/add-coupon',couponHelper.addCoupon)
 router.get('/edit-coupon/:id',adminAuth,couponHelper.getEditPage)
-router.post('/edit-coupon/:id',couponHelper.editCoupon)
-router.post('/delete-coupon/:id', couponHelper.deleteCoupon)
+
 
 /**offer management */
 router.get('/offers',adminAuth,offerHelper.updateOfferStatus,offerHelper.getOfferPage)
+router.post('/offers',offerHelper.addOffer)
+router.put('/offers/:id',offerHelper.editOffer)
 router.get('/add-offers',adminAuth,offerHelper.getAddOfferPage)
-router.post('/add-offers',offerHelper.addOffer)
 router.get('/edit-offer/:id',adminAuth,offerHelper.getEditOfferPage)
-router.post('/edit-offer/:id',offerHelper.editOffer)
-router.post('/delete-offer/:id',offerHelper.deletOffer)
+router.delete('/offers',offerHelper.deletOffer)
 router.get('/show-offer/:id',adminAuth,offerHelper.showOfferPage)
 router.post("/apply-offer", offerHelper.applyOffer);
 router.post("/remove-offer", offerHelper.removeOffer);

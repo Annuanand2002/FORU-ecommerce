@@ -9,12 +9,12 @@ const {checkAuthentication,checkUserBlocked}= require('../controllers/auth-middl
 const pagination= require('../controllers/pagination-middleware')
 const nodemailer = require('nodemailer');
 const {getFilteredProducts }= require('../controllers/getFilteredProduct');
-const {getSingleProduct}= require('../controllers/product-controller');
+const {getSingleProduct,search}= require('../controllers/product-controller');
 const {updateProfile,deleteAccount}= require('../controllers/userAccount-middleware')
 const {wishlistMangement, getWishlistData, fetchProductWishlist,getWishlist}= require('../controllers/wishlist-middleware')
 const {addAddress,getAddresses,removeAddress,getEditAddresses,editAddress,setDefaultAddress} = require('../controllers/address-middleware')
 const {addToCart,getCart,removeCart,updateCartQunatity,getAddAddressCart,addressCart,addAddressCart,cartQuantityCheck,applyCoupon,removeCoupon} = require('../controllers/cart-middleware')
-const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,retryPayment,getOrderDetails,orderCancel,orderReturn,handlePaymentResponse,addAddressses,invoiceDownload,paymentFailPage} = require('../controllers/order-controller')
+const {getPaymentPage,placeOrder,orderConfirmed,getOrderPage,retryPayment,getOrderDetails,orderCancel,requestReturn,handlePaymentResponse,addAddressses,invoiceDownload,paymentFailPage} = require('../controllers/order-controller')
 const couponHelper = require('../controllers/coupon-middleware')
 const walletHelper = require('../controllers/wallet-middleware')
 
@@ -188,7 +188,6 @@ router.post('/reset-password', async (req, res) => {
 });
 
 router.get('/collections',getFilteredProducts);
-
 /**profile-mangement */
 router.get('/account',checkAuthentication,(req,res)=>{
   const user = req.session.user;
@@ -199,6 +198,7 @@ router.get('/edit-profile',checkAuthentication,checkUserBlocked,(req,res)=>{
   res.render('user/edit-userProfile',{user,isUser:true})
 })
 router.post('/edit-profile',updateProfile);
+
 /**address */
 router.get('/address',checkAuthentication,getAddresses)
 router.get('/add-address',checkAuthentication,(req,res)=>{
@@ -220,7 +220,7 @@ router.post('/delete-account', deleteAccount);
 router.get('/orders',checkAuthentication,getOrderPage)
 router.get('/order-details/:orderId/:itemId',checkAuthentication,getOrderDetails)
 router.post('/cancel-order',orderCancel)
-router.post('/return-order',orderReturn)
+router.post('/return-order',requestReturn)
 router.get('/payment',checkAuthentication,getPaymentPage)
 router.post('/place-order',placeOrder)
 router.post('/handle-payment-response',handlePaymentResponse)
@@ -247,7 +247,7 @@ router.post('/cart/remove',removeCart)
 router.post('/cart/update-quantity',updateCartQunatity)
 router.get('/address-cart',checkAuthentication,addressCart)
 router.get('/addAddressCart',checkAuthentication,getAddAddressCart)
-router.post('addAddressCart',checkAuthentication,addAddressCart)
+router.post('/addAddressCart',checkAuthentication,addAddressCart)
 router.get('/product/:productId/size/:size/quantity',cartQuantityCheck)
 router.get('/apply-coupon',couponHelper.getApplyCouponPage)
 router.post('/apply-coupon',applyCoupon)

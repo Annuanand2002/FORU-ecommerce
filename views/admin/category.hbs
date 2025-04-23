@@ -107,40 +107,160 @@
   </div>
 </div>
 
+
 <script>
-  // Optional: Add JavaScript for better mobile experience
-  document.addEventListener('DOMContentLoaded', function() {
-    // Make delete buttons more touch-friendly on mobile
-    if (window.innerWidth < 768) {
-      document.querySelectorAll('.delete-category').forEach(btn => {
-        btn.style.padding = '0.4rem 0.6rem';
-        btn.style.fontSize = '1rem';
-      });
+
+document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const nameInput = document.getElementById('categoryName');
+  const name = nameInput.value.trim();
+  const errorElement = document.getElementById('categoryError');
+  const submitButton = e.target.querySelector('button[type="submit"]');
+  const form = e.target;
+  
+  // Clear previous errors
+  errorElement.textContent = '';
+  
+  // Client-side validation
+  if (!name) {
+    errorElement.textContent = 'Category name is required';
+    nameInput.focus();
+    return;
+  }
+
+  if (name.length < 2) {
+    errorElement.textContent = 'Name must be at least 2 characters';
+    nameInput.focus();
+    return;
+  }
+
+  if (name.length > 50) {
+    errorElement.textContent = 'Name cannot exceed 50 characters';
+    nameInput.focus();
+    return;
+  }
+
+  // Show loading state
+  submitButton.disabled = true;
+  submitButton.innerHTML = `
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Creating...
+  `;
+
+  try {
+    const response = await fetch('/admin/category', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create category');
     }
+
+    // Success case - show message and handle UI updates
+    await Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: result.message,
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+    // Close modal and reset form
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
+    if (modal) modal.hide();
+    form.reset();
     
-    // Form validation for add category
-    const addCategoryForm = document.getElementById('addCategoryForm');
-    if (addCategoryForm) {
-      addCategoryForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const categoryName = document.getElementById('categoryName').value.trim();
-        const errorElement = document.getElementById('categoryError');
-        
-        if (!categoryName) {
-          errorElement.textContent = 'Please enter a category name';
-          return;
-        }
-        
-        if (categoryName.length < 2) {
-          errorElement.textContent = 'Category name must be at least 2 characters';
-          return;
-        }
-        
-        // Submit form if validation passes
-        this.submit();
+    // Refresh the page
+    window.location.reload();
+
+  } catch (error) {
+    // Error handling - show only one error message
+    errorElement.textContent = error.message;
+    nameInput.focus();
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to create category'
+    });
+  } finally {
+    // Reset button state
+    submitButton.disabled = false;
+    submitButton.textContent = 'Save';
+  }
+});
+
+document.querySelectorAll('.delete-category').forEach(button => {
+  button.addEventListener('click', async function() {
+    const categoryId = this.dataset.id;
+    const categoryName = this.closest('li').textContent.trim().split('\n')[0]; 
+    
+    // Show loading state
+    const originalHTML = this.innerHTML;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    this.disabled = true;
+
+    try {
+      const result = await Swal.fire({
+        title: 'Delete Category',
+        html: `Are you sure you want to delete <strong>${categoryName}</strong>?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        allowOutsideClick: false
       });
+
+      if (result.isConfirmed) {
+        const response = await fetch(`/admin/category/${categoryId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Add CSRF token if needed:
+            // 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to delete category');
+        }
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: `Category "${categoryName}" was deleted successfully`,
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        // Remove from UI
+        this.closest('li').remove();
+      }
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to delete category',
+        timer: 3000
+      });
+    } finally {
+      // Reset button state
+      this.innerHTML = originalHTML;
+      this.disabled = false;
     }
   });
+});
 </script>
-
 

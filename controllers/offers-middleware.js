@@ -95,44 +95,138 @@ const getEditOfferPage = async (req,res)=>{
 }
 
 /**logic to edit offer */
-const editOffer = async(req,res)=>{
-  try{
+const editOffer = async (req, res) => {
+  try {
     const offerId = req.params.id;
-    const {name,description,discountType,discountValue,applicableTo,startDate,endDate} = req.body
-    const updatedOffer = await Offer.findByIdAndUpdate(offerId,{
-      name,
-      description,
-      discountType,
-      discountValue,
-      applicableTo,
-      startDate,
-      endDate
-    }, {new: true })
+    console.log("offerId",offerId)
+    const { name, description, discountType, discountValue, applicableTo, startDate, endDate } = req.body;
+    console.log("Raw dates received:", { startDate, endDate });
+
+    const errors = {};
+
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      errors.name = "Offer name is required and must be a valid string";
+    }
+
+    if (!discountType || !['percentage', 'fixed'].includes(discountType)) {
+      errors.discountType = "Invalid discount type";
+    }
+
+    if (!discountValue || isNaN(discountValue) || discountValue <= 0) {
+      errors.discountValue = 'Discount value must be a positive number';
+    } else if (discountType === 'percentage' && discountValue > 100) {
+      errors.discountValue = 'Percentage discount cannot exceed 100%';
+    }
+
+    if (!applicableTo || !['product', 'category'].includes(applicableTo)) {
+      errors.applicableTo = 'Invalid applicable type';
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const normalizeDate = (date) => {
+      const d = new Date(date);
+      return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+    }
+    const normalizedStart = normalizeDate(startDate);
+    const normalizedEnd = normalizeDate(endDate);
+    console.log("Normalized dates:", { normalizedStart, normalizedEnd });
+
+    if (!startDate || isNaN(start.getTime())) {
+      errors.startDate = 'Valid start date is required';
+    }
+
+    if (!endDate || isNaN(end.getTime())) {
+      errors.endDate = 'Valid end date is required';
+    } else if (normalizedEnd <= normalizedStart) {
+      errors.endDate = 'End date must be after start date';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ 
+        success: false,
+        errors 
+      });
+    }
+
+    // Update the offer
+    const updatedOffer = await Offer.findByIdAndUpdate(
+      offerId,
+      {
+        name: name.trim(),
+        description: description.trim(),
+        discountType,
+        discountValue,
+        applicableTo,
+        startDate: normalizedStart,
+        endDate: normalizedEnd,
+        updatedAt: Date.now()
+      },
+      { 
+        new: true, 
+        runValidators: true,
+        context: 'query' // This ensures validators have access to the correct 'this'
+      }
+    );
+
     if (!updatedOffer) {
-      return res.status(404).json({ message: "Offer not found." });
-  }
-  res.status(200).json({ message: "Offer updated successfully", offer: updatedOffer });
-}catch(error){
-  console.error("Error updating offer:", error);
-        res.status(500).json({ message: "An error occurred while updating the offer." });
-}
-}
+      return res.status(404).json({ 
+        success: false,
+        message: "Offer not found" 
+      });
+    }
 
+    res.status(200).json({ 
+      success: true,
+      message: "Offer updated successfully",
+      offer: updatedOffer
+    });
+
+  } catch (error) {
+    console.error("Error updating offer:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "An error occurred while updating the offer",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
 /**logic to delete offer */
-const deletOffer = async(req,res)=>{
-  try{
-    const offerId = req.params.id
-    const deletedOffer = await Offer.findByIdAndDelete(offerId);
-    if (!deletedOffer) {
-      return res.status(404).json({ message: "Offer not found." });
-  }
-  res.redirect("/admin/offers");
-  }catch(error){
-    console.error("Error deleting offer:", error);
-        res.status(500).json({ message: "An error occurred while deleting the offer." });
-  }
-}
+const deletOffer = async (req, res) => {
+  try {
+    const { id } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Offer ID is required in the request body." 
+      });
+    }
 
+    const deletedOffer = await Offer.findByIdAndDelete(id);
+    
+    if (!deletedOffer) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Offer not found." 
+      });
+    }
+
+    // Always return JSON since we're using fetch
+    return res.status(200).json({ 
+      success: true,
+      message: "Offer deleted successfully." 
+    });
+    
+  } catch (error) {
+    console.error("Error deleting offer:", error);
+    return res.status(500).json({ 
+      success: false,
+      message: "An error occurred while deleting the offer.",
+      error: error.message // Include error message for debugging
+    });
+  }
+};
 /**show product offer listed page */
 const showOfferPage = async(req,res)=>{
   try{

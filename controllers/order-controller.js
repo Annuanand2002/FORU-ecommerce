@@ -553,177 +553,238 @@ const orderCancel = async (req, res) => {
 };
 
 /** returning the order */
-const orderReturn = async (req, res) => {
+// const orderReturn = async (req, res) => {
+//   const { orderId, itemId, reason } = req.body;
+
+//   try {
+
+//     const order = await Order.findById(orderId);
+//     if (!order) {
+//       return res.status(404).json({ success: false, message: "Order not found" });
+//     }
+
+//     const item = order.items.find((item) => item._id.toString() === itemId);
+//     if (!item) {
+//       return res.status(404).json({ success: false, message: "Item not found in order" });
+//     }
+
+//     if (item.status === "Returned") {
+//       return res.status(400).json({ success: false, message: "Item is already returned" });
+//     }
+//     if (item.status !== "Completed") {
+//       return res.status(400).json({ success: false, message: "Only completed items can be returned" });
+//     }
+//     if (!item.completionDate) {
+//       return res.status(400).json({ success: false, message: "Completion date not found" });
+//     }
+
+//     const completionDate = new Date(item.completionDate);
+//     const returnEndDate = new Date(completionDate);
+//     returnEndDate.setDate(returnEndDate.getDate() + 7);
+
+//     if (new Date() > returnEndDate) {
+//       return res.status(400).json({ success: false, message: "The return period for this item has ended" });
+//     }
+
+//     const product = await Product.findById(item.productId);
+//     if (product) {
+//       const sizeIndex = product.sizes.findIndex(
+//         (size) => size.size === item.size
+//       );
+//       if (sizeIndex !== -1) {
+//         product.sizes[sizeIndex].quantity += item.quantity;
+//         await product.save();
+//       }
+//     }
+
+//     const calculateRefundAmount = ()=>{
+//       const orderTotalBeforeDiscount = order.items.reduce((sum,item)=>sum + (item.price * item.quantity),0)
+//       const discountRatio = order.discountCouponFee/orderTotalBeforeDiscount;
+//       const itemSubTotal = item.price * item.quantity
+//       const itemDiscount = Math.round(itemSubTotal * discountRatio)
+//       return itemSubTotal - itemDiscount;
+//     }
+
+//     const refundAmount = calculateRefundAmount();
+
+    
+//     if (order.payment === "Cash on Delivery" || order.payment === "Wallet") {
+
+//       const wallet = await Wallet.findOne({ userId: order.userId });
+//       if (!wallet) {
+
+//         const newWallet = new Wallet({
+//           userId: order.userId,
+//           balance: refundAmount,
+//           transactions: [
+//             {
+//               type: "credit",
+//               amount: refundAmount,
+//               description: `Refund for returned item ${item.productName} in order ${order._id}`,
+//             },
+//           ],
+//         });
+//         await newWallet.save();
+//       } else {
+
+//         wallet.balance += itemTotal;
+//         wallet.transactions.push({
+//           type: "credit",
+//           amount: refundAmount,
+//           description: `Refund for returned item ${item.productName} in order ${order._id}`,
+//         });
+//         await wallet.save();
+//       }
+//     } else if (order.payment === "Online Payment") {
+//       if (!order.paymentId) {
+//         return res.status(400).json({ success: false, message: "Payment ID not found" });
+//       }
+
+//       try {
+
+//         const razorpayRefundAmount = refundAmount * 100;
+
+
+//         const refund = await razorpay.payments.refund(order.paymentId, {
+//           amount: razorpayRefundAmount,
+//           speed: "normal",
+//         });
+
+
+//         const wallet = await Wallet.findOne({ userId: order.userId });
+//         if (!wallet) {
+ 
+//           const newWallet = new Wallet({
+//             userId: order.userId,
+//             balance: refund/100,
+//             transactions: [
+//               {
+//                 type: "credit",
+//                 amount: refund/100,
+//                 description: `Refund for returned item ${item.productName} in order ${order._id}`,
+//               },
+//             ],
+//           });
+//           await newWallet.save();
+//         } else {
+
+//           wallet.balance += refundAmount;
+//           wallet.transactions.push({
+//             type: "credit",
+//             amount: refundAmount,
+//             description: `Refund for returned item ${item.productName} in order ${order._id}`,
+//           });
+//           await wallet.save();
+//         }
+//       } catch (razorpayError) {
+//         console.error("Razorpay refund error:", razorpayError);
+//         return res.status(500).json({
+//           success: false,
+//           message: "Failed to initiate refund. Please contact support.",
+//           error: razorpayError.message,
+//         });
+//       }
+//     }
+
+//     item.status = "Returned";
+//     item.returnReason.push({ 
+//       itemId: item._id, 
+//       reason,
+//       returnedAt: new Date()
+//     });
+
+
+//     const allItemsReturned = order.items.every((i) => i.status === "Returned");
+//     if (allItemsReturned) {
+//       order.status = "Returned";
+//       order.paymentStatus = "Refunded";
+//     }
+
+//     await order.save();
+
+//     const sales = await Sales.findOne({ orderId: order._id });
+//     if (sales) {
+//       const salesItem = sales.items.find((i) => i.itemId.toString() === itemId);
+//       if (salesItem) {
+//         salesItem.status = "Returned";
+//         await sales.save();
+//       }
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Item returned and refund processed successfully",
+//     });
+//   } catch (error) {
+//     console.error("Error:", error);
+//     return res
+//       .status(500)
+//       .json({ success: false, message: "An error occurred. Please try again." });
+//   }
+// };
+
+
+
+const requestReturn = async (req, res) => {
   const { orderId, itemId, reason } = req.body;
 
   try {
-
     const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
-    const item = order.items.find((item) => item._id.toString() === itemId);
-    if (!item) {
-      return res.status(404).json({ success: false, message: "Item not found in order" });
-    }
+    const item = order.items.id(itemId);
+    if (!item) return res.status(404).json({ success: false, message: "Item not found" });
 
-    if (item.status === "Returned") {
-      return res.status(400).json({ success: false, message: "Item is already returned" });
-    }
+    // Validate return eligibility
     if (item.status !== "Completed") {
-      return res.status(400).json({ success: false, message: "Only completed items can be returned" });
-    }
-    if (!item.completionDate) {
-      return res.status(400).json({ success: false, message: "Completion date not found" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Only completed items can be returned" 
+      });
     }
 
-    const completionDate = new Date(item.completionDate);
-    const returnEndDate = new Date(completionDate);
+    if (!item.completionDate) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Completion date not found" 
+      });
+    }
+
+    const returnEndDate = new Date(item.completionDate);
     returnEndDate.setDate(returnEndDate.getDate() + 7);
 
     if (new Date() > returnEndDate) {
-      return res.status(400).json({ success: false, message: "The return period for this item has ended" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Return period (7 days) has ended" 
+      });
     }
 
-    const product = await Product.findById(item.productId);
-    if (product) {
-      const sizeIndex = product.sizes.findIndex(
-        (size) => size.size === item.size
-      );
-      if (sizeIndex !== -1) {
-        product.sizes[sizeIndex].quantity += item.quantity;
-        await product.save();
-      }
-    }
-
-    const calculateRefundAmount = ()=>{
-      const orderTotalBeforeDiscount = order.items.reduce((sum,item)=>sum + (item.price * item.quantity),0)
-      const discountRatio = order.discountCouponFee/orderTotalBeforeDiscount;
-      const itemSubTotal = item.price * item.quantity
-      const itemDiscount = Math.round(itemSubTotal * discountRatio)
-      return itemSubTotal - itemDiscount;
-    }
-
-    const refundAmount = calculateRefundAmount();
-
-    
-    if (order.payment === "Cash on Delivery" || order.payment === "Wallet") {
-
-      const wallet = await Wallet.findOne({ userId: order.userId });
-      if (!wallet) {
-
-        const newWallet = new Wallet({
-          userId: order.userId,
-          balance: refundAmount,
-          transactions: [
-            {
-              type: "credit",
-              amount: refundAmount,
-              description: `Refund for returned item ${item.productName} in order ${order._id}`,
-            },
-          ],
-        });
-        await newWallet.save();
-      } else {
-
-        wallet.balance += itemTotal;
-        wallet.transactions.push({
-          type: "credit",
-          amount: refundAmount,
-          description: `Refund for returned item ${item.productName} in order ${order._id}`,
-        });
-        await wallet.save();
-      }
-    } else if (order.payment === "Online Payment") {
-      if (!order.paymentId) {
-        return res.status(400).json({ success: false, message: "Payment ID not found" });
-      }
-
-      try {
-
-        const razorpayRefundAmount = refundAmount * 100;
-
-
-        const refund = await razorpay.payments.refund(order.paymentId, {
-          amount: razorpayRefundAmount,
-          speed: "normal",
-        });
-
-
-        const wallet = await Wallet.findOne({ userId: order.userId });
-        if (!wallet) {
- 
-          const newWallet = new Wallet({
-            userId: order.userId,
-            balance: refund/100,
-            transactions: [
-              {
-                type: "credit",
-                amount: refund/100,
-                description: `Refund for returned item ${item.productName} in order ${order._id}`,
-              },
-            ],
-          });
-          await newWallet.save();
-        } else {
-
-          wallet.balance += refundAmount;
-          wallet.transactions.push({
-            type: "credit",
-            amount: refundAmount,
-            description: `Refund for returned item ${item.productName} in order ${order._id}`,
-          });
-          await wallet.save();
-        }
-      } catch (razorpayError) {
-        console.error("Razorpay refund error:", razorpayError);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to initiate refund. Please contact support.",
-          error: razorpayError.message,
-        });
-      }
-    }
-
-    item.status = "Returned";
-    item.returnReason.push({ 
-      itemId: item._id, 
+    // Set return request
+    item.returnRequest = {
+      requested: true,
       reason,
-      returnedAt: new Date()
-    });
+      requestedAt: new Date()
+    };
 
-
-    const allItemsReturned = order.items.every((i) => i.status === "Returned");
-    if (allItemsReturned) {
-      order.status = "Returned";
-      order.paymentStatus = "Refunded";
-    }
+    // Change status to "Return Processing"
+    item.status = "Return Processing";
 
     await order.save();
 
-    const sales = await Sales.findOne({ orderId: order._id });
-    if (sales) {
-      const salesItem = sales.items.find((i) => i.itemId.toString() === itemId);
-      if (salesItem) {
-        salesItem.status = "Returned";
-        await sales.save();
-      }
-    }
-
     return res.status(200).json({
       success: true,
-      message: "Item returned and refund processed successfully",
+      message: "Return request submitted for admin approval"
     });
+
   } catch (error) {
-    console.error("Error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "An error occurred. Please try again." });
+    console.error("Return request error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Error processing return request" 
+    });
   }
 };
-
-
 
 /**add address from the  choosing delivery-address page */
 const addAddressses = async (req, res) => {
@@ -965,6 +1026,140 @@ console.log("sucesss")
   }
 }
 
+const processReturnRequest = async (req, res) => {
+  const { orderId, itemId, action } = req.body; // action: 'approve' or 'reject'
+
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+    const item = order.items.id(itemId);
+    if (!item) return res.status(404).json({ success: false, message: "Item not found" });
+
+    if (item.status !== "Return Processing") {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Item is not in return processing state" 
+      });
+    }
+
+    if (action === 'approve') {
+      // Process refund and update status
+      const refundAmount = calculateRefundAmount(order, item);
+      
+      if (["Cash on Delivery", "Wallet"].includes(order.payment)) {
+        await processWalletRefund(order.userId, order._id, item, refundAmount);
+      } else if (order.payment === "Online Payment") {
+        await processRazorpayRefund(
+          order.paymentId, 
+          order.userId, 
+          order._id, 
+          item, 
+          refundAmount
+        );
+      }
+      
+      // Restore product stock
+      const product = await Product.findById(item.productId);
+      if (product) {
+        const sizeIndex = product.sizes.findIndex(s => s.size === item.size);
+        if (sizeIndex !== -1) {
+          product.sizes[sizeIndex].quantity += item.quantity;
+          await product.save();
+        }
+      }
+
+      item.status = "Returned";
+      item.returnRequest.approved = true;
+      item.returnRequest.approvedAt = new Date();
+      
+      // Check if all items are returned
+      const allItemsReturned = order.items.every(i => 
+        i.status === "Returned" || i.status === "Cancelled"
+      );
+      
+      if (allItemsReturned) {
+        order.status = "Returned";
+        order.paymentStatus = "Refunded";
+      }
+      
+      await order.save();
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: "Return approved and refund processed",
+        refundAmount
+      });
+      
+    } else if (action === 'reject') {
+      item.status = "Completed";
+      item.returnRequest = undefined;
+      await order.save();
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: "Return request rejected" 
+      });
+    }
+
+  } catch (error) {
+    console.error("Process return error:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: "Error processing return request",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Helper functions
+function calculateRefundAmount(order, item) {
+  const orderTotalBeforeDiscount = order.items.reduce(
+    (sum, item) => sum + (item.price * item.quantity), 0
+  );
+  
+  if (orderTotalBeforeDiscount === 0) return 0;
+  
+  const discountRatio = order.discountCouponFee / orderTotalBeforeDiscount;
+  const itemSubTotal = item.price * item.quantity;
+  const itemDiscount = Math.round(itemSubTotal * discountRatio);
+  return itemSubTotal - itemDiscount;
+}
+
+async function processWalletRefund(userId, orderId, item, amount) {
+  if (amount <= 0) return;
+
+  const wallet = await Wallet.findOne({ userId }) || 
+    new Wallet({ userId, balance: 0, transactions: [] });
+
+  wallet.balance += amount;
+  wallet.transactions.push({
+    type: "credit",
+    amount,
+    description: `Refund for returned ${item.productName} (Order: ${orderId})`
+  });
+
+  await wallet.save();
+}
+
+async function processRazorpayRefund(paymentId, userId, orderId, item, amount) {
+  if (amount <= 0) return;
+
+  const razorpayRefundAmount = Math.round(amount * 100); // Convert to paise
+
+  const refund = await razorpay.payments.refund(paymentId, {
+    amount: razorpayRefundAmount,
+    speed: "normal",
+    notes: {
+      reason: "Item return",
+      item: item.productName,
+      orderId: orderId.toString()
+    }
+  });
+
+  // Credit to wallet even for Razorpay refunds
+  await processWalletRefund(userId, orderId, item, amount);
+}
 module.exports = {
   invoiceDownload,
   placeOrder,
@@ -978,7 +1173,8 @@ module.exports = {
   orderCancel,
   handlePaymentResponse,
   addAddressses,
-  orderReturn,
   paymentFailPage,
-  retryPayment
+  retryPayment,
+  requestReturn,
+  processReturnRequest
 };
